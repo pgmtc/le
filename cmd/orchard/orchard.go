@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/pgmtc/orchard/internal/pkg/local"
-	"github.com/pgmtc/orchard/internal/pkg/source"
+	"github.com/pgmtc/orchard-cli/internal/pkg/local"
+	"github.com/pgmtc/orchard-cli/internal/pkg/source"
 	"os"
 )
 

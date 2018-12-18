@@ -19,9 +19,13 @@ func ParseParams(actions map[string]func(args []string) error, args []string) er
 	actionArgs := args[1:]
 
 	if (actions[action] != nil) {
-		actions[action](actionArgs)
+		return actions[action](actionArgs)
 	} else {
-		return errors.New(fmt.Sprintf("Action '%s' does not exist", action))
+		availableActions := make([]string, 0, len(actions))
+		for k := range actions {
+			availableActions = append(availableActions, k)
+		}
+		return errors.New(fmt.Sprintf("Action '%s' does not exist. Available actions = %s", action, availableActions))
 	}
 	return nil
 }

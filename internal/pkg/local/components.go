@@ -6,6 +6,24 @@ type Component struct {
 	testUrl string
 }
 
+func componentNames() []string {
+	components := getComponents()
+	componentNames := []string{}
+	for _, component := range components {
+		componentNames = append(componentNames, component.name)
+	}
+	return componentNames
+}
+
+func componentMap() map[string]Component{
+	components := getComponents()
+	elementMap := make(map[string]Component)
+	for i := 0; i < len(components); i +=1 {
+		elementMap[components[i].name] = components[i]
+	}
+	return elementMap
+}
+
 func getComponents() []Component {
 	return []Component {
 		Component {

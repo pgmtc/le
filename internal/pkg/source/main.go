@@ -1,7 +1,7 @@
 package source
 
 import (
-	"github.com/pgmtc/orchard/internal/pkg/common"
+	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 )
 
 func Parse(args []string) error {
@@ -9,6 +9,9 @@ func Parse(args []string) error {
 	actions["pull"] = pull
 
 	return common.ParseParams(actions, args)
+
+	// Get latest sources
+	// Update
 }
 
 
