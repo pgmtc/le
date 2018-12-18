@@ -6,8 +6,8 @@ import (
 )
 
 func isResponding(cmp Component) string {
-	if (cmp.testUrl == "") {
-		return "N/A"
+	if cmp.testUrl == "" {
+		return " . "
 	}
 
 	client := &http.Client{
