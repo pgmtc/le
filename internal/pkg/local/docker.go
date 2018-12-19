@@ -15,17 +15,6 @@ import (
 	"strconv"
 )
 
-
-func isRunning(component Component, runningContainers []string) string {
-	componentId := component.dockerId
-	for _, runningContainer := range runningContainers {
-		if (runningContainer == componentId) {
-			return "UP"
-		}
-	}
-	return "DOWN"
-}
-
 func dockerGetLogs(containerId string, follow bool) error {
 	i, err := dockerGetClient().ContainerLogs(context.Background(), containerId, types.ContainerLogsOptions{
 		ShowStderr: true,
@@ -56,7 +45,6 @@ func dockerGetLogs(containerId string, follow bool) error {
 		_, err = i.Read(dat)
 		fmt.Fprint(w, string(dat))
 	}
-
 }
 
 func dockerGetContainers() (map[string]types.Container, error) {
@@ -72,7 +60,6 @@ func dockerGetContainers() (map[string]types.Container, error) {
 		containerName := container.Names[0][1:len(container.Names[0])]
 		containerMap[containerName] = container
 	}
-
 	return containerMap, nil
 }
 
@@ -98,9 +85,7 @@ func dockerRemoveContainer(container types.Container) error {
 			return err
 		}
 	}
-
 	fmt.Println("Removing container ", container.ID[:10], "... ")
-
 	if err := dockerGetClient().ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{}); err != nil {
 		return err
 	}
@@ -111,19 +96,15 @@ func createContainer(component Component) error {
 	if isContainerRunning(component.dockerId) {
 		return errors.New(fmt.Sprintf("Component %s already exist (%s), please stop and remove it first", component.name, component.dockerId))
 	}
-
 	exposePort := strconv.Itoa(component.containerPort)
 	mapPort := strconv.Itoa(component.hostPort)
-
 	var exposedPorts nat.PortSet
 	var portMap nat.PortMap
-
 	if (component.containerPort > 0 && component.hostPort > 0) {
 		exposedPorts = nat.PortSet{nat.Port(exposePort): struct{}{}}
 		portMap = map[nat.Port][]nat.PortBinding{nat.Port(exposePort): {{HostIP: "0.0.0.0", HostPort: mapPort}}}
 		fmt.Printf("Container port %d will be mapped to host port %d\n", component.containerPort, component.hostPort)
 	}
-
 	resp, err := dockerGetClient().ContainerCreate(context.Background(), &container.Config {
 		Image: component.image,
 		Env: component.env,
@@ -134,12 +115,10 @@ func createContainer(component Component) error {
 	if err != nil {
 		return err
 	}
-
 	err = dockerStartContainer(types.Container{ID: resp.ID})
 	if (err != nil) {
 		return err
 	}
-
 	return nil
 }
 
