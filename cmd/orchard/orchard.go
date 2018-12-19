@@ -6,24 +6,34 @@ import (
 	"github.com/pgmtc/orchard-cli/internal/pkg/local"
 	"github.com/pgmtc/orchard-cli/internal/pkg/source"
 	"os"
+	"reflect"
 )
 
 func main() {
-
 	args := os.Args[1:]
+
+	modules := make(map[string]func(args []string) error)
+	modules["local"] = local.Parse
+	modules["source"] = source.Parse
+
+	availableModules := reflect.ValueOf(modules).MapKeys()
+
 	if (len(args) == 0) {
-		fmt.Println("Please provide domain, for example:")
-		fmt.Printf("    %s local status\n", os.Args[0])
+		color.Red("Please provide module")
+		color.Red(fmt.Sprintf(" %s [module] [action]", os.Args[0]))
+		color.Red(fmt.Sprintf(" example: %s local status", os.Args[0]))
+		color.Red(fmt.Sprintf(" available modules = %s", availableModules))
 		os.Exit(1)
 	}
 
-	domain := args[0]
+	module := args[0]
+	handler := modules[module]
 
-	actions := make(map[string]func(args []string) error)
-	actions["local"] = local.Parse
-	actions["source"] = source.Parse
+	if handler == nil {
+		color.Red(fmt.Sprintf(" Module '%s' does not exist. Available modules = %s", module, availableModules))
+		os.Exit(1)
+	}
 
-	handler := actions[domain]
 	err := handler(args[1:])
 	if (err != nil) {
 		color.Red(err.Error())
