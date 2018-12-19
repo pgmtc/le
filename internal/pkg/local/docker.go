@@ -121,9 +121,8 @@ func createContainer(component Component) error {
 	if (component.containerPort > 0 && component.hostPort > 0) {
 		exposedPorts = nat.PortSet{nat.Port(exposePort): struct{}{}}
 		portMap = map[nat.Port][]nat.PortBinding{nat.Port(exposePort): {{HostIP: "0.0.0.0", HostPort: mapPort}}}
-		fmt.Println("Container port %s will be mapped to host port %s", component.containerPort, component.hostPort)
+		fmt.Printf("Container port %d will be mapped to host port %d\n", component.containerPort, component.hostPort)
 	}
-
 
 	resp, err := dockerGetClient().ContainerCreate(context.Background(), &container.Config {
 		Image: component.image,
