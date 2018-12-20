@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
@@ -12,6 +13,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/user"
 	"strconv"
 )
 
@@ -57,8 +59,11 @@ func dockerGetContainers() (map[string]types.Container, error) {
 
 	containerMap := make(map[string]types.Container)
 	for _, container := range containers {
-		containerName := container.Names[0][1:len(container.Names[0])]
-		containerMap[containerName] = container
+		fmt.Println(container.Names)
+		for _, cName := range container.Names {
+			containerName := cName[1:len(cName)]
+			containerMap[containerName] = container
+		}
 	}
 	return containerMap, nil
 }
@@ -111,17 +116,28 @@ func createContainer(component Component) error {
 	mapPort := strconv.Itoa(component.hostPort)
 	var exposedPorts nat.PortSet
 	var portMap nat.PortMap
+
+
 	if (component.containerPort > 0 && component.hostPort > 0) {
 		exposedPorts = nat.PortSet{nat.Port(exposePort): struct{}{}}
 		portMap = map[nat.Port][]nat.PortBinding{nat.Port(exposePort): {{HostIP: "0.0.0.0", HostPort: mapPort}}}
 		fmt.Printf(" port %d will be mapped to host port %d : ", component.containerPort, component.hostPort)
 	}
+
+	// Mount AWS login credentials
+	usr, _ := user.Current()
+	dir := usr.HomeDir
+	var awsCliMount []mount.Mount
+	awsCliMount = append(awsCliMount, mount.Mount{Type: mount.TypeBind,	Source: dir + "/.aws", Target: "/root/.aws"})
+
 	resp, err := dockerGetClient().ContainerCreate(context.Background(), &container.Config {
 		Image: component.image,
 		Env: component.env,
 		ExposedPorts: exposedPorts,
 	}, &container.HostConfig{
 		PortBindings: portMap,
+		Links: component.links,
+		Mounts: awsCliMount,
 	}, nil, component.dockerId)
 	if err != nil {
 		return err
