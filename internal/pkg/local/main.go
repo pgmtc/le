@@ -3,7 +3,6 @@ package local
 import (
 	"errors"
 	"fmt"
-	"github.com/docker/docker/api/types"
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
@@ -13,36 +12,19 @@ import (
 func Parse(args []string) error {
 	actions := common.MakeActions()
 	actions["status"] = status
-	actions["stop"] = dockerActionHandler(dockerStopContainer)
-	actions["start"] = dockerActionHandler(dockerStartContainer)
-	actions["remove"] = dockerActionHandler(dockerRemoveContainer)
-	actions["create"] = createContainerHandler
+	actions["stop"] = componentActionHander(stopContainer)
+	actions["start"] = componentActionHander(dockerStartContainer)
+	actions["remove"] = componentActionHander(removeContainer)
+	actions["create"] = componentActionHander(createContainer)
+	actions["list-images"] = listImages
+	actions["pull-image"] = componentActionHander(pullImage)
 	actions["logs"] = logsHandler(false)
 	actions["watch"] = logsHandler(true)
 	return common.ParseParams(actions, args)
 }
 
-func createContainerHandler(args[] string) error {
-	if len(args) == 0 {
-		return errors.New(fmt.Sprintf("Missing component name. Available components = %s", componentNames()))
-	}
-	componentId := args[0]
-
-	if (componentId == "all") {
-		for _, cmp := range getComponents() {
-			err := createContainer(cmp)
-			if (err != nil) {
-				return err
-			}
-		}
-		return nil
-	}
-
-	componentMap := componentMap()
-	if component, ok := componentMap[componentId]; ok {
-		return createContainer(component)
-	}
-	return errors.New(fmt.Sprintf("Cannot find component '%s'. Available components = %s", componentId, componentNames()))
+func listImages(args[] string) error {
+	return dockerListImages()
 }
 
 func logsHandler(follow bool) func(args[] string) error {
@@ -53,50 +35,7 @@ func logsHandler(follow bool) func(args[] string) error {
 		componentId := args[0]
 		componentMap := componentMap()
 		if component, ok := componentMap[componentId]; ok {
-			return dockerGetLogs(component.dockerId, follow)
-		}
-		return errors.New(fmt.Sprintf("Cannot find component '%s'. Available components = %s", componentId, componentNames()))
-	}
-}
-
-func dockerActionHandler(handler func(container types.Container) error) func(args[] string) error {
-	return func (args[] string) error {
-		if len(args) == 0 {
-			return errors.New(fmt.Sprintf("Missing component name. Available components = %s", componentNames()))
-		}
-		componentId := args[0]
-		if (componentId == "all") {
-			containerMap, err := dockerGetContainers()
-			if (err != nil) {
-				return err
-			}
-
-			for _, cmp := range getComponents() {
-				var err error
-				if container, ok := containerMap[cmp.dockerId]; ok {
-					err = handler(container)
-					if (err != nil) {
-						return err
-					}
-				} else {
-					fmt.Printf("Starting container: Can't start component '%s'. Container '%s'does not exist\n", cmp.name, cmp.dockerId)
-				}
-			}
-			return nil
-		}
-		componentMap := componentMap()
-		if component, ok := componentMap[componentId]; ok {
-			dockerId := component.dockerId
-			containerMap, err := dockerGetContainers()
-			if (err != nil) {
-				return err
-			}
-
-			if container, ok := containerMap[dockerId]; ok {
-				return handler(container)
-			} else {
-				return errors.New("Can't find the container")
-			}
+			return dockerGetLogs(component, follow)
 		}
 		return errors.New(fmt.Sprintf("Cannot find component '%s'. Available components = %s", componentId, componentNames()))
 	}
@@ -148,4 +87,47 @@ func status(args[] string) error {
 	fmt.Printf("\r")
 	table.Render()
 	return nil
+}
+
+func componentActionHander(handler func(component Component) error) func(args []string) error {
+	return func(args []string) error {
+		if len(args) == 0 {
+			return errors.New(fmt.Sprintf("Missing component name. Available components = %s", componentNames()))
+		}
+
+		// If all provided, do for all components
+		if args[0] == "all" {
+			for _, cmp := range getComponents() {
+				err := handler(cmp)
+				if (err != nil) {
+					color.HiBlack(err.Error())
+				}
+			}
+			return nil
+		}
+
+		if (len(args) > 1) {
+			// Multiple components
+			for _, cmpName := range args {
+				if component, ok := (componentMap())[cmpName]; ok {
+					err := handler(component)
+					if (err != nil) {
+						color.HiBlack(err.Error())
+					}
+				} else {
+					color.HiBlack("Component '%s' has not been found", cmpName)
+				}
+
+			}
+			return nil
+		}
+
+		// Run only for defined component
+		if component, ok := (componentMap())[args[0]]; ok {
+			return handler(component)
+		}
+
+		return errors.New(fmt.Sprintf("Cannot find component '%s'. Available components = %s", args[0], componentNames()))
+
+	}
 }

@@ -15,8 +15,8 @@ import (
 	"strconv"
 )
 
-func dockerGetLogs(containerId string, follow bool) error {
-	i, err := dockerGetClient().ContainerLogs(context.Background(), containerId, types.ContainerLogsOptions{
+func dockerGetLogs(component Component, follow bool) error {
+	i, err := dockerGetClient().ContainerLogs(context.Background(), component.dockerId, types.ContainerLogsOptions{
 		ShowStderr: true,
 		ShowStdout: true,
 		Timestamps: false,
@@ -63,39 +63,50 @@ func dockerGetContainers() (map[string]types.Container, error) {
 	return containerMap, nil
 }
 
-func dockerStartContainer(container types.Container) error {
-	fmt.Println("Starting container ", container.ID[:10], "... ")
-	if err := dockerGetClient().ContainerStart(context.Background(), container.ID, types.ContainerStartOptions{}); err != nil {
-		return err
-	}
-	return nil
-}
+func dockerStartContainer(component Component) error {
+	if container, err := getContainer(component); err == nil {
+		fmt.Printf("Starting container '%s' for component '%s'\n", component.dockerId, component.name)
 
-func dockerStopContainer(container types.Container) error {
-	fmt.Println("Stopping container ", container.ID[:10], "... ")
-	if err := dockerGetClient().ContainerStop(context.Background(), container.ID, nil); err != nil {
-		return err
-	}
-	return nil
-}
-
-func dockerRemoveContainer(container types.Container) error {
-	if isContainerRunning(getContainerName(container)) {
-		if err := dockerStopContainer(container); err != nil {
+		if err := dockerGetClient().ContainerStart(context.Background(), container.ID, types.ContainerStartOptions{}); err != nil {
 			return err
 		}
+		return nil
 	}
-	fmt.Println("Removing container ", container.ID[:10], "... ")
-	if err := dockerGetClient().ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{}); err != nil {
-		return err
+	return errors.Errorf("Starting container '%s' for component '%s': Not found. Create it first\n", component.name, component.dockerId)
+}
+
+func stopContainer(component Component) error {
+	if container, err := getContainer(component); err == nil {
+		fmt.Printf("Stopping container '%s' for component '%s'\n", component.dockerId, component.name)
+		if err := dockerGetClient().ContainerStop(context.Background(), container.ID, nil); err != nil {
+			return err
+		}
+		return nil
 	}
-	return nil
+	return errors.Errorf("Stopping container '%s' for component '%s': Not found found. Nothing to stop\n", component.name, component.dockerId)
+}
+
+func removeContainer(component Component) error {
+	if container, err := getContainer(component); err == nil {
+		if isContainerRunning(getContainerName(container)) {
+			if err := stopContainer(component); err != nil {
+				return err
+			}
+		}
+		fmt.Printf("Removing container '%s' for component '%s'\n", component.dockerId, component.name)
+		if err := dockerGetClient().ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{}); err != nil {
+			return err
+		}
+		return nil
+	}
+	return errors.Errorf("Removing container '%s' for component '%s': Not found. Nothing to remove\n", component.name, component.dockerId)
 }
 
 func createContainer(component Component) error {
 	if isContainerRunning(component.dockerId) {
-		return errors.New(fmt.Sprintf("Component %s already exist (%s), please stop and remove it first", component.name, component.dockerId))
+		return errors.New(fmt.Sprintf("Component %s already exist (%s). If you want to recreate, then please stop and remove it first", component.name, component.dockerId))
 	}
+	fmt.Printf("Creating container '%s' for component '%s': ", component.dockerId, component.name)
 	exposePort := strconv.Itoa(component.containerPort)
 	mapPort := strconv.Itoa(component.hostPort)
 	var exposedPorts nat.PortSet
@@ -103,7 +114,7 @@ func createContainer(component Component) error {
 	if (component.containerPort > 0 && component.hostPort > 0) {
 		exposedPorts = nat.PortSet{nat.Port(exposePort): struct{}{}}
 		portMap = map[nat.Port][]nat.PortBinding{nat.Port(exposePort): {{HostIP: "0.0.0.0", HostPort: mapPort}}}
-		fmt.Printf("Container port %d will be mapped to host port %d\n", component.containerPort, component.hostPort)
+		fmt.Printf(" port %d will be mapped to host port %d : ", component.containerPort, component.hostPort)
 	}
 	resp, err := dockerGetClient().ContainerCreate(context.Background(), &container.Config {
 		Image: component.image,
@@ -115,11 +126,32 @@ func createContainer(component Component) error {
 	if err != nil {
 		return err
 	}
-	err = dockerStartContainer(types.Container{ID: resp.ID})
+
+	fmt.Println()
+
+	if err := dockerGetClient().ContainerStart(context.Background(), resp.ID, types.ContainerStartOptions{}); err != nil {
+		return err
+	}
 	if (err != nil) {
 		return err
 	}
+
 	return nil
+}
+
+func getContainer(component Component) (types.Container, error) {
+	var nilCont types.Container
+	dockerId := component.dockerId
+	containerMap, err := dockerGetContainers()
+	if (err != nil) {
+		return nilCont, err
+	}
+
+	if cont, ok := containerMap[dockerId]; ok {
+		return cont, nil
+	} else {
+		return nilCont, errors.New("Can't find the container")
+	}
 }
 
 func isContainerRunning(containerId string) bool {
@@ -140,4 +172,28 @@ func dockerGetClient() *client.Client {
 
 func getContainerName(container types.Container) string {
 	return container.Names[0][1:len(container.Names[0])]
+}
+
+func dockerListImages() error {
+	images, err := dockerGetClient().ImageList(context.Background(), types.ImageListOptions{})
+	if err != nil {
+		return err
+	}
+	for _, image := range images {
+		repoName := image.RepoTags[0]
+		fmt.Println(repoName)
+	}
+	return nil
+}
+
+func pullImage(component Component) error{
+	fmt.Printf("pulling image for '%s' (%s) ... ", component.name, component.image)
+	out, err := dockerGetClient().ImagePull(context.Background(), component.image, types.ImagePullOptions{})
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	io.Copy(os.Stdout, out)
+	fmt.Printf("done\n")
+	return nil
 }
