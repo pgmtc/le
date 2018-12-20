@@ -13,7 +13,7 @@ func Parse(args []string) error {
 	actions := common.MakeActions()
 	actions["status"] = status
 	actions["stop"] = componentActionHander(stopContainer)
-	actions["start"] = componentActionHander(dockerStartContainer)
+	actions["start"] = componentActionHander(startContainer)
 	actions["remove"] = componentActionHander(removeContainer)
 	actions["create"] = componentActionHander(createContainer)
 	actions["list-images"] = listImages

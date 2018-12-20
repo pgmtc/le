@@ -63,7 +63,7 @@ func dockerGetContainers() (map[string]types.Container, error) {
 	return containerMap, nil
 }
 
-func dockerStartContainer(component Component) error {
+func startContainer(component Component) error {
 	if container, err := getContainer(component); err == nil {
 		fmt.Printf("Starting container '%s' for component '%s'\n", component.dockerId, component.name)
 
@@ -88,7 +88,7 @@ func stopContainer(component Component) error {
 
 func removeContainer(component Component) error {
 	if container, err := getContainer(component); err == nil {
-		if isContainerRunning(getContainerName(container)) {
+		if container.State == "running" {
 			if err := stopContainer(component); err != nil {
 				return err
 			}
@@ -103,7 +103,13 @@ func removeContainer(component Component) error {
 }
 
 func createContainer(component Component) error {
-	if isContainerRunning(component.dockerId) {
+	if (component.name == "" || component.dockerId == "" || component.image == "") {
+		return errors.New("Missing container name, dockerId or image")
+	}
+	fmt.Println(component.name)
+	fmt.Println(component.dockerId)
+	fmt.Println(component.image)
+	if _, err := getContainer(component); err == nil {
 		return errors.New(fmt.Sprintf("Component %s already exist (%s). If you want to recreate, then please stop and remove it first", component.name, component.dockerId))
 	}
 	fmt.Printf("Creating container '%s' for component '%s': ", component.dockerId, component.name)
@@ -154,24 +160,12 @@ func getContainer(component Component) (types.Container, error) {
 	}
 }
 
-func isContainerRunning(containerId string) bool {
-	containers, _ := dockerGetContainers()
-	if container, ok := containers[containerId]; ok {
-		return container.State == "running"
-	}
-	return false
-}
-
 func dockerGetClient() *client.Client {
 	cli, err := client.NewClientWithOpts(client.WithVersion("1.39"))
 	if err != nil {
 		panic(err)
 	}
 	return cli
-}
-
-func getContainerName(container types.Container) string {
-	return container.Names[0][1:len(container.Names[0])]
 }
 
 func dockerListImages() error {
