@@ -68,7 +68,7 @@ func dockerGetContainers() (map[string]types.Container, error) {
 	return containerMap, nil
 }
 
-func dockerStartContainer(component Component) error {
+func startContainer(component Component) error {
 	if container, err := getContainer(component); err == nil {
 		fmt.Printf("Starting container '%s' for component '%s'\n", component.dockerId, component.name)
 

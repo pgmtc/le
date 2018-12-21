@@ -19,6 +19,7 @@ func isResponding(cmp Component) string {
 	resp, err := client.Get(cmp.testUrl)
 	if err != nil {
 		// handle error
+		fmt.Println(err)
 		return "ERR"
 	}
 	defer resp.Body.Close()
