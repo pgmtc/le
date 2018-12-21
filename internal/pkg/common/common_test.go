@@ -20,13 +20,14 @@ func TestMakeParams_noArgs(t *testing.T) {
 	actions := mockActions()
 	var args []string
 	result := ParseParams(actions, args)
-	expectedMessage := "Missing action, available actions = [actionSuccess actionFail]"
+	expectedMessage1 := "Missing action, available actions = [actionSuccess actionFail]"
+	expectedMessage2 := "Missing action, available actions = [actionFail actionSuccess]"
 
 	if (result == nil) {
 		t.Errorf("Expected method to fail (no parameters)")
 	}
-	if (result.Error() != expectedMessage) {
-		t.Errorf("Expected error to be '%s' but got '%s'", expectedMessage, result.Error())
+	if (result.Error() != expectedMessage1 && result.Error() != expectedMessage2) {
+		t.Errorf("Expected error to be '%s' but got '%s'", expectedMessage1, result.Error())
 	}
 }
 
