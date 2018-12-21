@@ -16,15 +16,10 @@ func Parse(args []string) error {
 	actions["start"] = componentActionHander(startContainer)
 	actions["remove"] = componentActionHander(removeContainer)
 	actions["create"] = componentActionHander(createContainer)
-	actions["list-images"] = listImages
 	actions["pull-image"] = componentActionHander(pullImage)
 	actions["logs"] = logsHandler(false)
 	actions["watch"] = logsHandler(true)
 	return common.ParseParams(actions, args)
-}
-
-func listImages(args[] string) error {
-	return dockerListImages()
 }
 
 func logsHandler(follow bool) func(args[] string) error {
@@ -35,7 +30,7 @@ func logsHandler(follow bool) func(args[] string) error {
 		componentId := args[0]
 		componentMap := componentMap()
 		if component, ok := componentMap[componentId]; ok {
-			return dockerGetLogs(component, follow)
+			return dockerPrintLogs(component, follow)
 		}
 		return errors.New(fmt.Sprintf("Cannot find component '%s'. Available components = %s", componentId, componentNames()))
 	}

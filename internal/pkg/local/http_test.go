@@ -20,13 +20,31 @@ func Test_isResponding(t *testing.T) {
 			want: "",
 		},
 		{
-			name: "test-200",
+			name: "test-success",
 			args: args {
 				cmp: Component{
 					name: "testComponent",
 					testUrl: "http://www.praguematica.co.uk/",
 				}},
 			want: "200",
+		},
+		{
+			name: "test-redirect",
+			args: args {
+				cmp: Component{
+					name: "testComponent",
+					testUrl: "http://praguematica.co.uk/",
+				}},
+			want: "301",
+		},
+		{
+			name: "test-fail",
+			args: args {
+				cmp: Component{
+					name: "testComponent",
+					testUrl: "http://non-existing-url/",
+				}},
+			want: "ERR",
 		},
 	}
 	for _, tt := range tests {
