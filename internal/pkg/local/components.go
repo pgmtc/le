@@ -51,6 +51,37 @@ func getComponents() []Component {
 			dockerId: "dcmp_orchard-config-msvc_1",
 			testUrl:  ""},
 		Component{
+			name: "auth",
+			image: "orchard/orchard-auth-msvc:latest",
+			dockerId: "dcmp_orchard-auth-msvc_1",
+			links: []string {
+				"dcmp_orchard-redis_1:redis",
+				"orchard-local-db:db",
+				"dcmp_orchard-config-msvc_1:config",
+			},
+			testUrl:  "http://localhost:8765/orchard-gateway-msvc/orchard-auth-msvc/health"},
+		Component{
+			name: "doc-analysis",
+			image: "orchard/orchard-doc-analysis-msvc:latest",
+			dockerId: "dcmp_orchard-doc-analysis-msvc_1",
+			links: []string {
+				"dcmp_orchard-redis_1:redis",
+				"orchard-local-db:db",
+				"dcmp_orchard-config-msvc_1:config",
+			},
+			testUrl:  "http://localhost:8765/orchard-gateway-msvc/orchard-doc-analysis-msvc/health"},
+		Component{
+			name: "case-flow",
+			image: "orchard/orchard-case-flow-msvc:latest",
+			dockerId: "dcmp_orchard-case-flow-msvc_1",
+			links: []string {
+				"dcmp_orchard-redis_1:redis",
+				"orchard-local-db:db",
+				"dcmp_orchard-config-msvc_1:config",
+				"dcmp_orchard-doc-analysis-msvc_1:doc-analysis",
+			},
+			testUrl:  "http://localhost:8765/orchard-gateway-msvc/orchard-case-flow-msvc/health"},
+		Component{
 			name: "gateway",
 			image: "orchard/orchard-gateway-msvc:latest",
 			dockerId: "dcmp_orchard-gateway-msvc_1",
@@ -58,39 +89,13 @@ func getComponents() []Component {
 			hostPort: 8765,
 			links: []string {
 				"dcmp_orchard-redis_1:redis",
+				"orchard-local-db:db",
 				"dcmp_orchard-config-msvc_1:config",
 				"dcmp_orchard-auth-msvc_1:auth",
-				"dcmp_orchard-case-flow_1:case-flow",
+				"dcmp_orchard-case-flow-msvc_1:case-flow",
 				"dcmp_orchard-doc-analysis-msvc_1:doc-analysis",
 			},
 			testUrl:  "http://localhost:8765/orchard-gateway-msvc/health"},
-
-		Component{
-			name: "auth",
-			image: "orchard/orchard-auth-msvc:latest",
-			dockerId: "dcmp_orchard-auth-msvc_1",
-			links: []string {
-				"dcmp_orchard-redis_1:redis",
-				"dcmp_orchard-config-msvc_1:config",
-			},
-			testUrl:  "http://localhost:8765/orchard-gateway-msvc/orchard-auth-msvc/health"},
-		Component{
-			name: "case-flow",
-			image: "orchard/orchard-case-flow-msvc:latest",
-			dockerId: "dcmp_orchard-case-flow-msvc_1",
-			links: []string {
-				"dcmp_orchard-config-msvc_1:redis",
-				"dcmp_orchard-doc-analysis-msvc_1:config",
-			},
-			testUrl:  "http://localhost:8765/orchard-gateway-msvc/orchard-case-flow-msvc/health"},
-		Component{
-			name: "doc-analysis",
-			image: "orchard/orchard-doc-analysis-msvc:latest",
-			dockerId: "dcmp_orchard-doc-analysis-msvc_1",
-			links: []string {
-				"dcmp_orchard-config-msvc_1:config",
-			},
-			testUrl:  "http://localhost:8765/orchard-gateway-msvc/orchard-doc-analysis-msvc/health"},
 		Component{
 			name: "ui",
 			image: "orchard/orchard-doc-analysis-ui:latest",

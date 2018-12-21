@@ -76,7 +76,7 @@ func status(args[] string) error {
 		}
 
 
-		table.Append([]string{color.YellowString(cmp.name), color.BlueString(cmp.dockerId), color.YellowString(exists), state, responding})
+		table.Append([]string{color.YellowString(cmp.name), color.HiBlackString(cmp.dockerId), color.YellowString(exists), state, responding})
 	}
 
 	fmt.Printf("\r")
