@@ -12,11 +12,11 @@ import (
 func Parse(args []string) error {
 	actions := common.MakeActions()
 	actions["status"] = status
-	actions["stop"] = componentActionHander(stopContainer)
-	actions["start"] = componentActionHander(startContainer)
-	actions["remove"] = componentActionHander(removeContainer)
-	actions["create"] = componentActionHander(createContainer)
-	actions["pull-image"] = componentActionHander(pullImage)
+	actions["stop"] = componentActionHandler(stopContainer)
+	actions["start"] = componentActionHandler(startContainer)
+	actions["remove"] = componentActionHandler(removeContainer)
+	actions["create"] = componentActionHandler(createContainer)
+	actions["pull-image"] = componentActionHandler(pullImage)
 	actions["logs"] = logsHandler(false)
 	actions["watch"] = logsHandler(true)
 	return common.ParseParams(actions, args)
@@ -84,7 +84,7 @@ func status(args[] string) error {
 	return nil
 }
 
-func componentActionHander(handler func(component Component) error) func(args []string) error {
+func componentActionHandler(handler func(component Component) error) func(args []string) error {
 	return func(args []string) error {
 		if len(args) == 0 {
 			return errors.New(fmt.Sprintf("Missing component name. Available components = %s", componentNames()))
@@ -101,28 +101,26 @@ func componentActionHander(handler func(component Component) error) func(args []
 			return nil
 		}
 
-		if (len(args) > 1) {
-			// Multiple components
-			for _, cmpName := range args {
-				if component, ok := (componentMap())[cmpName]; ok {
-					err := handler(component)
-					if (err != nil) {
+		for _, cmpName := range args {
+			if component, ok := (componentMap())[cmpName]; ok {
+				err := handler(component)
+				if (err != nil) {
+					if (len(args) > 1) {
 						color.HiBlack(err.Error())
+					} else {
+						return err
 					}
-				} else {
-					color.HiBlack("Component '%s' has not been found", cmpName)
+
 				}
-
+			} else {
+				if (len(args) > 1) { // Single use
+					color.HiBlack("Component '%s' has not been found", cmpName)
+				} else { // Multiple use
+					return errors.New(fmt.Sprintf("Component %s has not been found. Available components = %s", cmpName, componentNames()))
+				}
 			}
-			return nil
 		}
-
-		// Run only for defined component
-		if component, ok := (componentMap())[args[0]]; ok {
-			return handler(component)
-		}
-
-		return errors.New(fmt.Sprintf("Cannot find component '%s'. Available components = %s", args[0], componentNames()))
+		return nil
 
 	}
 }
