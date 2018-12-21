@@ -43,8 +43,8 @@ func TestComplex(t *testing.T) {
 		name:          "test",
 		dockerId:      "testContainer",
 		image:         "bitnami/redis:latest",
-		containerPort: 8080,
-		hostPort:      8765,
+		containerPort: 9999,
+		hostPort:      9999,
 		testUrl:       "http://localhost:8765/orchard-gateway-msvc/health",
 		env: []string{
 			"env1=value1",

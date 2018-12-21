@@ -64,13 +64,14 @@ func TestMakeParams_nonExisting(t *testing.T) {
 	actions := mockActions()
 	args := []string{"actionNonExisting", "param3"}
 	result := ParseParams(actions, args)
-	expectedMessage := "Action 'actionNonExisting' does not exist. Available actions = [actionSuccess actionFail]"
+	expectedMessage1 := "Action 'actionNonExisting' does not exist. Available actions = [actionSuccess actionFail]"
+	expectedMessage2 := "Action 'actionNonExisting' does not exist. Available actions = [actionSuccess actionFail]"
 
 	if (result == nil) {
 		t.Errorf("Expected method to fail (non existing action)")
 	}
-	if (result.Error() != expectedMessage) {
-		t.Errorf("Expected error to be '%s' but got '%s'", expectedMessage, result.Error())
+	if (result.Error() != expectedMessage1 && result.Error() != expectedMessage2) {
+		t.Errorf("Expected error to be '%s' but got '%s'", expectedMessage1, result.Error())
 	}
 	if (calledParam != "param2") {
 		t.Errorf("Expected that method receives right parameter value")
