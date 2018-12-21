@@ -16,13 +16,13 @@ func Parse(args []string) error {
 	actions["start"] = componentActionHandler(startContainer)
 	actions["remove"] = componentActionHandler(removeContainer)
 	actions["create"] = componentActionHandler(createContainer)
-	actions["pull-image"] = componentActionHandler(pullImage)
-	actions["logs"] = logsHandler(false)
-	actions["watch"] = logsHandler(true)
+	actions["pull"] = componentActionHandler(pullImage)
+	actions["logs"] = logsHandler(dockerPrintLogs, false)
+	actions["watch"] = logsHandler(dockerPrintLogs, true)
 	return common.ParseParams(actions, args)
 }
 
-func logsHandler(follow bool) func(args[] string) error {
+func logsHandler(handler func(component Component, follow bool) error, follow bool) func(args[] string) error {
 	return func(args[] string) error {
 		if len(args) == 0 {
 			return errors.New(fmt.Sprintf("Missing component name. Available components = %s", componentNames()))
@@ -30,7 +30,7 @@ func logsHandler(follow bool) func(args[] string) error {
 		componentId := args[0]
 		componentMap := componentMap()
 		if component, ok := componentMap[componentId]; ok {
-			return dockerPrintLogs(component, follow)
+			return handler(component, follow)
 		}
 		return errors.New(fmt.Sprintf("Cannot find component '%s'. Available components = %s", componentId, componentNames()))
 	}

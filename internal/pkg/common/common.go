@@ -13,6 +13,9 @@ func ParseParams(actions map[string]func(args []string) error, args []string) er
 	if (len(args) == 0) {
 		return errors.New(fmt.Sprintf("Missing action, available actions = %s", getActionNames(actions)))
 	}
+	if actions["help"] == nil { // Add generic help handler
+		actions["help"] = mkHelpHandler(actions)
+	}
 	action := args[0]
 	actionArgs := args[1:]
 	if (actions[action] != nil) {
@@ -28,3 +31,11 @@ func getActionNames(actions map[string]func(args []string) error) []string {
 	}
 	return availableActions
 }
+
+func mkHelpHandler(actions map[string]func(args []string) error) func(args []string) error {
+	return func(args []string) error {
+		fmt.Printf("Available actions = %s\n", getActionNames(actions))
+		return nil
+	}
+}
+

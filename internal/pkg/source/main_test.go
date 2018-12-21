@@ -12,14 +12,14 @@ func TestParse(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "test-fail",
+			name: "failTest",
 			args: args {
 				[]string{"nonExistingAction", "param2", "param3"},
 				},
 			wantErr: true,
 		},
 		{
-			name: "test-pull",
+			name: "successTest",
 			args: args {
 				[]string{"pull", "param2", "param3"},
 			},
