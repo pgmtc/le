@@ -31,8 +31,10 @@ jobs: # basic units of work in a run
       - run: go get github.com/fatih/color
       - run: go get github.com/olekukonko/tablewriter
       - run: go get github.com/jstemmer/go-junit-report
+      - run: rm -rf /go/src/github.com/docker/docker/vendor/github.com/docker/go-connections
 
-      - run: rm -rf /go/src/github.com/docker/docker/vendor/github.com/docker/go-connections/nat
+      - setup_remote_docker
+
       - run:
           name: Run unit tests
           command: |
