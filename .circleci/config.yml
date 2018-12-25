@@ -1,11 +1,9 @@
 version: 2 # use CircleCI 2.0
 jobs: # basic units of work in a run
   build: # runs not using Workflows must have a `build` job as entry point
-#    docker: # run the steps with Docker
-#      # CircleCI Go images available at: https://hub.docker.com/r/circleci/golang/
-#      - image: circleci/golang:1.8 #
-
-    machine: true
+    docker: # run the steps with Docker
+      # CircleCI Go images available at: https://hub.docker.com/r/circleci/golang/
+      - image: circleci/golang:1.8 #
 
     working_directory: /go/src/github.com/pgmtc/orchard-cli
 
@@ -21,6 +19,17 @@ jobs: # basic units of work in a run
           keys:
             - v1-pkg-cache
 
+      - setup_remote_docker
+        docker_layer_caching: true
+          - run:
+              name: Install Docker client
+              command: |
+                set -x
+                VER="17.03.0-ce"
+                curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+                tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+                mv /tmp/docker/* /usr/bin
+
       # Normally, this step would be in a custom primary image;
       # we've added it here for the sake of explanation.
       - run: go get github.com/docker/docker/api
@@ -34,8 +43,6 @@ jobs: # basic units of work in a run
       - run: go get github.com/olekukonko/tablewriter
       - run: go get github.com/jstemmer/go-junit-report
       - run: rm -rf /go/src/github.com/docker/docker/vendor/github.com/docker/go-connections
-
-#      - setup_remote_docker
 
       - run:
           name: Run unit tests
