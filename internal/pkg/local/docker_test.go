@@ -138,4 +138,3 @@ func Test_pullImage(t *testing.T) {
 		})
 	}
 }
-

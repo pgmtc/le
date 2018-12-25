@@ -33,7 +33,6 @@ func TestMakeParams_helpAdded(t *testing.T) {
 		t.Errorf("Expected provided help method to be run and result in fail")
 	}
 
-
 }
 
 func TestMakeParams_noArgs(t *testing.T) {
@@ -118,4 +117,3 @@ func mockActions() map[string]func(args []string) error {
 	}
 	return actions
 }
-

@@ -17,7 +17,7 @@ import (
 
 func dockerPrintLogs(component Component, follow bool) error {
 	if container, err := getContainer(component); err == nil {
-		options := types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: follow, Timestamps:false}
+		options := types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: follow, Timestamps: false}
 		out, err := dockerGetClient().ContainerLogs(context.Background(), container.ID, options)
 		if err != nil {
 			return err
@@ -95,8 +95,7 @@ func createContainer(component Component) error {
 	var exposedPorts nat.PortSet
 	var portMap nat.PortMap
 
-
-	if (component.containerPort > 0 && component.hostPort > 0) {
+	if component.containerPort > 0 && component.hostPort > 0 {
 		exposedPorts = nat.PortSet{nat.Port(exposePort): struct{}{}}
 		portMap = map[nat.Port][]nat.PortBinding{nat.Port(exposePort): {{HostIP: "0.0.0.0", HostPort: mapPort}}}
 		fmt.Printf(" port %d will be mapped to host port %d : ", component.containerPort, component.hostPort)
@@ -106,16 +105,16 @@ func createContainer(component Component) error {
 	usr, _ := user.Current()
 	dir := usr.HomeDir
 	var awsCliMount []mount.Mount
-	awsCliMount = append(awsCliMount, mount.Mount{Type: mount.TypeBind,	Source: dir + "/.aws", Target: "/root/.aws"})
+	awsCliMount = append(awsCliMount, mount.Mount{Type: mount.TypeBind, Source: dir + "/.aws", Target: "/root/.aws"})
 
-	resp, err := dockerGetClient().ContainerCreate(context.Background(), &container.Config {
-		Image: component.image,
-		Env: component.env,
+	resp, err := dockerGetClient().ContainerCreate(context.Background(), &container.Config{
+		Image:        component.image,
+		Env:          component.env,
 		ExposedPorts: exposedPorts,
 	}, &container.HostConfig{
 		PortBindings: portMap,
-		Links: component.links,
-		Mounts: awsCliMount,
+		Links:        component.links,
+		Mounts:       awsCliMount,
 	}, nil, component.dockerId)
 	if err != nil {
 		return err
@@ -126,7 +125,7 @@ func createContainer(component Component) error {
 	if err := dockerGetClient().ContainerStart(context.Background(), resp.ID, types.ContainerStartOptions{}); err != nil {
 		return err
 	}
-	if (err != nil) {
+	if err != nil {
 		return err
 	}
 
@@ -137,7 +136,7 @@ func getContainer(component Component) (types.Container, error) {
 	var nilCont types.Container
 	dockerId := component.dockerId
 	containerMap, err := dockerGetContainers()
-	if (err != nil) {
+	if err != nil {
 		return nilCont, err
 	}
 
@@ -168,7 +167,7 @@ func getContainerName(container types.Container) string {
 	return container.Names[0][1:len(container.Names[0])]
 }
 
-func pullImage(component Component) error{
+func pullImage(component Component) error {
 	fmt.Printf("pulling image for '%s' (%s) ... ", component.name, component.image)
 	out, err := dockerGetClient().ImagePull(context.Background(), component.image, types.ImagePullOptions{})
 	if err != nil {

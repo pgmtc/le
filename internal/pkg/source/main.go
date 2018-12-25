@@ -9,8 +9,3 @@ func Parse(args []string) error {
 	actions["pull"] = pull
 	return common.ParseParams(actions, args)
 }
-
-
-
-
-

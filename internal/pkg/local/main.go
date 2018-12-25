@@ -22,8 +22,8 @@ func Parse(args []string) error {
 	return common.ParseParams(actions, args)
 }
 
-func logsHandler(handler func(component Component, follow bool) error, follow bool) func(args[] string) error {
-	return func(args[] string) error {
+func logsHandler(handler func(component Component, follow bool) error, follow bool) func(args []string) error {
+	return func(args []string) error {
 		if len(args) == 0 {
 			return errors.New(fmt.Sprintf("Missing component name. Available components = %s", componentNames()))
 		}
@@ -36,10 +36,10 @@ func logsHandler(handler func(component Component, follow bool) error, follow bo
 	}
 }
 
-func status(args[] string) error {
+func status(args []string) error {
 	allComponents := getComponents()
 	containerMap, err := dockerGetContainers()
-	if (err != nil) {
+	if err != nil {
 		return err
 	}
 
@@ -60,21 +60,27 @@ func status(args[] string) error {
 
 		// Some formatting
 		switch exists {
-			case "YES": exists = color.HiGreenString(exists)
-			case "NO": exists = color.RedString(exists)
+		case "YES":
+			exists = color.HiGreenString(exists)
+		case "NO":
+			exists = color.RedString(exists)
 		}
 
 		switch state {
-			case "running": state = color.HiGreenString(state)
-			case "exited": state = color.YellowString(state)
-			case "missing": state = color.RedString(state)
+		case "running":
+			state = color.HiGreenString(state)
+		case "exited":
+			state = color.YellowString(state)
+		case "missing":
+			state = color.RedString(state)
 		}
 
 		switch responding {
-			case "200": responding = color.HiGreenString(responding)
-			default: responding = color.RedString(responding)
+		case "200":
+			responding = color.HiGreenString(responding)
+		default:
+			responding = color.RedString(responding)
 		}
-
 
 		table.Append([]string{color.YellowString(cmp.name), color.HiBlackString(cmp.dockerId), color.YellowString(exists), state, responding})
 	}
@@ -94,7 +100,7 @@ func componentActionHandler(handler func(component Component) error) func(args [
 		if args[0] == "all" {
 			for _, cmp := range getComponents() {
 				err := handler(cmp)
-				if (err != nil) {
+				if err != nil {
 					color.HiBlack(err.Error())
 				}
 			}
@@ -104,8 +110,8 @@ func componentActionHandler(handler func(component Component) error) func(args [
 		for _, cmpName := range args {
 			if component, ok := (componentMap())[cmpName]; ok {
 				err := handler(component)
-				if (err != nil) {
-					if (len(args) > 1) {
+				if err != nil {
+					if len(args) > 1 {
 						color.HiBlack(err.Error())
 					} else {
 						return err
@@ -113,7 +119,7 @@ func componentActionHandler(handler func(component Component) error) func(args [
 
 				}
 			} else {
-				if (len(args) > 1) { // Single use
+				if len(args) > 1 { // Single use
 					color.HiBlack("Component '%s' has not been found", cmpName)
 				} else { // Multiple use
 					return errors.New(fmt.Sprintf("Component %s has not been found. Available components = %s", cmpName, componentNames()))

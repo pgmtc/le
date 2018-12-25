@@ -18,7 +18,7 @@ func main() {
 
 	availableModules := reflect.ValueOf(modules).MapKeys()
 
-	if (len(args) == 0) {
+	if len(args) == 0 {
 		color.Red("Please provide module")
 		color.Red(fmt.Sprintf(" %s [module] [action]", os.Args[0]))
 		color.Red(fmt.Sprintf(" example: %s local status", os.Args[0]))
@@ -35,7 +35,7 @@ func main() {
 	}
 
 	err := handler(args[1:])
-	if (err != nil) {
+	if err != nil {
 		color.Red(err.Error())
 	} else {
 		color.HiGreen("Finished OK")

@@ -5,7 +5,7 @@ import (
 )
 
 func TestArrContains(t *testing.T) {
-	arr := []string {"element1", "element2", "element3"}
+	arr := []string{"element1", "element2", "element3"}
 	var emptyArr []string
 
 	if !ArrContains(arr, "element1") {

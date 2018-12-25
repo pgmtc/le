@@ -196,8 +196,6 @@ func Test_status(t *testing.T) {
 
 func TestParse(t *testing.T) {
 	// Prepare - stop redis container just in case it is running
-
-
 	type args struct {
 		args []string
 	}
@@ -207,13 +205,13 @@ func TestParse(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "failTest",
-			args: args {[]string{"nonExistingAction"}},
+			name:    "failTest",
+			args:    args{[]string{"nonExistingAction"}},
 			wantErr: true,
 		},
 		{
-			name: "successTest",
-			args: args {[]string{"help"}},
+			name:    "successTest",
+			args:    args{[]string{"help"}},
 			wantErr: false,
 		}, // No need to test the rest - actions tested individually
 	}

@@ -10,7 +10,7 @@ func MakeActions() map[string]func(args []string) error {
 }
 
 func ParseParams(actions map[string]func(args []string) error, args []string) error {
-	if (len(args) == 0) {
+	if len(args) == 0 {
 		return errors.New(fmt.Sprintf("Missing action, available actions = %s", getActionNames(actions)))
 	}
 	if actions["help"] == nil { // Add generic help handler
@@ -18,7 +18,7 @@ func ParseParams(actions map[string]func(args []string) error, args []string) er
 	}
 	action := args[0]
 	actionArgs := args[1:]
-	if (actions[action] != nil) {
+	if actions[action] != nil {
 		return actions[action](actionArgs)
 	}
 	return errors.New(fmt.Sprintf("Action '%s' does not exist. Available actions = %s", action, getActionNames(actions)))
@@ -38,4 +38,3 @@ func mkHelpHandler(actions map[string]func(args []string) error) func(args []str
 		return nil
 	}
 }
-

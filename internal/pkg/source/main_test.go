@@ -13,19 +13,18 @@ func TestParse(t *testing.T) {
 	}{
 		{
 			name: "failTest",
-			args: args {
+			args: args{
 				[]string{"nonExistingAction", "param2", "param3"},
-				},
+			},
 			wantErr: true,
 		},
 		{
 			name: "successTest",
-			args: args {
+			args: args{
 				[]string{"pull", "param2", "param3"},
 			},
 			wantErr: false,
 		},
-
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
