@@ -35,7 +35,7 @@ jobs: # basic units of work in a run
       - run: go get github.com/jstemmer/go-junit-report
       - run: rm -rf /go/src/github.com/docker/docker/vendor/github.com/docker/go-connections
 
-      - setup_remote_docker
+#      - setup_remote_docker
 
       - run:
           name: Run unit tests
