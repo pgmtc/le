@@ -28,6 +28,8 @@ jobs: # basic units of work in a run
       - run: go get github.com/docker/go-connections/nat
       - run: go get github.com/Microsoft/go-winio
       - run: go get golang.org/x/sys/windows
+      - run: go get github.com/fatih/color
+      - run: go get github.com/olekukonko/tablewriter
       - run:
           name: Run unit tests
           command: |
