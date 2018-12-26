@@ -1,50 +1,31 @@
 package local
 
 import (
-	"encoding/binary"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"io"
-	"log"
 	"os"
+	"os/user"
 	"strconv"
 )
 
-func dockerGetLogs(component Component, follow bool) error {
-	i, err := dockerGetClient().ContainerLogs(context.Background(), component.dockerId, types.ContainerLogsOptions{
-		ShowStderr: true,
-		ShowStdout: true,
-		Timestamps: false,
-		Follow:     follow,
-		Tail:       "40",
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	hdr := make([]byte, 8)
-	for {
-		_, err := i.Read(hdr)
+func dockerPrintLogs(component Component, follow bool) error {
+	if container, err := getContainer(component); err == nil {
+		options := types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: follow, Timestamps: false}
+		out, err := dockerGetClient().ContainerLogs(context.Background(), container.ID, options)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
-		var w io.Writer
-		switch hdr[0] {
-		case 1:
-			w = os.Stdout
-		default:
-			w = os.Stderr
-		}
-		count := binary.BigEndian.Uint32(hdr[4:])
-		dat := make([]byte, count)
-		_, err = i.Read(dat)
-		fmt.Fprint(w, string(dat))
+		io.Copy(os.Stdout, out)
+		return nil
 	}
+	return errors.Errorf("Error when getting container logs for '%s' (%s)\n", component.name, component.dockerId)
 }
 
 func dockerGetContainers() (map[string]types.Container, error) {
@@ -57,8 +38,10 @@ func dockerGetContainers() (map[string]types.Container, error) {
 
 	containerMap := make(map[string]types.Container)
 	for _, container := range containers {
-		containerName := container.Names[0][1:len(container.Names[0])]
-		containerMap[containerName] = container
+		for _, cName := range container.Names {
+			containerName := cName[1:len(cName)]
+			containerMap[containerName] = container
+		}
 	}
 	return containerMap, nil
 }
@@ -117,17 +100,27 @@ func createContainer(component Component) error {
 	mapPort := strconv.Itoa(component.hostPort)
 	var exposedPorts nat.PortSet
 	var portMap nat.PortMap
-	if (component.containerPort > 0 && component.hostPort > 0) {
+
+	if component.containerPort > 0 && component.hostPort > 0 {
 		exposedPorts = nat.PortSet{nat.Port(exposePort): struct{}{}}
 		portMap = map[nat.Port][]nat.PortBinding{nat.Port(exposePort): {{HostIP: "0.0.0.0", HostPort: mapPort}}}
 		fmt.Printf(" port %d will be mapped to host port %d : ", component.containerPort, component.hostPort)
 	}
-	resp, err := dockerGetClient().ContainerCreate(context.Background(), &container.Config {
-		Image: component.image,
-		Env: component.env,
+
+	// Mount AWS login credentials
+	usr, _ := user.Current()
+	dir := usr.HomeDir
+	var awsCliMount []mount.Mount
+	awsCliMount = append(awsCliMount, mount.Mount{Type: mount.TypeBind, Source: dir + "/.aws", Target: "/root/.aws"})
+
+	resp, err := dockerGetClient().ContainerCreate(context.Background(), &container.Config{
+		Image:        component.image,
+		Env:          component.env,
 		ExposedPorts: exposedPorts,
 	}, &container.HostConfig{
 		PortBindings: portMap,
+		Links:        component.links,
+		Mounts:       awsCliMount,
 	}, nil, component.dockerId)
 	if err != nil {
 		return err
@@ -138,7 +131,7 @@ func createContainer(component Component) error {
 	if err := dockerGetClient().ContainerStart(context.Background(), resp.ID, types.ContainerStartOptions{}); err != nil {
 		return err
 	}
-	if (err != nil) {
+	if err != nil {
 		return err
 	}
 
@@ -149,7 +142,7 @@ func getContainer(component Component) (types.Container, error) {
 	var nilCont types.Container
 	dockerId := component.dockerId
 	containerMap, err := dockerGetContainers()
-	if (err != nil) {
+	if err != nil {
 		return nilCont, err
 	}
 
@@ -168,6 +161,7 @@ func dockerGetClient() *client.Client {
 	return cli
 }
 
+<<<<<<< HEAD
 func dockerListImages() error {
 	images, err := dockerGetClient().ImageList(context.Background(), types.ImageListOptions{})
 	if err != nil {
@@ -181,6 +175,13 @@ func dockerListImages() error {
 }
 
 func pullImage(component Component) error{
+=======
+func getContainerName(container types.Container) string {
+	return container.Names[0][1:len(container.Names[0])]
+}
+
+func pullImage(component Component) error {
+>>>>>>> ebd35fcfdf40477b29a5c99a3629725738a8dfb3
 	fmt.Printf("pulling image for '%s' (%s) ... ", component.name, component.image)
 	out, err := dockerGetClient().ImagePull(context.Background(), component.image, types.ImagePullOptions{})
 	if err != nil {

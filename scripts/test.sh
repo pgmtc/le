@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-go test ./... -cover
+go test ./... -v -cover
