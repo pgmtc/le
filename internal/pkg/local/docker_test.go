@@ -4,15 +4,6 @@ import (
 	"testing"
 )
 
-<<<<<<< HEAD
-func TestMissingParameters(t * testing.T) {
-	cmp := Component {
-		name: "test",
-		dockerId: "test-container",
-	}
-	err := createContainer(cmp)
-	if (err == nil) {
-=======
 func TestMissingParameters(t *testing.T) {
 	cmp := Component{
 		name:     "test",
@@ -20,40 +11,10 @@ func TestMissingParameters(t *testing.T) {
 	}
 	err := createContainer(cmp)
 	if err == nil {
->>>>>>> ebd35fcfdf40477b29a5c99a3629725738a8dfb3
 		t.Errorf("Expected to fail due to mandatory missing")
 	}
 }
 
-<<<<<<< HEAD
-
-func TestComplex(t *testing.T) {
-	cmp := Component {
-		name: "test",
-		dockerId: "test-container",
-		image: "bitnami/redis:latest",
-		containerPort: 8080,
-		hostPort: 8765,
-		testUrl:  "http://localhost:8765/orchard-gateway-msvc/health",
-	}
-	err := createContainer(cmp)
-	if (err != nil) {
-		t.Errorf("Expected to fail due to mandatory missing")
-	}
-
-	removeContainer(cmp)
-}
-
-func TestSimpleContainerWorkflow(t *testing.T) {
-	cmp := Component {
-		name: "test",
-		dockerId: "test-container",
-		image: "bitnami/redis:latest",
-	}
-
-	err := createContainer(cmp)
-	if (err != nil) {
-=======
 func TestComplex(t *testing.T) {
 	var err error
 
@@ -110,28 +71,15 @@ func TestContainerWorkflow(t *testing.T) {
 	err := createContainer(cmp)
 	defer removeContainer(cmp)
 	if err != nil {
->>>>>>> ebd35fcfdf40477b29a5c99a3629725738a8dfb3
 		t.Errorf("Expected container to be created, got %s", err.Error())
 	}
 
 	err = stopContainer(cmp)
-<<<<<<< HEAD
-	if (err != nil) {
-=======
 	if err != nil {
->>>>>>> ebd35fcfdf40477b29a5c99a3629725738a8dfb3
 		t.Errorf("Expected container to be stopped, got %s", err.Error())
 	}
 
 	err = startContainer(cmp)
-<<<<<<< HEAD
-	if (err != nil) {
-		t.Errorf("Expected container to be started, got %s", err.Error())
-	}
-
-	err = removeContainer(cmp)
-	if  (err != nil) {
-=======
 	if err != nil {
 		t.Errorf("Expected container to be started, got %s", err.Error())
 	}
@@ -143,17 +91,10 @@ func TestContainerWorkflow(t *testing.T) {
 
 	err = removeContainer(cmp)
 	if err != nil {
->>>>>>> ebd35fcfdf40477b29a5c99a3629725738a8dfb3
 		t.Errorf("Expected container to be removed, got %s", err.Error())
 	}
 
 	container, err := getContainer(cmp)
-<<<<<<< HEAD
-	if (err == nil) {
-		t.Errorf("Expected container not to exist, got %s", container.Names)
-	}
-}
-=======
 	if err == nil {
 		t.Errorf("Expected container not to exist, got %s", container.Names)
 	}
@@ -197,4 +138,3 @@ func Test_pullImage(t *testing.T) {
 		})
 	}
 }
->>>>>>> ebd35fcfdf40477b29a5c99a3629725738a8dfb3

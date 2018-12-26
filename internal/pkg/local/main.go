@@ -12,16 +12,6 @@ import (
 func Parse(args []string) error {
 	actions := common.MakeActions()
 	actions["status"] = status
-<<<<<<< HEAD
-	actions["stop"] = componentActionHander(stopContainer)
-	actions["start"] = componentActionHander(startContainer)
-	actions["remove"] = componentActionHander(removeContainer)
-	actions["create"] = componentActionHander(createContainer)
-	actions["list-images"] = listImages
-	actions["pull-image"] = componentActionHander(pullImage)
-	actions["logs"] = logsHandler(false)
-	actions["watch"] = logsHandler(true)
-=======
 	actions["stop"] = componentActionHandler(stopContainer)
 	actions["start"] = componentActionHandler(startContainer)
 	actions["remove"] = componentActionHandler(removeContainer)
@@ -29,7 +19,6 @@ func Parse(args []string) error {
 	actions["pull"] = componentActionHandler(pullImage)
 	actions["logs"] = logsHandler(dockerPrintLogs, false)
 	actions["watch"] = logsHandler(dockerPrintLogs, true)
->>>>>>> ebd35fcfdf40477b29a5c99a3629725738a8dfb3
 	return common.ParseParams(actions, args)
 }
 

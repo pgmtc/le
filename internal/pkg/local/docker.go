@@ -161,27 +161,11 @@ func dockerGetClient() *client.Client {
 	return cli
 }
 
-<<<<<<< HEAD
-func dockerListImages() error {
-	images, err := dockerGetClient().ImageList(context.Background(), types.ImageListOptions{})
-	if err != nil {
-		return err
-	}
-	for _, image := range images {
-		repoName := image.RepoTags[0]
-		fmt.Println(repoName)
-	}
-	return nil
-}
-
-func pullImage(component Component) error{
-=======
 func getContainerName(container types.Container) string {
 	return container.Names[0][1:len(container.Names[0])]
 }
 
 func pullImage(component Component) error {
->>>>>>> ebd35fcfdf40477b29a5c99a3629725738a8dfb3
 	fmt.Printf("pulling image for '%s' (%s) ... ", component.name, component.image)
 	out, err := dockerGetClient().ImagePull(context.Background(), component.image, types.ImagePullOptions{})
 	if err != nil {

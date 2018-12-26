@@ -32,18 +32,6 @@ func componentMap() map[string]Component {
 
 func getComponents() []Component {
 	return []Component{
-<<<<<<< HEAD
-		{
-			name: "db",
-			image: "orchard/orchard-local-db:latest",
-			containerPort: 3306,
-			hostPort: 3306,
-			dockerId: "orchard-local-db",
-			testUrl:  ""},
-		{
-			name: "redis",
-			image: "bitnami/redis:latest",
-=======
 		Component{
 			name:          "db",
 			image:         "orchard/orchard-local-db:latest",
@@ -54,43 +42,9 @@ func getComponents() []Component {
 		Component{
 			name:     "redis",
 			image:    "bitnami/redis:latest",
->>>>>>> ebd35fcfdf40477b29a5c99a3629725738a8dfb3
 			dockerId: "dcmp_orchard-redis_1",
 			env:      []string{"ALLOW_EMPTY_PASSWORD=yes"},
 			testUrl:  ""},
-<<<<<<< HEAD
-		{
-			name: "config",
-			image: "orchard/orchard-config-msvc:latest",
-			dockerId: "dcmp_orchard-config-msvc_1",
-			testUrl:  ""},
-		{
-			name: "gateway",
-			image: "orchard/orchard-gateway-msvc:latest",
-			dockerId: "dcmp_orchard-gateway-msvc_1",
-			containerPort: 8080,
-			hostPort: 8765,
-			testUrl:  "http://localhost:8765/orchard-gateway-msvc/health"},
-		{
-			name: "auth",
-			image: "orchard/orchard-auth-msvc:latest",
-			dockerId: "dcmp_orchard-auth-msvc_1",
-			testUrl:  "http://localhost:8765/orchard-gateway-msvc/orchard-auth-msvc/health"},
-		{
-			name: "case-flow",
-			image: "orchard/orchard-case-flow-msvc:latest",
-			dockerId: "dcmp_orchard-case-flow-msvc_1",
-			testUrl:  "http://localhost:8765/orchard-gateway-msvc/orchard-case-flow-msvc/health"},
-		{
-			name: "doc-analysis",
-			image: "orchard/orchard-doc-analysis-msvc:latest",
-			dockerId: "dcmp_orchard-doc-analysis-msvc_1",
-			testUrl:  "http://localhost:8765/orchard-gateway-msvc/orchard-doc-analysis-msvc/health"},
-		{
-			name: "ui",
-			image: "orchard/orchard-doc-analysis-ui:latest",
-			dockerId: "dcmp_orchard-doc-analysis-ui_1",
-=======
 		Component{
 			name:     "config",
 			image:    "orchard/orchard-config-msvc:latest",
@@ -146,7 +100,6 @@ func getComponents() []Component {
 			name:          "ui",
 			image:         "orchard/orchard-doc-analysis-ui:latest",
 			dockerId:      "dcmp_orchard-doc-analysis-ui_1",
->>>>>>> ebd35fcfdf40477b29a5c99a3629725738a8dfb3
 			containerPort: 80,
 			hostPort:      3000,
 			testUrl:       "http://localhost:3000/"},
