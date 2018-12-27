@@ -6,7 +6,7 @@ import (
 )
 
 func isResponding(cmp Component) string {
-	if cmp.testUrl == "" {
+	if cmp.TestUrl == "" {
 		return ""
 	}
 
@@ -16,7 +16,7 @@ func isResponding(cmp Component) string {
 		},
 	}
 
-	resp, err := client.Get(cmp.testUrl)
+	resp, err := client.Get(cmp.TestUrl)
 	if err != nil {
 		// handle error
 		fmt.Println(err)

@@ -6,8 +6,8 @@ import (
 
 func TestMissingParameters(t *testing.T) {
 	cmp := Component{
-		name:     "test",
-		dockerId: "test-container",
+		Name:     "test",
+		DockerId: "test-container",
 	}
 	err := createContainer(cmp)
 	if err == nil {
@@ -19,14 +19,14 @@ func TestComplex(t *testing.T) {
 	var err error
 
 	cmp1 := Component{
-		name:     "linkedContainer",
-		dockerId: "linkedContainer",
-		image:    "nginx:stable-alpine",
+		Name:     "linkedContainer",
+		DockerId: "linkedContainer",
+		Image:    "nginx:stable-alpine",
 	}
 
 	err = pullImage(cmp1)
 	if err != nil {
-		t.Errorf("Error, expected image to be pulled, got %s", err.Error())
+		t.Errorf("Error, expected Image to be pulled, got %s", err.Error())
 	}
 
 	err = createContainer(cmp1)
@@ -40,17 +40,17 @@ func TestComplex(t *testing.T) {
 	}
 
 	cmp := Component{
-		name:          "test",
-		dockerId:      "testContainer",
-		image:         "bitnami/redis:latest",
-		containerPort: 9999,
-		hostPort:      9999,
-		testUrl:       "http://localhost:8765/orchard-gateway-msvc/health",
-		env: []string{
+		Name:          "test",
+		DockerId:      "testContainer",
+		Image:         "bitnami/redis:latest",
+		ContainerPort: 9999,
+		HostPort:      9999,
+		TestUrl:       "http://localhost:8765/orchard-gateway-msvc/health",
+		Env: []string{
 			"env1=value1",
 			"evn2=value2",
 		},
-		links: []string{
+		Links: []string{
 			"linkedContainer:link1",
 		},
 	}
@@ -63,9 +63,9 @@ func TestComplex(t *testing.T) {
 
 func TestContainerWorkflow(t *testing.T) {
 	cmp := Component{
-		name:     "test",
-		dockerId: "test-container",
-		image:    "nginx:stable-alpine",
+		Name:     "test",
+		DockerId: "test-container",
+		Image:    "nginx:stable-alpine",
 	}
 
 	err := createContainer(cmp)
@@ -113,8 +113,8 @@ func Test_pullImage(t *testing.T) {
 			name: "testNginx",
 			args: args{
 				component: Component{
-					name:  "ironGo",
-					image: "iron/go",
+					Name:  "ironGo",
+					Image: "iron/go",
 				},
 			},
 			wantErr: false,
@@ -123,8 +123,8 @@ func Test_pullImage(t *testing.T) {
 			name: "testNonExisting",
 			args: args{
 				component: Component{
-					name:  "nonExisting",
-					image: "whatever-nonexisting",
+					Name:  "nonExisting",
+					Image: "whatever-nonexisting",
 				},
 			},
 			wantErr: true,

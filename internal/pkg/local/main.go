@@ -25,7 +25,7 @@ func Parse(args []string) error {
 func logsHandler(handler func(component Component, follow bool) error, follow bool) func(args []string) error {
 	return func(args []string) error {
 		if len(args) == 0 {
-			return errors.New(fmt.Sprintf("Missing component name. Available components = %s", componentNames()))
+			return errors.New(fmt.Sprintf("Missing component Name. Available components = %s", componentNames()))
 		}
 		componentId := args[0]
 		componentMap := componentMap()
@@ -46,11 +46,11 @@ func status(args []string) error {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Component", "Docker Container", "Exists", "State", "HTTP"})
 	for _, cmp := range allComponents {
-		fmt.Printf("\rChecking state of %s ...", cmp.name)
+		fmt.Printf("\rChecking state of %s ...", cmp.Name)
 		exists := "NO"
 		state := "missing"
 		responding := ""
-		if container, ok := containerMap[cmp.dockerId]; ok {
+		if container, ok := containerMap[cmp.DockerId]; ok {
 			exists = "YES"
 			state = container.State
 			if state == "running" {
@@ -82,7 +82,7 @@ func status(args []string) error {
 			responding = color.RedString(responding)
 		}
 
-		table.Append([]string{color.YellowString(cmp.name), color.HiBlackString(cmp.dockerId), color.YellowString(exists), state, responding})
+		table.Append([]string{color.YellowString(cmp.Name), color.HiBlackString(cmp.DockerId), color.YellowString(exists), state, responding})
 	}
 
 	fmt.Printf("\r")
@@ -93,7 +93,7 @@ func status(args []string) error {
 func componentActionHandler(handler func(component Component) error) func(args []string) error {
 	return func(args []string) error {
 		if len(args) == 0 {
-			return errors.New(fmt.Sprintf("Missing component name. Available components = %s", componentNames()))
+			return errors.New(fmt.Sprintf("Missing component Name. Available components = %s", componentNames()))
 		}
 
 		// If all provided, do for all components

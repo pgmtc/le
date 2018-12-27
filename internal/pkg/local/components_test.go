@@ -9,8 +9,8 @@ func Test_componentNames(t *testing.T) {
 	components := getComponents()
 	componentNames := componentNames()
 	for _, cmp := range components {
-		if !common.ArrContains(componentNames, cmp.name) {
-			t.Errorf("Component %s had not been found in list of component names", cmp.name)
+		if !common.ArrContains(componentNames, cmp.Name) {
+			t.Errorf("Component %s had not been found in list of component names", cmp.Name)
 		}
 	}
 }
@@ -19,8 +19,8 @@ func Test_componentMap(t *testing.T) {
 	components := getComponents()
 	componentMap := componentMap()
 	for _, cmp := range components {
-		if _, ok := componentMap[cmp.name]; !ok {
-			t.Errorf("Component %s had not been found in the map", cmp.name)
+		if _, ok := componentMap[cmp.Name]; !ok {
+			t.Errorf("Component %s had not been found in the map", cmp.Name)
 		}
 	}
 
@@ -34,8 +34,8 @@ func Test_getComponents(t *testing.T) {
 
 	for _, cmp := range components {
 		// Test mandatory fields
-		if cmp.name == "" || cmp.dockerId == "" || cmp.image == "" {
-			t.Errorf("Component name, dockerId or image is empty for (%s, %s, %s)", cmp.name, cmp.dockerId, cmp.image)
+		if cmp.Name == "" || cmp.DockerId == "" || cmp.Image == "" {
+			t.Errorf("Component Name, DockerId or Image is empty for (%s, %s, %s)", cmp.Name, cmp.DockerId, cmp.Image)
 		}
 	}
 }

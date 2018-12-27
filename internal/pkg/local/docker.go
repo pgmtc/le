@@ -25,7 +25,7 @@ func dockerPrintLogs(component Component, follow bool) error {
 		io.Copy(os.Stdout, out)
 		return nil
 	}
-	return errors.Errorf("Error when getting container logs for '%s' (%s)\n", component.name, component.dockerId)
+	return errors.Errorf("Error when getting container logs for '%s' (%s)\n", component.Name, component.DockerId)
 }
 
 func dockerGetContainers() (map[string]types.Container, error) {
@@ -48,25 +48,25 @@ func dockerGetContainers() (map[string]types.Container, error) {
 
 func startContainer(component Component) error {
 	if container, err := getContainer(component); err == nil {
-		fmt.Printf("Starting container '%s' for component '%s'\n", component.dockerId, component.name)
+		fmt.Printf("Starting container '%s' for component '%s'\n", component.DockerId, component.Name)
 
 		if err := dockerGetClient().ContainerStart(context.Background(), container.ID, types.ContainerStartOptions{}); err != nil {
 			return err
 		}
 		return nil
 	}
-	return errors.Errorf("Starting container '%s' for component '%s': Not found. Create it first\n", component.name, component.dockerId)
+	return errors.Errorf("Starting container '%s' for component '%s': Not found. Create it first\n", component.Name, component.DockerId)
 }
 
 func stopContainer(component Component) error {
 	if container, err := getContainer(component); err == nil {
-		fmt.Printf("Stopping container '%s' for component '%s'\n", component.dockerId, component.name)
+		fmt.Printf("Stopping container '%s' for component '%s'\n", component.DockerId, component.Name)
 		if err := dockerGetClient().ContainerStop(context.Background(), container.ID, nil); err != nil {
 			return err
 		}
 		return nil
 	}
-	return errors.Errorf("Stopping container '%s' for component '%s': Not found found. Nothing to stop\n", component.name, component.dockerId)
+	return errors.Errorf("Stopping container '%s' for component '%s': Not found found. Nothing to stop\n", component.Name, component.DockerId)
 }
 
 func removeContainer(component Component) error {
@@ -76,35 +76,35 @@ func removeContainer(component Component) error {
 				return err
 			}
 		}
-		fmt.Printf("Removing container '%s' for component '%s'\n", component.dockerId, component.name)
+		fmt.Printf("Removing container '%s' for component '%s'\n", component.DockerId, component.Name)
 		if err := dockerGetClient().ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{}); err != nil {
 			return err
 		}
 		return nil
 	}
-	return errors.Errorf("Removing container '%s' for component '%s': Not found. Nothing to remove\n", component.name, component.dockerId)
+	return errors.Errorf("Removing container '%s' for component '%s': Not found. Nothing to remove\n", component.Name, component.DockerId)
 }
 
 func createContainer(component Component) error {
-	if (component.name == "" || component.dockerId == "" || component.image == "") {
-		return errors.New("Missing container name, dockerId or image")
+	if component.Name == "" || component.DockerId == "" || component.Image == "" {
+		return errors.New("Missing container Name, DockerId or Image")
 	}
-	fmt.Println(component.name)
-	fmt.Println(component.dockerId)
-	fmt.Println(component.image)
+	fmt.Println(component.Name)
+	fmt.Println(component.DockerId)
+	fmt.Println(component.Image)
 	if _, err := getContainer(component); err == nil {
-		return errors.New(fmt.Sprintf("Component %s already exist (%s). If you want to recreate, then please stop and remove it first", component.name, component.dockerId))
+		return errors.New(fmt.Sprintf("Component %s already exist (%s). If you want to recreate, then please stop and remove it first", component.Name, component.DockerId))
 	}
-	fmt.Printf("Creating container '%s' for component '%s': ", component.dockerId, component.name)
-	exposePort := strconv.Itoa(component.containerPort)
-	mapPort := strconv.Itoa(component.hostPort)
+	fmt.Printf("Creating container '%s' for component '%s': ", component.DockerId, component.Name)
+	exposePort := strconv.Itoa(component.ContainerPort)
+	mapPort := strconv.Itoa(component.HostPort)
 	var exposedPorts nat.PortSet
 	var portMap nat.PortMap
 
-	if component.containerPort > 0 && component.hostPort > 0 {
+	if component.ContainerPort > 0 && component.HostPort > 0 {
 		exposedPorts = nat.PortSet{nat.Port(exposePort): struct{}{}}
 		portMap = map[nat.Port][]nat.PortBinding{nat.Port(exposePort): {{HostIP: "0.0.0.0", HostPort: mapPort}}}
-		fmt.Printf(" port %d will be mapped to host port %d : ", component.containerPort, component.hostPort)
+		fmt.Printf(" port %d will be mapped to host port %d : ", component.ContainerPort, component.HostPort)
 	}
 
 	// Mount AWS login credentials
@@ -114,14 +114,14 @@ func createContainer(component Component) error {
 	awsCliMount = append(awsCliMount, mount.Mount{Type: mount.TypeBind, Source: dir + "/.aws", Target: "/root/.aws"})
 
 	resp, err := dockerGetClient().ContainerCreate(context.Background(), &container.Config{
-		Image:        component.image,
-		Env:          component.env,
+		Image:        component.Image,
+		Env:          component.Env,
 		ExposedPorts: exposedPorts,
 	}, &container.HostConfig{
 		PortBindings: portMap,
-		Links:        component.links,
+		Links:        component.Links,
 		Mounts:       awsCliMount,
-	}, nil, component.dockerId)
+	}, nil, component.DockerId)
 	if err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func createContainer(component Component) error {
 
 func getContainer(component Component) (types.Container, error) {
 	var nilCont types.Container
-	dockerId := component.dockerId
+	dockerId := component.DockerId
 	containerMap, err := dockerGetContainers()
 	if err != nil {
 		return nilCont, err
@@ -166,8 +166,8 @@ func getContainerName(container types.Container) string {
 }
 
 func pullImage(component Component) error {
-	fmt.Printf("pulling image for '%s' (%s) ... ", component.name, component.image)
-	out, err := dockerGetClient().ImagePull(context.Background(), component.image, types.ImagePullOptions{})
+	fmt.Printf("pulling Image for '%s' (%s) ... ", component.Name, component.Image)
+	out, err := dockerGetClient().ImagePull(context.Background(), component.Image, types.ImagePullOptions{})
 	if err != nil {
 		return err
 	}

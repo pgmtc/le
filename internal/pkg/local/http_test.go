@@ -13,36 +13,36 @@ func Test_isResponding(t *testing.T) {
 	}{
 		{
 			name: "test-no-url",
-			args: args {
+			args: args{
 				cmp: Component{
-					name: "testComponent",
+					Name: "testComponent",
 				}},
 			want: "",
 		},
 		{
 			name: "test-success",
-			args: args {
+			args: args{
 				cmp: Component{
-					name: "testComponent",
-					testUrl: "http://www.praguematica.co.uk/",
+					Name:    "testComponent",
+					TestUrl: "http://www.praguematica.co.uk/",
 				}},
 			want: "200",
 		},
 		{
 			name: "test-redirect",
-			args: args {
+			args: args{
 				cmp: Component{
-					name: "testComponent",
-					testUrl: "http://praguematica.co.uk/",
+					Name:    "testComponent",
+					TestUrl: "http://praguematica.co.uk/",
 				}},
 			want: "301",
 		},
 		{
 			name: "test-fail",
-			args: args {
+			args: args{
 				cmp: Component{
-					name: "testComponent",
-					testUrl: "http://non-existing-url/",
+					Name:    "testComponent",
+					TestUrl: "http://non-existing-url/",
 				}},
 			want: "ERR",
 		},

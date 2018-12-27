@@ -12,7 +12,7 @@ var (
 
 // Method called by actionHandler test - success
 func handlerMethod_success(component Component) error {
-	handlerMethodCalledStore[component.name] = true
+	handlerMethodCalledStore[component.Name] = true
 	return nil
 }
 
