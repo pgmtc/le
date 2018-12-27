@@ -2,10 +2,11 @@ package local
 
 import (
 	"fmt"
+	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"net/http"
 )
 
-func isResponding(cmp Component) string {
+func isResponding(cmp common.Component) string {
 	if cmp.TestUrl == "" {
 		return ""
 	}

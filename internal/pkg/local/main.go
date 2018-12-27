@@ -22,22 +22,22 @@ func Parse(args []string) error {
 	return common.ParseParams(actions, args)
 }
 
-func logsHandler(handler func(component Component, follow bool) error, follow bool) func(args []string) error {
+func logsHandler(handler func(component common.Component, follow bool) error, follow bool) func(args []string) error {
 	return func(args []string) error {
 		if len(args) == 0 {
-			return errors.New(fmt.Sprintf("Missing component Name. Available components = %s", componentNames()))
+			return errors.New(fmt.Sprintf("Missing component Name. Available components = %s", common.ComponentNames()))
 		}
 		componentId := args[0]
-		componentMap := componentMap()
+		componentMap := common.ComponentMap()
 		if component, ok := componentMap[componentId]; ok {
 			return handler(component, follow)
 		}
-		return errors.New(fmt.Sprintf("Cannot find component '%s'. Available components = %s", componentId, componentNames()))
+		return errors.New(fmt.Sprintf("Cannot find component '%s'. Available components = %s", componentId, common.ComponentNames()))
 	}
 }
 
 func status(args []string) error {
-	allComponents := getComponents()
+	allComponents := common.GetComponents()
 	containerMap, err := dockerGetContainers()
 	if err != nil {
 		return err
@@ -90,15 +90,15 @@ func status(args []string) error {
 	return nil
 }
 
-func componentActionHandler(handler func(component Component) error) func(args []string) error {
+func componentActionHandler(handler func(component common.Component) error) func(args []string) error {
 	return func(args []string) error {
 		if len(args) == 0 {
-			return errors.New(fmt.Sprintf("Missing component Name. Available components = %s", componentNames()))
+			return errors.New(fmt.Sprintf("Missing component Name. Available components = %s", common.ComponentNames()))
 		}
 
 		// If all provided, do for all components
 		if args[0] == "all" {
-			for _, cmp := range getComponents() {
+			for _, cmp := range common.GetComponents() {
 				err := handler(cmp)
 				if err != nil {
 					color.HiBlack(err.Error())
@@ -108,7 +108,7 @@ func componentActionHandler(handler func(component Component) error) func(args [
 		}
 
 		for _, cmpName := range args {
-			if component, ok := (componentMap())[cmpName]; ok {
+			if component, ok := (common.ComponentMap())[cmpName]; ok {
 				err := handler(component)
 				if err != nil {
 					if len(args) > 1 {
@@ -122,7 +122,7 @@ func componentActionHandler(handler func(component Component) error) func(args [
 				if len(args) > 1 { // Single use
 					color.HiBlack("Component '%s' has not been found", cmpName)
 				} else { // Multiple use
-					return errors.New(fmt.Sprintf("Component %s has not been found. Available components = %s", cmpName, componentNames()))
+					return errors.New(fmt.Sprintf("Component %s has not been found. Available components = %s", cmpName, common.ComponentNames()))
 				}
 			}
 		}

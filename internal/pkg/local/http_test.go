@@ -1,10 +1,13 @@
 package local
 
-import "testing"
+import (
+	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"testing"
+)
 
 func Test_isResponding(t *testing.T) {
 	type args struct {
-		cmp Component
+		cmp common.Component
 	}
 	tests := []struct {
 		name string
@@ -14,7 +17,7 @@ func Test_isResponding(t *testing.T) {
 		{
 			name: "test-no-url",
 			args: args{
-				cmp: Component{
+				cmp: common.Component{
 					Name: "testComponent",
 				}},
 			want: "",
@@ -22,7 +25,7 @@ func Test_isResponding(t *testing.T) {
 		{
 			name: "test-success",
 			args: args{
-				cmp: Component{
+				cmp: common.Component{
 					Name:    "testComponent",
 					TestUrl: "http://www.praguematica.co.uk/",
 				}},
@@ -31,7 +34,7 @@ func Test_isResponding(t *testing.T) {
 		{
 			name: "test-redirect",
 			args: args{
-				cmp: Component{
+				cmp: common.Component{
 					Name:    "testComponent",
 					TestUrl: "http://praguematica.co.uk/",
 				}},
@@ -40,7 +43,7 @@ func Test_isResponding(t *testing.T) {
 		{
 			name: "test-fail",
 			args: args{
-				cmp: Component{
+				cmp: common.Component{
 					Name:    "testComponent",
 					TestUrl: "http://non-existing-url/",
 				}},

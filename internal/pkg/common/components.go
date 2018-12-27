@@ -1,4 +1,4 @@
-package local
+package common
 
 type Component struct {
 	Name          string
@@ -12,8 +12,8 @@ type Component struct {
 	Volumes       []string
 }
 
-func componentNames() []string {
-	components := getComponents()
+func ComponentNames() []string {
+	components := GetComponents()
 	componentNames := []string{}
 	for _, component := range components {
 		componentNames = append(componentNames, component.Name)
@@ -21,8 +21,8 @@ func componentNames() []string {
 	return componentNames
 }
 
-func componentMap() map[string]Component {
-	components := getComponents()
+func ComponentMap() map[string]Component {
+	components := GetComponents()
 	elementMap := make(map[string]Component)
 	for i := 0; i < len(components); i += 1 {
 		elementMap[components[i].Name] = components[i]
@@ -30,7 +30,7 @@ func componentMap() map[string]Component {
 	return elementMap
 }
 
-func getComponents() []Component {
+func GetComponents() []Component {
 	return []Component{
 		Component{
 			Name:          "db",

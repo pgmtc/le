@@ -2,6 +2,7 @@ package local
 
 import (
 	"errors"
+	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"testing"
 )
 
@@ -11,18 +12,18 @@ var (
 )
 
 // Method called by actionHandler test - success
-func handlerMethod_success(component Component) error {
+func handlerMethod_success(component common.Component) error {
 	handlerMethodCalledStore[component.Name] = true
 	return nil
 }
 
 // Method called by actionHandler test - failure
-func handlerMethod_fail(component Component) error {
+func handlerMethod_fail(component common.Component) error {
 	return errors.New("Method deliberately returned error")
 }
 
 // Method called by logsHandler test
-func handlerMethod_logs(component Component, follow bool) error {
+func handlerMethod_logs(component common.Component, follow bool) error {
 	handlerMethodLogsFollow = follow
 	if follow { // Reuse follow flag for failure testing - lazy!
 		return errors.New("deliberate error from logs handler")
@@ -120,7 +121,7 @@ func Test_componentActionHandler_all(t *testing.T) {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
 	// Check that handlerMethodCalled variable had been switched to true for all provided components
-	componentsUnderTest := componentNames()
+	componentsUnderTest := common.ComponentNames()
 	for _, cmpUnderTest := range componentsUnderTest {
 		if !handlerMethodCalledStore[cmpUnderTest] {
 			t.Errorf("When using 'all' as a parameter, expected handlerMethod_success to be called for component %s, but it was not", cmpUnderTest)

@@ -1,11 +1,12 @@
 package local
 
 import (
+	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"testing"
 )
 
 func TestMissingParameters(t *testing.T) {
-	cmp := Component{
+	cmp := common.Component{
 		Name:     "test",
 		DockerId: "test-container",
 	}
@@ -18,7 +19,7 @@ func TestMissingParameters(t *testing.T) {
 func TestComplex(t *testing.T) {
 	var err error
 
-	cmp1 := Component{
+	cmp1 := common.Component{
 		Name:     "linkedContainer",
 		DockerId: "linkedContainer",
 		Image:    "nginx:stable-alpine",
@@ -39,7 +40,7 @@ func TestComplex(t *testing.T) {
 		t.Errorf("Error, expected container to be created, got %s", err.Error())
 	}
 
-	cmp := Component{
+	cmp := common.Component{
 		Name:          "test",
 		DockerId:      "testContainer",
 		Image:         "bitnami/redis:latest",
@@ -62,7 +63,7 @@ func TestComplex(t *testing.T) {
 }
 
 func TestContainerWorkflow(t *testing.T) {
-	cmp := Component{
+	cmp := common.Component{
 		Name:     "test",
 		DockerId: "test-container",
 		Image:    "nginx:stable-alpine",
@@ -102,7 +103,7 @@ func TestContainerWorkflow(t *testing.T) {
 
 func Test_pullImage(t *testing.T) {
 	type args struct {
-		component Component
+		component common.Component
 	}
 	tests := []struct {
 		name    string
@@ -112,7 +113,7 @@ func Test_pullImage(t *testing.T) {
 		{
 			name: "testNginx",
 			args: args{
-				component: Component{
+				component: common.Component{
 					Name:  "ironGo",
 					Image: "iron/go",
 				},
@@ -122,7 +123,7 @@ func Test_pullImage(t *testing.T) {
 		{
 			name: "testNonExisting",
 			args: args{
-				component: Component{
+				component: common.Component{
 					Name:  "nonExisting",
 					Image: "whatever-nonexisting",
 				},

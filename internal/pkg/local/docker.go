@@ -7,6 +7,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"io"
@@ -15,7 +16,7 @@ import (
 	"strconv"
 )
 
-func dockerPrintLogs(component Component, follow bool) error {
+func dockerPrintLogs(component common.Component, follow bool) error {
 	if container, err := getContainer(component); err == nil {
 		options := types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: follow, Timestamps: false}
 		out, err := dockerGetClient().ContainerLogs(context.Background(), container.ID, options)
@@ -46,7 +47,7 @@ func dockerGetContainers() (map[string]types.Container, error) {
 	return containerMap, nil
 }
 
-func startContainer(component Component) error {
+func startContainer(component common.Component) error {
 	if container, err := getContainer(component); err == nil {
 		fmt.Printf("Starting container '%s' for component '%s'\n", component.DockerId, component.Name)
 
@@ -58,7 +59,7 @@ func startContainer(component Component) error {
 	return errors.Errorf("Starting container '%s' for component '%s': Not found. Create it first\n", component.Name, component.DockerId)
 }
 
-func stopContainer(component Component) error {
+func stopContainer(component common.Component) error {
 	if container, err := getContainer(component); err == nil {
 		fmt.Printf("Stopping container '%s' for component '%s'\n", component.DockerId, component.Name)
 		if err := dockerGetClient().ContainerStop(context.Background(), container.ID, nil); err != nil {
@@ -69,7 +70,7 @@ func stopContainer(component Component) error {
 	return errors.Errorf("Stopping container '%s' for component '%s': Not found found. Nothing to stop\n", component.Name, component.DockerId)
 }
 
-func removeContainer(component Component) error {
+func removeContainer(component common.Component) error {
 	if container, err := getContainer(component); err == nil {
 		if container.State == "running" {
 			if err := stopContainer(component); err != nil {
@@ -85,7 +86,7 @@ func removeContainer(component Component) error {
 	return errors.Errorf("Removing container '%s' for component '%s': Not found. Nothing to remove\n", component.Name, component.DockerId)
 }
 
-func createContainer(component Component) error {
+func createContainer(component common.Component) error {
 	if component.Name == "" || component.DockerId == "" || component.Image == "" {
 		return errors.New("Missing container Name, DockerId or Image")
 	}
@@ -138,7 +139,7 @@ func createContainer(component Component) error {
 	return nil
 }
 
-func getContainer(component Component) (types.Container, error) {
+func getContainer(component common.Component) (types.Container, error) {
 	var nilCont types.Container
 	dockerId := component.DockerId
 	containerMap, err := dockerGetContainers()
@@ -165,7 +166,7 @@ func getContainerName(container types.Container) string {
 	return container.Names[0][1:len(container.Names[0])]
 }
 
-func pullImage(component Component) error {
+func pullImage(component common.Component) error {
 	fmt.Printf("pulling Image for '%s' (%s) ... ", component.Name, component.Image)
 	out, err := dockerGetClient().ImagePull(context.Background(), component.Image, types.ImagePullOptions{})
 	if err != nil {
