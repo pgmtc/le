@@ -2,13 +2,10 @@ package builder
 
 import (
 	"fmt"
+	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 )
 
-func build(args []string) error {
-	fmt.Printf("Build an image, %s\n", args)
-	//if len(args) == 0 {
-	//	//return errors.New(fmt.Sprintf("Missing component name. Available components = %s", componentNames()))
-	//}
-	//componentId := args[0]
+func build(component common.Component) error {
+	fmt.Printf("Build an image, %s\n", component.Name)
 	return nil
 }

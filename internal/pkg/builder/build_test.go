@@ -1,10 +1,15 @@
 package builder
 
-import "testing"
+import (
+	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"testing"
+)
 
 func Test_build(t *testing.T) {
-	err := build([]string{})
+	var err error
+	cmp := common.ComponentMap()["db"]
+	err = build(cmp)
 	if err != nil {
-		t.Errorf("Unexpected error returned: %s", err.Error())
+		t.Errorf("Expected no error, got %s", err.Error())
 	}
 }

@@ -6,6 +6,6 @@ import (
 
 func Parse(args []string) error {
 	actions := common.MakeActions()
-	actions["build"] = build
+	actions["build"] = common.ComponentActionHandler(build)
 	return common.ParseParams(actions, args)
 }
