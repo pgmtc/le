@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/pgmtc/orchard-cli/internal/pkg/builder"
 	"github.com/pgmtc/orchard-cli/internal/pkg/local"
 	"github.com/pgmtc/orchard-cli/internal/pkg/source"
 	"os"
@@ -15,6 +16,7 @@ func main() {
 	modules := make(map[string]func(args []string) error)
 	modules["local"] = local.Parse
 	modules["source"] = source.Parse
+	modules["builder"] = builder.Parse
 
 	availableModules := reflect.ValueOf(modules).MapKeys()
 
