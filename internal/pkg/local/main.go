@@ -12,11 +12,11 @@ import (
 func Parse(args []string) error {
 	actions := common.MakeActions()
 	actions["status"] = status
-	actions["stop"] = componentActionHandler(stopContainer)
-	actions["start"] = componentActionHandler(startContainer)
-	actions["remove"] = componentActionHandler(removeContainer)
-	actions["create"] = componentActionHandler(createContainer)
-	actions["pull"] = componentActionHandler(pullImage)
+	actions["stop"] = common.ComponentActionHandler(stopContainer)
+	actions["start"] = common.ComponentActionHandler(startContainer)
+	actions["remove"] = common.ComponentActionHandler(removeContainer)
+	actions["create"] = common.ComponentActionHandler(createContainer)
+	actions["pull"] = common.ComponentActionHandler(pullImage)
 	actions["logs"] = logsHandler(dockerPrintLogs, false)
 	actions["watch"] = logsHandler(dockerPrintLogs, true)
 	return common.ParseParams(actions, args)
@@ -88,45 +88,4 @@ func status(args []string) error {
 	fmt.Printf("\r")
 	table.Render()
 	return nil
-}
-
-func componentActionHandler(handler func(component common.Component) error) func(args []string) error {
-	return func(args []string) error {
-		if len(args) == 0 {
-			return errors.New(fmt.Sprintf("Missing component Name. Available components = %s", common.ComponentNames()))
-		}
-
-		// If all provided, do for all components
-		if args[0] == "all" {
-			for _, cmp := range common.GetComponents() {
-				err := handler(cmp)
-				if err != nil {
-					color.HiBlack(err.Error())
-				}
-			}
-			return nil
-		}
-
-		for _, cmpName := range args {
-			if component, ok := (common.ComponentMap())[cmpName]; ok {
-				err := handler(component)
-				if err != nil {
-					if len(args) > 1 {
-						color.HiBlack(err.Error())
-					} else {
-						return err
-					}
-
-				}
-			} else {
-				if len(args) > 1 { // Single use
-					color.HiBlack("Component '%s' has not been found", cmpName)
-				} else { // Multiple use
-					return errors.New(fmt.Sprintf("Component %s has not been found. Available components = %s", cmpName, common.ComponentNames()))
-				}
-			}
-		}
-		return nil
-
-	}
 }

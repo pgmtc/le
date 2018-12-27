@@ -14,14 +14,14 @@ func TestParse(t *testing.T) {
 		{
 			name: "failTest",
 			args: args{
-				[]string{"nonExistingAction", "param2", "param3"},
+				[]string{"nonExistingAction"},
 			},
 			wantErr: true,
 		},
 		{
 			name: "successTest",
 			args: args{
-				[]string{"build", "param2", "param3"},
+				[]string{"help"},
 			},
 			wantErr: false,
 		},
