@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func skipDocker() {
+func skipDocker(t *testing.T) {
 	if os.Getenv("SKIP_DOCKER") != "" {
 		t.Skip("Skipping docker testing")
 	}
