@@ -24,6 +24,7 @@ jobs: # basic units of work in a run
 
       # Normally, this step would be in a custom primary image;
       # we've added it here for the sake of explanation.
+      - run: docker images
       - run: go get github.com/docker/docker/api
       - run: go get github.com/docker/docker/client
       - run: go get github.com/pkg/errors
