@@ -2,8 +2,15 @@ package local
 
 import (
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"os"
 	"testing"
 )
+
+func skipDocker() {
+	if os.Getenv("SKIP_DOCKER") != "" {
+		t.Skip("Skipping docker testing")
+	}
+}
 
 func TestMissingParameters(t *testing.T) {
 	cmp := common.Component{
@@ -17,6 +24,7 @@ func TestMissingParameters(t *testing.T) {
 }
 
 func TestComplex(t *testing.T) {
+	skipDocker()
 	var err error
 
 	cmp1 := common.Component{
@@ -63,6 +71,7 @@ func TestComplex(t *testing.T) {
 }
 
 func TestContainerWorkflow(t *testing.T) {
+	skipDocker()
 	cmp := common.Component{
 		Name:     "test",
 		DockerId: "test-container",
@@ -102,6 +111,7 @@ func TestContainerWorkflow(t *testing.T) {
 }
 
 func Test_pullImage(t *testing.T) {
+	skipDocker()
 	type args struct {
 		component common.Component
 	}
