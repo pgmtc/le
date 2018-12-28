@@ -19,9 +19,6 @@ jobs: # basic units of work in a run
           keys:
             - v1-pkg-cache
 
-      - setup_remote_docker:   # (2)
-          docker_layer_caching: true # (3)
-
       - run: go get github.com/docker/docker/api
       - run: go get github.com/docker/docker/client
       - run: go get github.com/pkg/errors
@@ -40,7 +37,7 @@ jobs: # basic units of work in a run
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
             make test | tee ${TEST_RESULTS}/go-test.out
           environment:
-            SKIP_DOCKER: true
+            SKIP_DOCKER_TESTING: true
 
       - run:
           name: Build

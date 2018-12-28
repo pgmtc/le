@@ -7,7 +7,7 @@ import (
 )
 
 func skipDocker(t *testing.T) {
-	if os.Getenv("SKIP_DOCKER") != "" {
+	if os.Getenv("SKIP_DOCKER_TESTING") != "" {
 		t.Skip("Skipping docker testing")
 	}
 }
@@ -24,7 +24,7 @@ func TestMissingParameters(t *testing.T) {
 }
 
 func TestComplex(t *testing.T) {
-	skipDocker()
+	skipDocker(t)
 	var err error
 
 	cmp1 := common.Component{
@@ -71,7 +71,7 @@ func TestComplex(t *testing.T) {
 }
 
 func TestContainerWorkflow(t *testing.T) {
-	skipDocker()
+	skipDocker(t)
 	cmp := common.Component{
 		Name:     "test",
 		DockerId: "test-container",
@@ -111,7 +111,7 @@ func TestContainerWorkflow(t *testing.T) {
 }
 
 func Test_pullImage(t *testing.T) {
-	skipDocker()
+	skipDocker(t)
 	type args struct {
 		component common.Component
 	}
