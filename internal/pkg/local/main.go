@@ -12,11 +12,11 @@ import (
 func Parse(args []string) error {
 	actions := common.MakeActions()
 	actions["status"] = status
-	actions["stop"] = common.ComponentActionHandler(stopContainer)
-	actions["start"] = common.ComponentActionHandler(startContainer)
-	actions["remove"] = common.ComponentActionHandler(removeContainer)
-	actions["create"] = common.ComponentActionHandler(createContainer)
-	actions["pull"] = common.ComponentActionHandler(pullImage)
+	actions["stop"] = common.ComponentActionHandler(stopContainer, common.HandlerArguments{})
+	actions["start"] = common.ComponentActionHandler(startContainer, common.HandlerArguments{})
+	actions["remove"] = common.ComponentActionHandler(removeContainer, common.HandlerArguments{})
+	actions["create"] = common.ComponentActionHandler(createContainer, common.HandlerArguments{})
+	actions["pull"] = common.ComponentActionHandler(pullImage, common.HandlerArguments{})
 	actions["logs"] = logsHandler(dockerPrintLogs, false)
 	actions["watch"] = logsHandler(dockerPrintLogs, true)
 	return common.ParseParams(actions, args)

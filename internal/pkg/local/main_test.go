@@ -70,7 +70,7 @@ func Test_logsHandler(t *testing.T) {
 }
 
 func Test_status(t *testing.T) {
-	skipDocker(t)
+	common.SkipDockerTesting(t)
 	// Not much testing here - just call it and hope for no error - also random depending on what is currently running or not - that's probably wrong
 	err := status([]string{})
 	if err != nil {
