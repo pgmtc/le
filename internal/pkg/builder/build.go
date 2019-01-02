@@ -32,12 +32,12 @@ func findMsvcJar(path string) (fileName string, returnError error) {
 	}
 
 	if len(files) > 1 {
-		returnError = errors.Errorf("Unexpected number of jar files found - expecting only one in '%s'", path + "/target/")
+		returnError = errors.Errorf("Unexpected number of jar files found - expecting only one in '%s'", path+"/target/")
 		return
 	}
 
 	for _, file := range files {
-		fileName = strings.Replace(file, path + "/", "", 1)
+		fileName = strings.Replace(file, path+"/", "", 1)
 	}
 	return
 }
@@ -47,7 +47,7 @@ func build(component common.Component, handlerArguments common.HandlerArguments)
 		returnError = errors.Errorf("Can't build %s, no dockerfile or build root defined for the component", component.Name)
 		return
 	}
-	fmt.Printf("Build an image, %s\n", component.Name)
+	fmt.Printf(color.BlueString("Building image for component '%s'\n", component.Name))
 	buildRoot := relativeOrAbsolute(component.BuildRoot)
 	dockerFile := relativeOrAbsolute(component.DockerFile)
 	contextTarFileName, returnError := mkContextTar(buildRoot, dockerFile)
@@ -76,19 +76,18 @@ func build(component common.Component, handlerArguments common.HandlerArguments)
 	}
 
 	args := map[string]*string{
-		"mvn_password":     &artifactoryPassword,
-		"JAR_FILE": 		&jarFile,
+		"mvn_password": &artifactoryPassword,
+		"JAR_FILE":     &jarFile,
 	}
-
 
 	options := types.ImageBuildOptions{
 		SuppressOutput: false,
 		Remove:         true,
 		ForceRemove:    true,
 		PullParent:     false,
-		Tags:			[]string {component.Image},
+		Tags:           []string{component.Image},
 		Dockerfile:     "Dockerfile",
-		BuildArgs: args,
+		BuildArgs:      args,
 	}
 	buildResponse, err := cli.ImageBuild(context.Background(), dockerBuildContext, options)
 	if err != nil {
@@ -105,7 +104,7 @@ func build(component common.Component, handlerArguments common.HandlerArguments)
 	d := json.NewDecoder(buildResponse.Body)
 
 	type Event struct {
-		Stream 		   string `json:"stream"`
+		Stream         string `json:"stream"`
 		Status         string `json:"status"`
 		Error          string `json:"error"`
 		Progress       string `json:"progress"`
@@ -127,7 +126,7 @@ func build(component common.Component, handlerArguments common.HandlerArguments)
 		//fmt.Printf("%+v\n", event)
 		switch true {
 		case event.Error != "":
-			returnError = errors.Errorf("build error: %s", event.Error)
+			returnError = errors.Errorf("\nbuild error: %s", event.Error)
 			return
 		case event.Progress != "" || event.Status != "":
 			fmt.Printf(color.MagentaString("\r%s: %s", event.Status, event.Progress))
@@ -142,7 +141,8 @@ func build(component common.Component, handlerArguments common.HandlerArguments)
 				imageId = strings.Replace(event.Stream, "Successfully built ", "", 1)
 				imageId = strings.TrimSuffix(imageId, "\n")
 			}
-		}}
+		}
+	}
 
 	return
 }
@@ -178,7 +178,7 @@ func mkContextTar(contextDir string, dockerFile string) (string, error) {
 
 func RemoveImage(imageId string) {
 	local.DockerGetClient().ImageRemove(context.Background(), imageId, types.ImageRemoveOptions{
-		Force:true,
-		PruneChildren:true,
+		Force:         true,
+		PruneChildren: true,
 	})
 }
