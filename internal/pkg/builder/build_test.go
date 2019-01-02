@@ -89,7 +89,12 @@ func Test_build(t *testing.T) {
 			DockerFile: testingRoot + "/buildtest/Dockerfile",
 			BuildRoot:  testingRoot + "/buildtest",
 		})
-	//defer common.ClearComponents()
+	common.AddComponent(
+		common.Component{
+			Name:       "test-component-invalid",
+			Image:      "orchard-cli/test-image",
+		})
+	defer common.ClearComponents()
 
 	var err error
 	cmp := common.ComponentMap()["test-component"]
@@ -98,6 +103,12 @@ func Test_build(t *testing.T) {
 		t.Errorf("Expected no error, got %s", err.Error())
 	}
 	defer RemoveImage(imageId)
+	// Test invalid component
+	cmp = common.ComponentMap()["test-component-invalid"]
+	imageId, err = build(cmp, common.HandlerArguments{})
+	if err == nil {
+		t.Errorf("Expected to get error, but nothing came back")
+	}
 }
 
 func Test_mkContextTar(t *testing.T) {

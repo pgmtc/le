@@ -43,6 +43,10 @@ func findMsvcJar(path string) (fileName string, returnError error) {
 }
 
 func build(component common.Component, handlerArguments common.HandlerArguments) (imageId string, returnError error) {
+	if component.BuildRoot == "" || component.DockerFile == "" {
+		returnError = errors.Errorf("Can't build %s, no dockerfile or build root defined for the component", component.Name)
+		return
+	}
 	fmt.Printf("Build an image, %s\n", component.Name)
 	buildRoot := relativeOrAbsolute(component.BuildRoot)
 	dockerFile := relativeOrAbsolute(component.DockerFile)
