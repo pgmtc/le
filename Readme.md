@@ -1,5 +1,6 @@
 # orchard-cli
 [![CircleCI](https://circleci.com/gh/pgmtc/orchard-cli.svg?style=svg)](https://circleci.com/gh/pgmtc/orchard-cli)
+[![codecov](https://codecov.io/gh/pgmtc/orchard-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/pgmtc/orchard-cli)
 
 ## Installation
 1. TODO
