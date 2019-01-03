@@ -145,7 +145,7 @@ func TestContainerWorkflow(t *testing.T) {
 }
 
 func TestDockerGetImages(t *testing.T) {
-	if _, err := DockerGetImages(); err != nil {
+	if _, err := dockerGetImages(); err != nil {
 		t.Errorf("Unexpected error, but got %s", err.Error())
 	}
 }
