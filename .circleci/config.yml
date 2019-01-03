@@ -3,14 +3,32 @@ jobs: # basic units of work in a run
   release:
     docker:
       - image: circleci/golang:1.10
+
+    working_directory: /go/src/github.com/pgmtc/orchard-cli
+
     steps:
       - checkout
+      - run: go get github.com/docker/docker/api
+      - run: go get github.com/docker/docker/client
+      - run: rm -rf /go/src/github.com/docker/docker/vendor/github.com/docker/go-connections
+
+      - run: go get -t -v ./...
+
+#      - run: go get github.com/pkg/errors
+#      - run: go get golang.org/x/net/context
+#      - run: go get github.com/docker/go-connections/nat
+#      - run: go get github.com/fatih/color
+#      - run: go get github.com/olekukonko/tablewriter
+#      - run: go get github.com/jhoonb/archivex
+#      - run: go get github.com/Microsoft/go-winio
+#      - run: go get golang.org/x/sys/windows
+
       - run: curl -sL https://git.io/goreleaser | bash
 
   build: # runs not using Workflows must have a `build` job as entry point
     docker: # run the steps with Docker
       # CircleCI Go images available at: https://hub.docker.com/r/circleci/golang/
-      - image: circleci/golang:1.8 #
+      - image: circleci/golang:1.10 #
 
     working_directory: /go/src/github.com/pgmtc/orchard-cli
 
