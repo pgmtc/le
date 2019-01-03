@@ -74,6 +74,8 @@ workflows:
   version: 2
   release:
     jobs:
+      - build:
+
       - release:
           filters:
             branches:
