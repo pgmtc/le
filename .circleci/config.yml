@@ -24,6 +24,8 @@ jobs: # basic units of work in a run
       - run: rm -rf /go/src/github.com/docker/docker/vendor/github.com/docker/go-connections
       - run: go get -t -v ./...
 
+      - run: go get github.com/jstemmer/go-junit-report
+
       - run:
           name: Run unit and coverage tests
           command: |
