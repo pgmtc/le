@@ -34,10 +34,10 @@ jobs: # basic units of work in a run
       - run: rm -rf /go/src/github.com/docker/docker/vendor/github.com/docker/go-connections
 
       - run:
-          name: Run unit tests
+          name: Run unit and coverage tests
           command: |
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
-            ./scripts/cover.sh | tee ${TEST_RESULTS}/go-test.out
+            ./scripts/coverage.sh | tee ${TEST_RESULTS}/go-test.out
           environment:
             SKIP_DOCKER_TESTING: true
 
