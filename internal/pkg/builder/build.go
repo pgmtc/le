@@ -17,14 +17,6 @@ import (
 	"strings"
 )
 
-func relativeOrAbsolute(path string) string {
-	if !strings.HasPrefix(path, "/") {
-		currentDir, _ := os.Getwd()
-		return currentDir + "/" + path
-	}
-	return path
-}
-
 func findMsvcJar(path string) (fileName string, returnError error) {
 	files, returnError := filepath.Glob(path + "/target/*.jar")
 	if returnError != nil {
@@ -48,8 +40,8 @@ func build(component common.Component, handlerArguments common.HandlerArguments)
 		return
 	}
 	fmt.Printf(color.BlueString("Building image for component '%s'\n", component.Name))
-	buildRoot := relativeOrAbsolute(component.BuildRoot)
-	dockerFile := relativeOrAbsolute(component.DockerFile)
+	buildRoot := common.ParsePath(component.BuildRoot)
+	dockerFile := common.ParsePath(component.DockerFile)
 	contextTarFileName, returnError := mkContextTar(buildRoot, dockerFile)
 	if returnError != nil {
 		return

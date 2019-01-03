@@ -82,19 +82,20 @@ func extractAndCompare(tarFileName string, testRootDirectory string) bool {
 func Test_build(t *testing.T) {
 	common.SkipDockerTesting(t)
 	testingRoot := mockupDir()
-	common.AddComponent(
-		common.Component{
-			Name:       "test-component",
-			Image:      "orchard-cli/test-image",
-			DockerFile: testingRoot + "/buildtest/Dockerfile",
-			BuildRoot:  testingRoot + "/buildtest",
-		})
-	common.AddComponent(
-		common.Component{
-			Name:       "test-component-invalid",
-			Image:      "orchard-cli/test-image",
-		})
-	defer common.ClearComponents()
+	common.CURRENT_PROFILE = common.Profile{
+		Components: []common.Component{
+			{
+				Name:       "test-component",
+				Image:      "orchard-cli/test-image",
+				DockerFile: testingRoot + "/buildtest/Dockerfile",
+				BuildRoot:  testingRoot + "/buildtest",
+			},
+			common.Component{
+				Name:  "test-component-invalid",
+				Image: "orchard-cli/test-image",
+			},
+		},
+	}
 
 	var err error
 	cmp := common.ComponentMap()["test-component"]
@@ -180,7 +181,7 @@ func Test_relativeOrAbsolute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := relativeOrAbsolute(tt.args.path)
+			got := common.ParsePath(tt.args.path)
 			if tt.wantChanged && tt.args.path == got {
 				t.Errorf("relativeOrAbsolute() = %v, want %v", got, tt.args.path)
 			}
@@ -241,4 +242,3 @@ func Test_findMsvcJar(t *testing.T) {
 		})
 	}
 }
-

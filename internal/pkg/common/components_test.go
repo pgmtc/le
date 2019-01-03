@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -37,19 +36,5 @@ func Test_getComponents(t *testing.T) {
 		if cmp.Name == "" || cmp.DockerId == "" || cmp.Image == "" {
 			t.Errorf("Component Name, DockerId or Image is empty for (%s, %s, %s)", cmp.Name, cmp.DockerId, cmp.Image)
 		}
-	}
-}
-
-func TestClearComponents(t *testing.T) {
-	AddComponent(Component{
-		Name: "testComponent",
-	})
-	cmpLength := len(GetComponents())
-	if (cmpLength != 1) {
-		fmt.Errorf("Expected lenght of components to be 1, got %d", len(GetComponents()))
-	}
-	ClearComponents()
-	if (len(GetComponents()) == cmpLength) {
-		fmt.Errorf("Expected length of components to change, got %d", len(GetComponents()))
 	}
 }
