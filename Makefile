@@ -19,4 +19,5 @@ workdir/orchard: $(GOFILES)
 test: test-all
 
 test-all:
-	@go test -v -cover $(GOPACKAGES)
+	#@go test -v -cover $(GOPACKAGES)
+	@go test -race -coverprofile=coverage.txt -covermode=atomic $(GOPACKAGES)
