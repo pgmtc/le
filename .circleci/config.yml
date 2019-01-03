@@ -41,12 +41,6 @@ jobs: # basic units of work in a run
           environment:
             SKIP_DOCKER_TESTING: true
 
-#      - run:
-#          name: Run coverage
-#          command: ./scripts/coverage.sh
-#          environment:
-#            SKIP_DOCKER_TESTING: true
-
       - run:
           name: Build
           command: ./scripts/build.sh
