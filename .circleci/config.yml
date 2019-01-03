@@ -44,26 +44,12 @@ jobs: # basic units of work in a run
           environment:
             SKIP_DOCKER_TESTING: true
 
-      - run:
-          name: Build
-          command: ./scripts/build.sh
-
-      - run:
-          name: Copy artifacts
-          command: |
-            mkdir /tmp/artifacts;
-            cp build/orchard-linux-amd64 /tmp/artifacts;
-            cp build/orchard-mac-amd64 /tmp/artifacts;
-            cp build/orchard-windows-amd64 /tmp/artifacts;
-
 
       - save_cache: # Store cache in the /go/pkg directory
           key: v1-pkg-cache
           paths:
             - "/go/pkg"
 
-      - store_artifacts: #
-          path: /tmp/artifacts
 
       - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
           path: /tmp/test-results
