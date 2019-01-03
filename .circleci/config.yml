@@ -5,6 +5,10 @@ jobs: # basic units of work in a run
       - image: circleci/golang:1.10
     steps:
       - checkout
+      - run: go get github.com/docker/docker/api
+      - run: go get github.com/docker/docker/client
+      - run: rm -rf /go/src/github.com/docker/docker/vendor/github.com/docker/go-connections
+      - run: go get -t -v ./...
       - run: curl -sL https://git.io/goreleaser | bash
 
   build: # runs not using Workflows must have a `build` job as entry point
