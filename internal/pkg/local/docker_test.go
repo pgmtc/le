@@ -145,6 +145,7 @@ func TestContainerWorkflow(t *testing.T) {
 }
 
 func TestDockerGetImages(t *testing.T) {
+	common.SkipDockerTesting(t)
 	if _, err := dockerGetImages(); err != nil {
 		t.Errorf("Unexpected error, but got %s", err.Error())
 	}
