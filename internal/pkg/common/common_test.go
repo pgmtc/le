@@ -12,13 +12,13 @@ var (
 )
 
 // Method called by actionHandler test - success
-func handlerMethod_success(component Component) error {
+func handlerMethod_success(component Component, arguments HandlerArguments) error {
 	handlerMethodCalledStore[component.Name] = true
 	return nil
 }
 
 // Method called by actionHandler test - failure
-func handlerMethod_fail(component Component) error {
+func handlerMethod_fail(component Component, arguments HandlerArguments) error {
 	return errors.New("Method deliberately returned error")
 }
 
@@ -134,7 +134,7 @@ func Test_componentActionHandler_missingArguments(t *testing.T) {
 	// Reset
 	handlerMethodCalledStore = map[string]bool{}
 	// Use ComponentActionHandler wrapper to convert it to actionHandler
-	actionHandler := ComponentActionHandler(handlerMethod_success)
+	actionHandler := ComponentActionHandler(handlerMethod_success, HandlerArguments{})
 	// Run without the arguments
 	err := actionHandler([]string{}) // Pick one of the existing components
 	if err == nil {
@@ -146,7 +146,7 @@ func Test_componentActionHandler_nonExistingComponent(t *testing.T) {
 	// Reset
 	handlerMethodCalledStore = map[string]bool{}
 	// Use ComponentActionHandler wrapper to convert it to actionHandler
-	actionHandler := ComponentActionHandler(handlerMethod_success)
+	actionHandler := ComponentActionHandler(handlerMethod_success, HandlerArguments{})
 	// Run the test for single component
 	componentUnderTest := "nonexisting"                // Pick one of the existing components
 	err := actionHandler([]string{componentUnderTest}) // Pick one of the existing components
@@ -159,7 +159,7 @@ func Test_componentActionHandler_single(t *testing.T) {
 	// Reset
 	handlerMethodCalledStore = map[string]bool{}
 	// Use ComponentActionHandler wrapper to convert it to actionHandler
-	actionHandler := ComponentActionHandler(handlerMethod_success)
+	actionHandler := ComponentActionHandler(handlerMethod_success, HandlerArguments{})
 	// Run the test for single component
 	componentUnderTest := "db" // Pick one of the existing components
 	err := actionHandler([]string{componentUnderTest})
@@ -176,7 +176,7 @@ func Test_componentActionHandler_single(t *testing.T) {
 		t.Errorf("Expected error to be returned for non existing component")
 	}
 	// Test failure scenario
-	actionFailureHandler := ComponentActionHandler(handlerMethod_fail)
+	actionFailureHandler := ComponentActionHandler(handlerMethod_fail, HandlerArguments{})
 	err = actionFailureHandler([]string{"db"})
 	if err == nil {
 		t.Errorf("Expected error to be returned by failure handler method, but got no error")
@@ -187,7 +187,7 @@ func Test_componentActionHandler_multiple(t *testing.T) {
 	// Reset
 	handlerMethodCalledStore = map[string]bool{}
 	// Use ComponentActionHandler wrapper to convert it to actionHandler
-	actionHandler := ComponentActionHandler(handlerMethod_success)
+	actionHandler := ComponentActionHandler(handlerMethod_success, HandlerArguments{})
 	// Run the test for single component
 	validComponents := []string{"db", "case-flow", "auth"}
 	allComponents := append(validComponents, "nonExisting")
@@ -202,7 +202,7 @@ func Test_componentActionHandler_multiple(t *testing.T) {
 		}
 	}
 	// Check failure scenario
-	actionFailureHandler := ComponentActionHandler(handlerMethod_fail)
+	actionFailureHandler := ComponentActionHandler(handlerMethod_fail, HandlerArguments{})
 	err = actionFailureHandler(validComponents)
 	if err != nil {
 		t.Errorf("Even though all runs for components have failed, expecting no error (those are reported as warning), but got %s", err.Error())
@@ -213,7 +213,7 @@ func Test_componentActionHandler_all(t *testing.T) {
 	// Reset
 	handlerMethodCalledStore = map[string]bool{}
 	// Use ComponentActionHandler wrapper to convert it to actionHandler
-	actionHandler := ComponentActionHandler(handlerMethod_success)
+	actionHandler := ComponentActionHandler(handlerMethod_success, HandlerArguments{})
 	// Run for all components
 	err := actionHandler([]string{"all"}) // Pick one of the existing components
 	if err != nil {
@@ -228,7 +228,7 @@ func Test_componentActionHandler_all(t *testing.T) {
 	}
 
 	// Test failure scenario
-	actionFailureHandler := ComponentActionHandler(handlerMethod_fail)
+	actionFailureHandler := ComponentActionHandler(handlerMethod_fail, HandlerArguments{})
 	// Run for all components
 	err = actionFailureHandler([]string{"all"}) // Pick one of the existing components
 	if err != nil {

@@ -12,11 +12,11 @@ import (
 func Parse(args []string) error {
 	actions := common.MakeActions()
 	actions["status"] = status
-	actions["stop"] = common.ComponentActionHandler(stopContainer)
-	actions["start"] = common.ComponentActionHandler(startContainer)
-	actions["remove"] = common.ComponentActionHandler(removeContainer)
-	actions["create"] = common.ComponentActionHandler(createContainer)
-	actions["pull"] = common.ComponentActionHandler(pullImage)
+	actions["stop"] = common.ComponentActionHandler(stopContainer, common.HandlerArguments{})
+	actions["start"] = common.ComponentActionHandler(startContainer, common.HandlerArguments{})
+	actions["remove"] = common.ComponentActionHandler(removeContainer, common.HandlerArguments{})
+	actions["create"] = common.ComponentActionHandler(createContainer, common.HandlerArguments{})
+	actions["pull"] = common.ComponentActionHandler(pullImage, common.HandlerArguments{})
 	actions["logs"] = logsHandler(dockerPrintLogs, false)
 	actions["watch"] = logsHandler(dockerPrintLogs, true)
 	return common.ParseParams(actions, args)
@@ -39,15 +39,18 @@ func logsHandler(handler func(component common.Component, follow bool) error, fo
 func status(args []string) error {
 	allComponents := common.GetComponents()
 	containerMap, err := dockerGetContainers()
+	images, err := dockerGetImages()
+
 	if err != nil {
 		return err
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Component", "Docker Container", "Exists", "State", "HTTP"})
+	table.SetHeader([]string{"Component", "Image (built or pulled)", "Container Exists (created)", "State", "HTTP"})
 	for _, cmp := range allComponents {
 		fmt.Printf("\rChecking state of %s ...", cmp.Name)
 		exists := "NO"
+		imageExists := "NO"
 		state := "missing"
 		responding := ""
 		if container, ok := containerMap[cmp.DockerId]; ok {
@@ -58,12 +61,23 @@ func status(args []string) error {
 			}
 		}
 
+		if common.ArrContains(images, cmp.Image) {
+			imageExists = "YES"
+		}
+
 		// Some formatting
+		switch imageExists {
+		case "YES":
+			imageExists = color.HiGreenString(cmp.Image)
+		case "NO":
+			imageExists = color.HiBlackString(cmp.Image)
+		}
+
 		switch exists {
 		case "YES":
-			exists = color.HiGreenString(exists)
+			exists = color.HiGreenString(cmp.DockerId)
 		case "NO":
-			exists = color.RedString(exists)
+			exists = color.HiBlackString(cmp.DockerId)
 		}
 
 		switch state {
@@ -72,17 +86,17 @@ func status(args []string) error {
 		case "exited":
 			state = color.YellowString(state)
 		case "missing":
-			state = color.RedString(state)
+			state = color.HiRedString(state)
 		}
 
 		switch responding {
 		case "200":
 			responding = color.HiGreenString(responding)
 		default:
-			responding = color.RedString(responding)
+			responding = color.HiRedString(responding)
 		}
 
-		table.Append([]string{color.YellowString(cmp.Name), color.HiBlackString(cmp.DockerId), color.YellowString(exists), state, responding})
+		table.Append([]string{color.YellowString(cmp.Name), imageExists, color.YellowString(exists), state, responding})
 	}
 
 	fmt.Printf("\r")
