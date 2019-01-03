@@ -52,14 +52,16 @@ var defaultComponents []Component = []Component{
 		Name:       "config",
 		Image:      "orchard/orchard-config-msvc:latest",
 		DockerId:   "dcmp_orchard-config-msvc_1",
+		Env:        []string{"SPRING_PROFILE=native,dcmp"},
 		TestUrl:    "",
-		DockerFile: "docker/Dockerfile-orchard-config-msvc",
+		DockerFile: "docker/Dockerfile-msvc",
 		BuildRoot:  "modules/orchard-config-msvc",
 	},
 	Component{
 		Name:     "auth",
 		Image:    "orchard/orchard-auth-msvc:latest",
 		DockerId: "dcmp_orchard-auth-msvc_1",
+		Env:      []string{"SPRING_PROFILE=dcmp"},
 		Links: []string{
 			"dcmp_orchard-redis_1:redis",
 			"orchard-local-db:db",
@@ -73,6 +75,7 @@ var defaultComponents []Component = []Component{
 		Name:     "doc-analysis",
 		Image:    "orchard/orchard-doc-analysis-msvc:latest",
 		DockerId: "dcmp_orchard-doc-analysis-msvc_1",
+		Env:      []string{"SPRING_PROFILE=dcmp"},
 		Links: []string{
 			"dcmp_orchard-redis_1:redis",
 			"orchard-local-db:db",
@@ -86,6 +89,7 @@ var defaultComponents []Component = []Component{
 		Name:     "case-flow",
 		Image:    "orchard/orchard-case-flow-msvc:latest",
 		DockerId: "dcmp_orchard-case-flow-msvc_1",
+		Env:      []string{"SPRING_PROFILE=dcmp"},
 		Links: []string{
 			"dcmp_orchard-redis_1:redis",
 			"orchard-local-db:db",
@@ -100,6 +104,7 @@ var defaultComponents []Component = []Component{
 		Name:          "gateway",
 		Image:         "orchard/orchard-gateway-msvc:latest",
 		DockerId:      "dcmp_orchard-gateway-msvc_1",
+		Env:           []string{"SPRING_PROFILE=dcmp"},
 		ContainerPort: 8080,
 		HostPort:      8765,
 		Links: []string{

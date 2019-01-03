@@ -18,10 +18,6 @@ func init() {
 		color.HiRed("Error when loading config: %s", err.Error())
 		color.HiRed("Try initializing config directory by running '%s config init'", os.Args[0])
 	}
-
-	if _, err := common.LoadProfile(common.CONFIG.Profile); err != nil {
-		color.HiRed("Error when loading profile %s: %s", common.CONFIG.Profile, err.Error())
-	}
 }
 
 func main() {
