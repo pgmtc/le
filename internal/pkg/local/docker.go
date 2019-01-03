@@ -16,6 +16,19 @@ import (
 	"strconv"
 )
 
+func dockerGetImages() (images []string, returnErr error) {
+	out, err := DockerGetClient().ImageList(context.Background(), types.ImageListOptions{})
+	if err != nil {
+		panic(err)
+	}
+	for _, img := range out {
+		for _, tag := range img.RepoTags {
+			images = append(images, tag)
+		}
+	}
+	return
+}
+
 func dockerPrintLogs(component common.Component, follow bool) error {
 	if container, err := getContainer(component); err == nil {
 		options := types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: follow, Timestamps: false}

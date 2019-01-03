@@ -1,10 +1,10 @@
 package local
 
 import (
-	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"testing"
-)
 
+	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+)
 
 func TestMissingParameters(t *testing.T) {
 	cmp := common.Component{
@@ -141,5 +141,11 @@ func TestContainerWorkflow(t *testing.T) {
 	container, err := getContainer(cmp)
 	if err == nil {
 		t.Errorf("Expected container not to exist, got %s", container.Names)
+	}
+}
+
+func TestDockerGetImages(t *testing.T) {
+	if _, err := DockerGetImages(); err != nil {
+		t.Errorf("Unexpected error, but got %s", err.Error())
 	}
 }
