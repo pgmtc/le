@@ -37,15 +37,15 @@ jobs: # basic units of work in a run
           name: Run unit tests
           command: |
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
-            ./scripts/test.sh | tee ${TEST_RESULTS}/go-test.out
+            ./scripts/cover.sh | tee ${TEST_RESULTS}/go-test.out
           environment:
             SKIP_DOCKER_TESTING: true
 
-      - run:
-          name: Run coverage
-          command: ./scripts/coverage.sh
-          environment:
-            SKIP_DOCKER_TESTING: true
+#      - run:
+#          name: Run coverage
+#          command: ./scripts/coverage.sh
+#          environment:
+#            SKIP_DOCKER_TESTING: true
 
       - run:
           name: Build
