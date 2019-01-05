@@ -6,6 +6,10 @@ builds:
   -
     main: ./cmd/orchard/orchard.go
     binary: orchard
+    goos:
+      - linux
+      - windows
+      - darwin
 
 archive:
   replacements:
