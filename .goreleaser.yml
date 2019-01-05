@@ -10,6 +10,13 @@ builds:
       - linux
       - windows
       - darwin
+    replacements:
+      amd64: 64-bit
+      386: 32-bit
+      darwin: macOS
+    format_overrides:
+      - goos: windows
+        format: zip
 
 archive:
   replacements:
