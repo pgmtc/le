@@ -6,14 +6,23 @@ builds:
   -
     main: ./cmd/orchard/orchard.go
     binary: orchard
+    goos:
+      - linux
+      - windows
+      - darwin
 
 archive:
   replacements:
-    darwin: Darwin
+    darwin: macOS
     linux: Linux
     windows: Windows
     386: i386
     amd64: x86_64
+
+  format_overrides:
+    - goos: windows
+      format: zip
+
 checksum:
   name_template: 'checksums.txt'
 snapshot:

@@ -1,9 +1,12 @@
 # orchard-cli
-[![CircleCI](https://circleci.com/gh/pgmtc/orchard-cli.svg?style=svg)](https://circleci.com/gh/pgmtc/orchard-cli)
+[![Build Status](https://travis-ci.com/mara-mfa/pru-gh-search.svg?branch=master)](https://travis-ci.com/mara-mfa/pru-gh-search)
 [![codecov](https://codecov.io/gh/pgmtc/orchard-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/pgmtc/orchard-cli)
 
 ## Installation
-1. TODO
+1. Download appropriate package from [releases page](https://github.com/pgmtc/orchard-cli/releases)
+2. Unzip, there should be an executable
+3. Put it somewhere to path
+4. Run it from the terminal / command line
 
 ## Usage 
 Syntax:

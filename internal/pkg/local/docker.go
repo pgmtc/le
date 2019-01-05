@@ -13,6 +13,7 @@ import (
 	"io"
 	"os"
 	"os/user"
+	"path/filepath"
 	"strconv"
 )
 
@@ -123,7 +124,10 @@ func createContainer(component common.Component, handlerArguments common.Handler
 	usr, _ := user.Current()
 	dir := usr.HomeDir
 	var awsCliMount []mount.Mount
-	awsCliMount = append(awsCliMount, mount.Mount{Type: mount.TypeBind, Source: dir + "/.aws", Target: "/root/.aws"})
+	awsCliPath := filepath.Join(dir, ".aws")
+	if _, err := os.Stat(awsCliPath); !os.IsNotExist(err) {
+		awsCliMount = append(awsCliMount, mount.Mount{Type: mount.TypeBind, Source: dir + "/.aws", Target: "/root/.aws"})
+	}
 
 	_, err := DockerGetClient().ContainerCreate(context.Background(), &container.Config{
 		Image:        component.Image,
