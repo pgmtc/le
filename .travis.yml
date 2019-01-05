@@ -13,7 +13,7 @@ notifications:
 install:
   - go get github.com/docker/docker/api
   - go get github.com/docker/docker/client
-  - rm -rf /go/src/github.com/docker/docker/vendor/github.com/docker/go-connections
+  - rm -rf ${TRAVIS_HOME}/gopath/src/github.com/docker/docker/vendor/github.com/docker/go-connections
   - go get -t -v ./...
   - go get github.com/Microsoft/go-winio
   - go get golang.org/x/sys/windows
