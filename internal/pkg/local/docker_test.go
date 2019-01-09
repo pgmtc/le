@@ -28,11 +28,11 @@ func Test_pullImage(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "testNginx",
+			name: "testIronGo",
 			args: args{
 				component: common.Component{
 					Name:  "ironGo",
-					Image: "iron/go",
+					Image: "iron/go:latest",
 				},
 			},
 			wantErr: false,
@@ -50,9 +50,38 @@ func Test_pullImage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := pullImage(tt.args.component, common.HandlerArguments{}); (err != nil) != tt.wantErr {
+			removeImage(tt.args.component, common.HandlerArguments{}) // Ignore errors, image may not exist
+
+			err := pullImage(tt.args.component, common.HandlerArguments{})
+			if (err != nil) != tt.wantErr {
 				t.Errorf("pullImage() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
+			if err == nil {
+				// Check that the image exists
+				images, err := dockerGetImages()
+				if err != nil {
+					t.Errorf("Unexpected error when getting list of images: %s", err.Error())
+				}
+
+				if !common.ArrContains(images, tt.args.component.Image) {
+					t.Errorf("Pulled image '%s' seems not to exist", tt.args.component.Image)
+				}
+
+				// Try to remove image
+				err = removeImage(tt.args.component, common.HandlerArguments{})
+				if err != nil {
+					t.Errorf("Unexpected error when removing image: %s", err.Error())
+				}
+				images, err = dockerGetImages()
+				if err != nil {
+					t.Errorf("Unexpected error when getting list of images: %s", err.Error())
+				}
+				if common.ArrContains(images, tt.args.component.Image) {
+					t.Errorf("Pulled image '%s' still exist, should have been removed", tt.args.component.Image)
+				}
+			}
+
 		})
 	}
 }

@@ -12,6 +12,7 @@ import (
 	"golang.org/x/net/context"
 	"io"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strconv"
@@ -170,13 +171,23 @@ func DockerGetClient() *client.Client {
 }
 
 func pullImage(component common.Component, handlerArguments common.HandlerArguments) error {
-	fmt.Printf("pulling Image for '%s' (%s) ... ", component.Name, component.Image)
-	out, err := DockerGetClient().ImagePull(context.Background(), component.Image, types.ImagePullOptions{})
-	if err != nil {
-		return err
+	fmt.Printf("pulling Image for '%s' (%s) ... \n", component.Name, component.Image)
+	name := "docker"
+	args := []string{"pull", component.Image}
+	cmd := exec.Command(name, args...)
+	if err := cmd.Run(); err != nil {
+		return errors.Errorf("Error when pulling the image: %s", err.Error())
 	}
-	defer out.Close()
-	io.Copy(os.Stdout, out)
-	fmt.Printf("done\n")
+	return nil
+}
+
+func removeImage(component common.Component, handlerArguments common.HandlerArguments) error {
+	fmt.Printf("removing Image for '%s' (%s) ... \n", component.Name, component.Image)
+	name := "docker"
+	args := []string{"rmi", component.Image}
+	cmd := exec.Command(name, args...)
+	if err := cmd.Run(); err != nil {
+		return errors.Errorf("Error when pulling the image: %s", err.Error())
+	}
 	return nil
 }
