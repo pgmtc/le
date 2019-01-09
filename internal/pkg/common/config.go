@@ -141,7 +141,7 @@ var defaultComponents []Component = []Component{
 var defaultRemoteComponents []Component = []Component{
 	Component{
 		Name:          "db",
-		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard-local-db:latest",
+		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-local-db:latest",
 		ContainerPort: 3306,
 		HostPort:      3306,
 		DockerId:      "orchard-local-db",
