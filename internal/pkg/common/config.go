@@ -227,7 +227,7 @@ var defaultRemoteComponents []Component = []Component{
 	},
 	Component{
 		Name:          "ui",
-		Image:         "orchard/orchard-doc-analysis-ui:latest",
+		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/temp-orchard-doc-analysis-ui:latest",
 		DockerId:      "dcmp_orchard-doc-analysis-ui_1",
 		ContainerPort: 80,
 		HostPort:      3000,
