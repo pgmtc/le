@@ -1,6 +1,7 @@
 package local
 
 import (
+	"os"
 	"testing"
 
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
@@ -47,16 +48,16 @@ func Test_pullImage(t *testing.T) {
 			},
 			wantErr: true,
 		},
-		//{
-		//	name: "testECRWithLogin",
-		//	args: args{
-		//		component: common.Component{
-		//			Name:  "case-flow",
-		//			Image: "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-case-flow-msvc:0.0.323",
-		//		},
-		//	},
-		//	wantErr: false,
-		//},
+		{
+			name: "testECRWithLogin",
+			args: args{
+				component: common.Component{
+					Name:  "loca-db",
+					Image: "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard-local-db:latest",
+				},
+			},
+			wantErr: !(os.Getenv("SKIP_AWS_TESTING") == ""),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
