@@ -47,6 +47,16 @@ func Test_pullImage(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		//{
+		//	name: "testECRWithLogin",
+		//	args: args{
+		//		component: common.Component{
+		//			Name:  "case-flow",
+		//			Image: "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-case-flow-msvc:0.0.323",
+		//		},
+		//	},
+		//	wantErr: false,
+		//},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
