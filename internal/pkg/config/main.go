@@ -52,14 +52,20 @@ func switchProfile(args []string) error {
 }
 
 func initialize(args []string) error {
-	common.SwitchCurrentProfile(common.DefaultProfile())
+	common.SwitchCurrentProfile(common.DefaultLocalProfile())
 	common.CONFIG.Profile = "default"
 
 	fileName, err := common.SaveConfig()
 	color.Blue("Config written to %s", fileName)
 
-	fileName, err = common.SaveProfile("default", common.DefaultProfile())
-	color.Blue("Default profile written to %s", fileName)
+	fileName, err = common.SaveProfile("default", common.DefaultRemoteProfile())
+	color.Blue("Profile written to %s", fileName)
+
+	fileName, err = common.SaveProfile("local", common.DefaultLocalProfile())
+	color.Blue("Profile written to %s", fileName)
+
+	fileName, err = common.SaveProfile("remote", common.DefaultRemoteProfile())
+	color.Blue("Profile written to %s", fileName)
 
 	return err
 }
@@ -72,7 +78,7 @@ func create(args []string) error {
 	}
 
 	profileName := args[0]
-	profile := common.DefaultProfile()
+	profile := common.DefaultLocalProfile()
 
 	if len(args) > 1 {
 		copyFromProfile, err := common.LoadProfile(args[1])
