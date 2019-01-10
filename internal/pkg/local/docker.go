@@ -258,9 +258,16 @@ func getEcrAuth() (authString string, resultError error) {
 		return
 	}
 
-	outString := string(out)
+	authString, resultError = parseAwsLogin(string(out))
+	return
+}
 
-	split := strings.Split(outString, " ")
+func parseAwsLogin(loginOutput string) (authString string, resultError error) {
+	split := strings.Split(loginOutput, " ")
+	if len(split) != 7 {
+		resultError = errors.Errorf("Unexpected number of items in aws docker login command, got %d, expected %d", len(split), 7)
+		return
+	}
 
 	authConfig := types.AuthConfig{
 		Username:      split[3],

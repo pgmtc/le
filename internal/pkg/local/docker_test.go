@@ -1,6 +1,7 @@
 package local
 
 import (
+	"encoding/base64"
 	"os"
 	"testing"
 
@@ -53,7 +54,7 @@ func Test_pullImage(t *testing.T) {
 			args: args{
 				component: common.Component{
 					Name:  "loca-db",
-					Image: "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard-local-db:latest",
+					Image: "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-local-db:latest",
 				},
 			},
 			wantErr: !(os.Getenv("SKIP_AWS_TESTING") == ""),
@@ -188,5 +189,49 @@ func TestDockerGetImages(t *testing.T) {
 	common.SkipDockerTesting(t)
 	if _, err := dockerGetImages(); err != nil {
 		t.Errorf("Unexpected error, but got %s", err.Error())
+	}
+}
+
+func Test_parseAwsLogin(t *testing.T) {
+	type args struct {
+		loginOutput string
+	}
+	tests := []struct {
+		name           string
+		args           args
+		wantAuthString string
+		wantErr        bool
+	}{
+		{
+			name: "testSuccess",
+			args: args{
+				loginOutput: "docker login -u username -p password https://server-name",
+			},
+			wantAuthString: "{\"username\":\"username\",\"password\":\"password\",\"serveraddress\":\"https://server-name\"}",
+			wantErr:        false,
+		},
+		{
+			name: "testFail",
+			args: args{
+				loginOutput: "some other unexpected return value",
+			},
+			wantAuthString: "",
+			wantErr:        true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotAuthString, err := parseAwsLogin(tt.args.loginOutput)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseAwsLogin() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			decodedAuthByte, _ := base64.URLEncoding.DecodeString(gotAuthString)
+			decodedAuthString := string(decodedAuthByte)
+			if decodedAuthString != tt.wantAuthString {
+				t.Errorf("parseAwsLogin() = %v, want %v", gotAuthString, tt.wantAuthString)
+			}
+		})
 	}
 }
