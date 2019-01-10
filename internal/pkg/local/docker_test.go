@@ -29,26 +29,26 @@ func Test_pullImage(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{
-			name: "testIronGo",
-			args: args{
-				component: common.Component{
-					Name:  "ironGo",
-					Image: "iron/go:latest",
-				},
-			},
-			wantErr: false,
-		},
-		{
-			name: "testNonExisting",
-			args: args{
-				component: common.Component{
-					Name:  "nonExisting",
-					Image: "whatever-nonexisting",
-				},
-			},
-			wantErr: true,
-		},
+		//{
+		//	name: "testIronGo",
+		//	args: args{
+		//		component: common.Component{
+		//			Name:  "ironGo",
+		//			Image: "iron/go:latest",
+		//		},
+		//	},
+		//	wantErr: false,
+		//},
+		//{
+		//	name: "testNonExisting",
+		//	args: args{
+		//		component: common.Component{
+		//			Name:  "nonExisting",
+		//			Image: "whatever-nonexisting",
+		//		},
+		//	},
+		//	wantErr: true,
+		//},
 		{
 			name: "testECRWithLogin",
 			args: args{

@@ -46,7 +46,7 @@ func ParsePath(path string) (result string) {
 func initConfigDir() (configDir string) {
 	configDir = ParsePath(CONFIG_LOCATION)
 	if _, err := os.Stat(configDir); os.IsNotExist(err) {
-		color.Blue("Config location '%s' does not exist, creating it", configDir)
+		color.Yellow("Config location '%s' does not exist, creating it", configDir)
 		if err := os.MkdirAll(configDir, os.ModePerm); err != nil {
 			panic(err)
 		}

@@ -7,6 +7,9 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func Parse(args []string) error {
@@ -37,6 +40,54 @@ func logsHandler(handler func(component common.Component, follow bool) error, fo
 }
 
 func status(args []string) error {
+	var verbose bool
+	var follow bool
+	var followLength int
+
+	if len(args) > 0 && args[0] == "-v" || len(args) > 1 && args[1] == "-v" {
+		verbose = true
+	}
+
+	// This could be improved - generalized
+	if len(args) > 0 && args[0] == "-f" || len(args) > 1 && args[1] == "-f" {
+		follow = true
+		switch true {
+		case len(args) > 1 && args[0] == "-f":
+			i, err := strconv.Atoi(args[1])
+			if err == nil {
+				followLength = i
+			}
+		case len(args) > 2 && args[1] == "-f":
+			i, err := strconv.Atoi(args[2])
+			if err == nil {
+				followLength = i
+			}
+		}
+		follow = true
+	}
+
+	if !follow {
+		return printStatus(verbose, follow, followLength)
+	}
+	print("\033[H\033[2J") // Clear screen
+	counter := 0
+	for {
+		print("\033[H\033[2J") // Clear screen
+		fmt.Println("Orchard local status: ", time.Now().Format("2006-01-02 15:04:05"))
+		printStatus(verbose, follow, followLength)
+		counter++
+		time.Sleep(1 * time.Second)
+		if counter == followLength {
+			break
+		}
+	}
+
+	return nil
+
+}
+
+func printStatus(verbose bool, follow bool, followLength int) error {
+
 	allComponents := common.GetComponents()
 	containerMap, err := dockerGetContainers()
 	images, err := dockerGetImages()
@@ -46,9 +97,13 @@ func status(args []string) error {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Component", "Image (built or pulled)", "Container Exists (created)", "State", "HTTP"})
+	if verbose {
+		table.SetHeader([]string{"Component", "Image (built or pulled)", "Container Exists (created)", "State", "HTTP"})
+	} else {
+		table.SetHeader([]string{"Component", "Image (built or pulled)", "Container Exists (created)", "HTTP"})
+	}
+
 	for _, cmp := range allComponents {
-		fmt.Printf("\rChecking state of %s ...", cmp.Name)
 		exists := "NO"
 		imageExists := "NO"
 		state := "missing"
@@ -66,27 +121,32 @@ func status(args []string) error {
 		}
 
 		// Some formatting
+		var imageString string = cmp.Image
+		if !verbose {
+			imageSplit := strings.Split(imageString, "/")
+			imageString = imageSplit[len(imageSplit)-1]
+		}
 		switch imageExists {
 		case "YES":
-			imageExists = color.HiGreenString(cmp.Image)
+			imageExists = color.HiWhiteString(imageString)
 		case "NO":
-			imageExists = color.HiBlackString(cmp.Image)
+			imageExists = color.HiBlackString(imageString)
 		}
 
 		switch exists {
 		case "YES":
-			exists = color.HiGreenString(cmp.DockerId)
+			exists = color.HiWhiteString(cmp.DockerId)
 		case "NO":
 			exists = color.HiBlackString(cmp.DockerId)
 		}
 
 		switch state {
 		case "running":
-			state = color.HiGreenString(state)
+			state = color.HiWhiteString(state)
 		case "exited":
 			state = color.YellowString(state)
 		case "missing":
-			state = color.HiRedString(state)
+			state = color.HiBlackString(state)
 		}
 
 		switch responding {
@@ -96,7 +156,12 @@ func status(args []string) error {
 			responding = color.HiRedString(responding)
 		}
 
-		table.Append([]string{color.YellowString(cmp.Name), imageExists, color.YellowString(exists), state, responding})
+		if verbose {
+			table.Append([]string{color.YellowString(cmp.Name), imageExists, color.YellowString(exists), state, responding})
+		} else {
+			table.Append([]string{color.YellowString(cmp.Name), imageExists, color.YellowString(exists), responding})
+		}
+
 	}
 
 	fmt.Printf("\r")

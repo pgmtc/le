@@ -17,16 +17,16 @@ func Parse(args []string) error {
 }
 
 func status(args []string) error {
-	color.Blue("Current profile: %s", common.CONFIG.Profile)
-	color.Blue("Available profiles: %s", common.GetAvailableProfiles())
+	color.HiWhite("Current profile: %s", common.CONFIG.Profile)
+	color.HiWhite("Available profiles: %s", common.GetAvailableProfiles())
 	if len(args) > 0 && args[0] == "-v" {
 		// Verbose output
 		s, _ := json.MarshalIndent(common.GetComponents(), "", "  ")
-		color.Blue("Components: \n%s\n", s)
+		color.White("Components: \n%s\n", s)
 	} else {
-		color.Blue("Components: (for more verbose output, add '-v' parameter)")
+		color.White("Components: (for more verbose output, add '-v' parameter)")
 		for i, cmp := range common.GetComponents() {
-			color.Blue("   %02d | Name: %s, DockerId: %s, Image: %s", i, cmp.Name, cmp.DockerId, cmp.Image)
+			color.White("   %02d | Name: %s, DockerId: %s, Image: %s", i, cmp.Name, cmp.DockerId, cmp.Image)
 		}
 	}
 
@@ -47,7 +47,7 @@ func switchProfile(args []string) error {
 	if err != nil {
 		return errors.Errorf("Erorr when saving config: %s", err.Error())
 	}
-	color.Blue("Successfully switched profile to %s. Changes written to %s", args[0], configFile)
+	color.White("Successfully switched profile to %s. Changes written to %s", args[0], configFile)
 	return nil
 }
 
@@ -56,16 +56,16 @@ func initialize(args []string) error {
 	common.CONFIG.Profile = "default"
 
 	fileName, err := common.SaveConfig()
-	color.Blue("Config written to %s", fileName)
+	color.White("Config written to %s", fileName)
 
 	fileName, err = common.SaveProfile("default", common.DefaultRemoteProfile())
-	color.Blue("Profile written to %s", fileName)
+	color.White("Profile written to %s", fileName)
 
 	fileName, err = common.SaveProfile("local", common.DefaultLocalProfile())
-	color.Blue("Profile written to %s", fileName)
+	color.White("Profile written to %s", fileName)
 
 	fileName, err = common.SaveProfile("remote", common.DefaultRemoteProfile())
-	color.Blue("Profile written to %s", fileName)
+	color.White("Profile written to %s", fileName)
 
 	return err
 }
@@ -93,6 +93,6 @@ func create(args []string) error {
 		return errors.Errorf("Error when saving profile: %s", err.Error())
 	}
 
-	color.Blue("Successfully saved profile %s to %s", profileName, fileName)
+	color.White("Successfully saved profile %s to %s", profileName, fileName)
 	return nil
 }

@@ -180,7 +180,7 @@ func removeImage(component common.Component, handlerArguments common.HandlerArgu
 	args := []string{"rmi", component.Image}
 	cmd := exec.Command(name, args...)
 	if err := cmd.Run(); err != nil {
-		return errors.Errorf("Error when pulling the image: %s", err.Error())
+		return errors.Errorf("Error when removing the image: %s", err.Error())
 	}
 	return nil
 }

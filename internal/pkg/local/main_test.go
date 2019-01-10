@@ -130,6 +130,16 @@ func Test_status(t *testing.T) {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
 
+	// Verbose and follow
+	if err := status([]string{"-v", "-f", "5"}); err != nil {
+		t.Errorf("Expected no error to be returned, but got %s", err.Error())
+	}
+
+	// Follow only
+	if err := status([]string{"-f", "1"}); err != nil {
+		t.Errorf("Expected no error to be returned, but got %s", err.Error())
+	}
+
 }
 
 func TestParse(t *testing.T) {

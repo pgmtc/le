@@ -2,10 +2,14 @@
 [![Build Status](https://travis-ci.com/mara-mfa/pru-gh-search.svg?branch=master)](https://travis-ci.com/mara-mfa/pru-gh-search)
 [![codecov](https://codecov.io/gh/pgmtc/orchard-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/pgmtc/orchard-cli)
 
+## Prerequisites
+1. Running docker daemon
+2. AWS cli
+
 ## Installation
 1. Download appropriate package from [releases page](https://github.com/pgmtc/orchard-cli/releases)
-2. Unzip, there should be an executable
-3. Put it somewhere to path
+2. Unzip it, there should be an executable inside
+3. Put it somewhere to path, potentially chmod a+x it
 4. Run it from the terminal / command line
 
 ## Usage 
@@ -62,3 +66,6 @@ Config is a centralized storage used by other modules.
 
 #### source
 Source module will be responsible for source code manipulation in orchard-poc-umbrella project
+
+#### util
+Various tools such as refresh or MFA login, help with repository urls

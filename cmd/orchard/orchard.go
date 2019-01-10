@@ -32,11 +32,11 @@ func main() {
 	availableModules := reflect.ValueOf(modules).MapKeys()
 
 	if len(args) == 0 {
-		color.Blue("Current profile: %s", common.CONFIG.Profile)
-		color.Blue("Please provide module")
-		color.Blue(fmt.Sprintf(" syntax : %s [module] [action]", os.Args[0]))
-		color.Blue(fmt.Sprintf(" example: %s local status", os.Args[0]))
-		color.Blue(fmt.Sprintf(" available modules: %s", availableModules))
+		color.Yellow("Current profile: %s", common.CONFIG.Profile)
+		color.Yellow("Please provide module")
+		color.Yellow(fmt.Sprintf(" syntax : %s [module] [action]", os.Args[0]))
+		color.Yellow(fmt.Sprintf(" example: %s local status", os.Args[0]))
+		color.Yellow(fmt.Sprintf(" available modules: %s", availableModules))
 		os.Exit(1)
 	}
 
@@ -44,13 +44,13 @@ func main() {
 	handler := modules[module]
 
 	if handler == nil {
-		color.Red(fmt.Sprintf(" Module '%s' does not exist. Available modules = %s", module, availableModules))
+		color.HiRed(fmt.Sprintf(" Module '%s' does not exist. Available modules = %s", module, availableModules))
 		os.Exit(1)
 	}
 
 	err := handler(args[1:])
 	if err != nil {
-		color.Red(err.Error())
+		color.HiRed(err.Error())
 	} else {
 		color.HiGreen("Finished OK (current profile: %s)", common.CONFIG.Profile)
 	}

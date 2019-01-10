@@ -39,7 +39,7 @@ func build(component common.Component, handlerArguments common.HandlerArguments)
 		returnError = errors.Errorf("Can't build %s, no dockerfile or build root defined for the component", component.Name)
 		return
 	}
-	fmt.Printf(color.BlueString("Building image for component '%s'\n", component.Name))
+	fmt.Printf(color.YellowString("Building image for component '%s'\n", component.Name))
 	buildRoot := common.ParsePath(component.BuildRoot)
 	dockerFile := common.ParsePath(component.DockerFile)
 	contextTarFileName, returnError := mkContextTar(buildRoot, dockerFile)
@@ -64,7 +64,7 @@ func build(component common.Component, handlerArguments common.HandlerArguments)
 	}
 
 	if jarFile != "" {
-		color.Blue("JAR_FILE used: %s", jarFile)
+		color.Yellow("JAR_FILE used: %s", jarFile)
 	}
 
 	args := map[string]*string{
