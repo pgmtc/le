@@ -53,7 +53,7 @@ func Test_pullImage(t *testing.T) {
 			name: "testECRWithLogin",
 			args: args{
 				component: common.Component{
-					Name:  "loca-db",
+					Name:  "local-db",
 					Image: "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-local-db:latest",
 				},
 			},
@@ -127,9 +127,9 @@ func TestComplex(t *testing.T) {
 		Name:          "test",
 		DockerId:      "testContainer",
 		Image:         "nginx:stable-alpine",
-		ContainerPort: 9999,
+		ContainerPort: 80,
 		HostPort:      9999,
-		TestUrl:       "http://localhost:8765/orchard-gateway-msvc/health",
+		TestUrl:       "http://localhost:9999",
 		Env: []string{
 			"env1=value1",
 			"evn2=value2",

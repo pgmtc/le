@@ -71,11 +71,65 @@ func Test_logsHandler(t *testing.T) {
 
 func Test_status(t *testing.T) {
 	common.SkipDockerTesting(t)
-	// Not much testing here - just call it and hope for no error - also random depending on what is currently running or not - that's probably wrong
-	err := status([]string{})
-	if err != nil {
+	COMPONENT_NAME := "test-status-component"
+	IMAGE_NAME := "nginx:alpine"
+	DOCKER_ID := "test-status-container"
+
+	common.CURRENT_PROFILE = common.Profile{
+		Components: []common.Component{
+			common.Component{
+				Name:          COMPONENT_NAME,
+				Image:         IMAGE_NAME,
+				DockerId:      DOCKER_ID,
+				ContainerPort: 80,
+				HostPort:      9998,
+				TestUrl:       "http://localhost:9998",
+			},
+		},
+	}
+
+	cmp := common.ComponentMap()[COMPONENT_NAME]
+	removeImage(cmp, common.HandlerArguments{}) // Ignore error if it does not exist
+
+	// Test - no image present
+	if err := status([]string{}); err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
+
+	// Pull image and run status
+	if err := pullImage(cmp, common.HandlerArguments{}); err != nil {
+		t.Errorf("Expected no error to be returned, but got %s", err.Error())
+	}
+	defer removeImage(cmp, common.HandlerArguments{})
+	if err := status([]string{}); err != nil {
+		t.Errorf("Expected no error to be returned, but got %s", err.Error())
+	}
+
+	// Create container and run status
+	if err := createContainer(cmp, common.HandlerArguments{}); err != nil {
+		t.Errorf("Expected no error to be returned, but got %s", err.Error())
+	}
+	defer removeContainer(cmp, common.HandlerArguments{})
+	if err := status([]string{}); err != nil {
+		t.Errorf("Expected no error to be returned, but got %s", err.Error())
+	}
+
+	// Start container
+	if err := startContainer(cmp, common.HandlerArguments{}); err != nil {
+		t.Errorf("Expected no error to be returned, but got %s", err.Error())
+	}
+	if err := status([]string{}); err != nil {
+		t.Errorf("Expected no error to be returned, but got %s", err.Error())
+	}
+
+	// Stop container
+	if err := stopContainer(cmp, common.HandlerArguments{}); err != nil {
+		t.Errorf("Expected no error to be returned, but got %s", err.Error())
+	}
+	if err := status([]string{}); err != nil {
+		t.Errorf("Expected no error to be returned, but got %s", err.Error())
+	}
+
 }
 
 func TestParse(t *testing.T) {
