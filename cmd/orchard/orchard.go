@@ -7,7 +7,6 @@ import (
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"github.com/pgmtc/orchard-cli/internal/pkg/config"
 	"github.com/pgmtc/orchard-cli/internal/pkg/local"
-	"github.com/pgmtc/orchard-cli/internal/pkg/source"
 	"os"
 	"reflect"
 )
@@ -25,18 +24,19 @@ func main() {
 
 	modules := make(map[string]func(args []string) error)
 	modules["local"] = local.Parse
-	modules["source"] = source.Parse
+	//modules["source"] = source.Parse
 	modules["builder"] = builder.Parse
 	modules["config"] = config.Parse
 
 	availableModules := reflect.ValueOf(modules).MapKeys()
 
 	if len(args) == 0 {
-		color.Yellow("Current profile: %s", common.CONFIG.Profile)
-		color.Yellow("Please provide module")
-		color.Yellow(fmt.Sprintf(" syntax : %s [module] [action]", os.Args[0]))
-		color.Yellow(fmt.Sprintf(" example: %s local status", os.Args[0]))
-		color.Yellow(fmt.Sprintf(" available modules: %s", availableModules))
+		fmt.Printf("Current profile: ")
+		color.HiWhite("%s", common.CONFIG.Profile)
+		fmt.Printf("Please provide module, available modules: ")
+		color.HiWhite("%s", availableModules)
+		fmt.Printf(" syntax : %s [module] [action]\n", os.Args[0])
+		fmt.Printf(" example: %s local status\n", os.Args[0])
 		os.Exit(1)
 	}
 

@@ -24,8 +24,8 @@ In cases related to containers (vast majority), syntax is as follows:
 - `orchard [module] [action] all` : runs for all available components
 
 
-### Modules
-#### local
+## Modules
+### local
 Local module is responsible for running local environments
 It has the following actions
 
@@ -45,13 +45,13 @@ It has the following actions
 
 `orchard local watch [component]`: shows logs on the 'follow' basis
 
-#### builder
+### builder
 Builder module is used for building containers. It has to be run from orchard-poc-umbrella directory
 
 `orchard builder build [component]`: builds a docker image for the component
 
 
-#### config
+### config
 Config is a centralized storage used by other modules.
 
 `orchard config init`: Run after the installation. Creates ~/.orchard, config file and default profile
@@ -61,11 +61,3 @@ Config is a centralized storage used by other modules.
 `orchard config create [profile] [source-profile]`: Creates a new profile. By passing source-profile parameter (not mandatory), it uses it as a base for copy
 
 `orchard config switch [profile]`: Switches current profile to another one
-
-### Modules TODO
-
-#### source
-Source module will be responsible for source code manipulation in orchard-poc-umbrella project
-
-#### util
-Various tools such as refresh or MFA login, help with repository urls
