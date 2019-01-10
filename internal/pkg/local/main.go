@@ -69,12 +69,10 @@ func status(args []string) error {
 	if !follow {
 		return printStatus(verbose, follow, followLength)
 	}
-	print("\033[H\033[2J") // Clear screen
 	counter := 0
 	for {
-		print("\033[H\033[2J") // Clear screen
-		fmt.Println("Orchard local status: ", time.Now().Format("2006-01-02 15:04:05"))
 		printStatus(verbose, follow, followLength)
+		fmt.Println("Orchard local status: ", time.Now().Format("2006-01-02 15:04:05"))
 		counter++
 		time.Sleep(1 * time.Second)
 		if counter == followLength {
@@ -112,7 +110,7 @@ func printStatus(verbose bool, follow bool, followLength int) error {
 			exists = "YES"
 			state = container.State
 			if state == "running" {
-				responding = isResponding(cmp)
+				responding, _ = isResponding(cmp)
 			}
 		}
 
@@ -164,6 +162,9 @@ func printStatus(verbose bool, follow bool, followLength int) error {
 
 	}
 
+	if follow {
+		print("\033[H\033[2J") // Clear screen
+	}
 	fmt.Printf("\r")
 	table.Render()
 	return nil
