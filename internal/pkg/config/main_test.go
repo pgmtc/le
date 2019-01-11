@@ -1,10 +1,12 @@
 package config
 
 import (
-	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"io/ioutil"
 	"os"
+	"path"
 	"testing"
+
+	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 )
 
 func TestParse(t *testing.T) {
@@ -122,5 +124,20 @@ func Test_initialize(t *testing.T) {
 	err := initialize([]string{})
 	if err != nil {
 		t.Errorf("Unexpected error returned: %s", err.Error())
+	}
+}
+
+func Test_updateCli(t *testing.T) {
+	// Create temporary directory
+	tmpDir, err := ioutil.TempDir("", "orchard-test")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
+	}
+	defer os.RemoveAll(tmpDir) // clean up
+
+	common.CONFIG.BinLocation = path.Join(tmpDir, "orchard-updated")
+	err = updateCli([]string{})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
 	}
 }

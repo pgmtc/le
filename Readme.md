@@ -7,10 +7,21 @@
 2. AWS cli
 
 ## Installation
+### Semi-automatic (experimental to be used on macOS)
+* Download 1.0.1 package and store in /tmp
+
+`curl -L  "https://github.com/pgmtc/orchard-cli/releases/download/1.0.1/orchard-cli_1.0.1_macOS_x86_64.tar.gz" | gunzip -c | tar -C /tmp -xvf -`
+
+* Run update which should self-update and install into /usr/local/bin
+
+`/tmp/orchard config update`
+
+### Manual
 1. Download appropriate package from [releases page](https://github.com/pgmtc/orchard-cli/releases)
 2. Unzip it, there should be an executable inside
 3. Put it somewhere to path, potentially chmod a+x it
 4. Run it from the terminal / command line
+
 
 ## Usage 
 Syntax:
