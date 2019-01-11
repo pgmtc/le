@@ -12,9 +12,13 @@
 
 `curl -L  "https://github.com/pgmtc/orchard-cli/releases/download/1.0.1/orchard-cli_1.0.1_macOS_x86_64.tar.gz" | gunzip -c | tar -C /tmp -xvf -`
 
-* Run update which should self-update and install into /usr/local/bin
+* Run update which should self-update and install into /usr/local/bin. Ignore errors about missing config for now
 
 `/tmp/orchard config update-cli`
+
+* Init config
+
+`orchard config init`
 
 ### Manual
 1. Download appropriate package from [releases page](https://github.com/pgmtc/orchard-cli/releases)
