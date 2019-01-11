@@ -9,12 +9,16 @@ var (
 )
 
 type Config struct {
-	Profile string
+	Profile     string
+	ReleasesURL string
+	BinLocation string
 }
 
 func init() {
 	CONFIG.Profile = "default"
 	CURRENT_PROFILE = DefaultRemoteProfile()
+	CONFIG.ReleasesURL = "https://github.com/pgmtc/orchard-cli/releases/latest"
+	CONFIG.BinLocation = "/usr/local/bin/orchard"
 }
 
 func DefaultLocalProfile() Profile {
