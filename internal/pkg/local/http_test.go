@@ -90,7 +90,7 @@ func Test_isResponding(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isResponding(tt.args.cmp); got != tt.want {
+			if got, _ := isResponding(tt.args.cmp); got != tt.want {
 				t.Errorf("isResponding() = %v, want %v", got, tt.want)
 			}
 		})

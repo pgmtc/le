@@ -7,7 +7,6 @@ import (
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"github.com/pgmtc/orchard-cli/internal/pkg/config"
 	"github.com/pgmtc/orchard-cli/internal/pkg/local"
-	"github.com/pgmtc/orchard-cli/internal/pkg/source"
 	"os"
 	"reflect"
 )
@@ -25,18 +24,19 @@ func main() {
 
 	modules := make(map[string]func(args []string) error)
 	modules["local"] = local.Parse
-	modules["source"] = source.Parse
+	//modules["source"] = source.Parse
 	modules["builder"] = builder.Parse
 	modules["config"] = config.Parse
 
 	availableModules := reflect.ValueOf(modules).MapKeys()
 
 	if len(args) == 0 {
-		color.Blue("Current profile: %s", common.CONFIG.Profile)
-		color.Blue("Please provide module")
-		color.Blue(fmt.Sprintf(" syntax : %s [module] [action]", os.Args[0]))
-		color.Blue(fmt.Sprintf(" example: %s local status", os.Args[0]))
-		color.Blue(fmt.Sprintf(" available modules: %s", availableModules))
+		fmt.Printf("Current profile: ")
+		color.HiWhite("%s", common.CONFIG.Profile)
+		fmt.Printf("Please provide module, available modules: ")
+		color.HiWhite("%s", availableModules)
+		fmt.Printf(" syntax : %s [module] [action]\n", os.Args[0])
+		fmt.Printf(" example: %s local status\n", os.Args[0])
 		os.Exit(1)
 	}
 
@@ -44,13 +44,13 @@ func main() {
 	handler := modules[module]
 
 	if handler == nil {
-		color.Red(fmt.Sprintf(" Module '%s' does not exist. Available modules = %s", module, availableModules))
+		color.HiRed(fmt.Sprintf(" Module '%s' does not exist. Available modules = %s", module, availableModules))
 		os.Exit(1)
 	}
 
 	err := handler(args[1:])
 	if err != nil {
-		color.Red(err.Error())
+		color.HiRed(err.Error())
 	} else {
 		color.HiGreen("Finished OK (current profile: %s)", common.CONFIG.Profile)
 	}

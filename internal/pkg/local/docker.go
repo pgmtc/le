@@ -1,20 +1,25 @@
 package local
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	"github.com/fatih/color"
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"io"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 func dockerGetImages() (images []string, returnErr error) {
@@ -169,14 +174,111 @@ func DockerGetClient() *client.Client {
 	return cli
 }
 
+func removeImage(component common.Component, handlerArguments common.HandlerArguments) error {
+	fmt.Printf("removing Image for '%s' (%s) ... \n", component.Name, component.Image)
+	name := "docker"
+	args := []string{"rmi", component.Image}
+	cmd := exec.Command(name, args...)
+	if err := cmd.Run(); err != nil {
+		return errors.Errorf("Error when removing the image: %s", err.Error())
+	}
+	return nil
+}
+
 func pullImage(component common.Component, handlerArguments common.HandlerArguments) error {
 	fmt.Printf("pulling Image for '%s' (%s) ... ", component.Name, component.Image)
-	out, err := DockerGetClient().ImagePull(context.Background(), component.Image, types.ImagePullOptions{})
+
+	var pullOptions types.ImagePullOptions
+
+	if strings.Contains(component.Image, "dkr.ecr.eu-west-1.amazonaws.com") {
+		authString, err := getEcrAuth()
+		if err != nil {
+			return errors.Errorf("problem when obtaining ecr authentication: %s", err.Error())
+		}
+		pullOptions = types.ImagePullOptions{
+			RegistryAuth: authString,
+		}
+	}
+
+	out, err := DockerGetClient().ImagePull(context.Background(), component.Image, pullOptions)
 	if err != nil {
 		return err
 	}
 	defer out.Close()
-	io.Copy(os.Stdout, out)
-	fmt.Printf("done\n")
+
+	d := json.NewDecoder(out)
+
+	type Event struct {
+		Stream         string `json:"stream"`
+		Status         string `json:"status"`
+		Error          string `json:"error"`
+		Progress       string `json:"progress"`
+		ProgressDetail struct {
+			Current int `json:"current"`
+			Total   int `json:"total"`
+		} `json:"progressDetail"`
+	}
+
+	var event *Event
+	for {
+		if err := d.Decode(&event); err != nil {
+			if err == io.EOF {
+				break
+			}
+			panic(err)
+		}
+
+		//fmt.Printf("%+v\n", event)
+		switch true {
+		case event.Error != "":
+			return errors.Errorf("\nbuild error: %s", event.Error)
+		case event.Progress != "" || event.Status != "":
+			fmt.Printf(color.MagentaString("\r%s: %s", event.Status, event.Progress))
+			if event.ProgressDetail.Current == 0 {
+				fmt.Println()
+			}
+		case strings.TrimSuffix(event.Stream, "\n") != "":
+			fmt.Printf(color.MagentaString("%s", event.Stream))
+		}
+
+	}
+
+	//io.Copy(os.Stdout, out)
+	//fmt.Printf("done\n")
+	fmt.Printf("\n")
 	return nil
+}
+
+func getEcrAuth() (authString string, resultError error) {
+	name := "aws"
+	args := []string{"ecr", "get-login", "--no-include-email", "--region", "eu-west-1"}
+	out, err := exec.Command(name, args...).Output()
+	if err != nil {
+		resultError = errors.Errorf("Error when pulling the image: %s", err.Error())
+		return
+	}
+
+	authString, resultError = parseAwsLogin(string(out))
+	return
+}
+
+func parseAwsLogin(loginOutput string) (authString string, resultError error) {
+	split := strings.Split(loginOutput, " ")
+	if len(split) != 7 {
+		resultError = errors.Errorf("Unexpected number of items in aws docker login command, got %d, expected %d", len(split), 7)
+		return
+	}
+
+	authConfig := types.AuthConfig{
+		Username:      split[3],
+		Password:      split[5],
+		ServerAddress: split[6],
+	}
+	encodedJSON, err := json.Marshal(authConfig)
+	if err != nil {
+		resultError = errors.Errorf("Error when encoding ECR auth: %s", err.Error())
+	}
+
+	authString = base64.URLEncoding.EncodeToString(encodedJSON)
+	return
 }

@@ -40,6 +40,7 @@ func mockupDir() string {
 
 	os.MkdirAll(tmpDir+"/buildtest", os.ModePerm)
 	ioutil.WriteFile(tmpDir+"/buildtest/Dockerfile", []byte("FROM scratch\nADD . ."), 0644)
+	ioutil.WriteFile(tmpDir+"/buildtest/Dockerfile-invalid", []byte("FROM rubbish\nADD . ."), 0644)
 
 	return tmpDir
 }
@@ -90,6 +91,12 @@ func Test_build(t *testing.T) {
 				DockerFile: testingRoot + "/buildtest/Dockerfile",
 				BuildRoot:  testingRoot + "/buildtest",
 			},
+			{
+				Name:       "test-dockerfile-invalid",
+				Image:      "orchard-cli/test-image-2",
+				DockerFile: testingRoot + "/buildtest/Dockerfile-invalid",
+				BuildRoot:  testingRoot + "/buildtest",
+			},
 			common.Component{
 				Name:  "test-component-invalid",
 				Image: "orchard-cli/test-image",
@@ -104,6 +111,13 @@ func Test_build(t *testing.T) {
 		t.Errorf("Expected no error, got %s", err.Error())
 	}
 	defer RemoveImage(imageId)
+	// Test invalid docker file
+	cmp = common.ComponentMap()["test-dockerfile-invalid"]
+	imageId, err = build(cmp, common.HandlerArguments{})
+	if err == nil {
+		t.Errorf("Expected to get error, but nothing came back")
+	}
+
 	// Test invalid component
 	cmp = common.ComponentMap()["test-component-invalid"]
 	imageId, err = build(cmp, common.HandlerArguments{})

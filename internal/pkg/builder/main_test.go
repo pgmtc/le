@@ -1,6 +1,9 @@
 package builder
 
-import "testing"
+import (
+	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"testing"
+)
 
 func TestParse(t *testing.T) {
 	type args struct {
@@ -33,4 +36,13 @@ func TestParse(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_buildActionHandler(t *testing.T) {
+	// This does not really test anything - just if it runs build - should fail as there is no component
+	err := buildActionHandler(common.Component{}, common.HandlerArguments{})
+	if err == nil {
+		t.Errorf("Expected error, got nothing")
+	}
+
 }

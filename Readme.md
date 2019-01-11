@@ -2,10 +2,14 @@
 [![Build Status](https://travis-ci.com/mara-mfa/pru-gh-search.svg?branch=master)](https://travis-ci.com/mara-mfa/pru-gh-search)
 [![codecov](https://codecov.io/gh/pgmtc/orchard-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/pgmtc/orchard-cli)
 
+## Prerequisites
+1. Running docker daemon
+2. AWS cli
+
 ## Installation
 1. Download appropriate package from [releases page](https://github.com/pgmtc/orchard-cli/releases)
-2. Unzip, there should be an executable
-3. Put it somewhere to path
+2. Unzip it, there should be an executable inside
+3. Put it somewhere to path, potentially chmod a+x it
 4. Run it from the terminal / command line
 
 ## Usage 
@@ -20,8 +24,8 @@ In cases related to containers (vast majority), syntax is as follows:
 - `orchard [module] [action] all` : runs for all available components
 
 
-### Modules
-#### local
+## Modules
+### local
 Local module is responsible for running local environments
 It has the following actions
 
@@ -41,13 +45,13 @@ It has the following actions
 
 `orchard local watch [component]`: shows logs on the 'follow' basis
 
-#### builder
+### builder
 Builder module is used for building containers. It has to be run from orchard-poc-umbrella directory
 
 `orchard builder build [component]`: builds a docker image for the component
 
 
-#### config
+### config
 Config is a centralized storage used by other modules.
 
 `orchard config init`: Run after the installation. Creates ~/.orchard, config file and default profile
@@ -57,8 +61,3 @@ Config is a centralized storage used by other modules.
 `orchard config create [profile] [source-profile]`: Creates a new profile. By passing source-profile parameter (not mandatory), it uses it as a base for copy
 
 `orchard config switch [profile]`: Switches current profile to another one
-
-### Modules TODO
-
-#### source
-Source module will be responsible for source code manipulation in orchard-poc-umbrella project
