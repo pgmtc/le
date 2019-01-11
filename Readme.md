@@ -14,7 +14,7 @@
 
 * Run update which should self-update and install into /usr/local/bin
 
-`/tmp/orchard config update`
+`/tmp/orchard config update-cli`
 
 ### Manual
 1. Download appropriate package from [releases page](https://github.com/pgmtc/orchard-cli/releases)
