@@ -1,5 +1,5 @@
 # orchard-cli
-[![Build Status](https://travis-ci.com/mara-mfa/pru-gh-search.svg?branch=master)](https://travis-ci.com/mara-mfa/pru-gh-search)
+[![Build Status](https://travis-ci.com/pgmtc/orchard-cli.svg?branch=master)](https://travis-ci.com/pgmtc/orchard-cli)
 [![codecov](https://codecov.io/gh/pgmtc/orchard-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/pgmtc/orchard-cli)
 
 ## Prerequisites
