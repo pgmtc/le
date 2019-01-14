@@ -47,5 +47,4 @@ func MockConfig(components []Component) Configuration {
 			Components: components,
 		},
 	}
-
 }
