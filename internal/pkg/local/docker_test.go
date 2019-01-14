@@ -13,7 +13,7 @@ func TestMissingParameters(t *testing.T) {
 		Name:     "test",
 		DockerId: "test-container",
 	}
-	err := createContainer(cmp, common.HandlerArguments{})
+	err := createContainer(cmp)
 	if err == nil {
 		t.Errorf("Expected to fail due to mandatory missing")
 	}
@@ -62,9 +62,9 @@ func Test_pullImage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			removeImage(tt.args.component, common.HandlerArguments{}) // Ignore errors, image may not exist
+			removeImage(tt.args.component) // Ignore errors, image may not exist
 
-			err := pullImage(tt.args.component, common.HandlerArguments{})
+			err := pullImage(tt.args.component)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("pullImage() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -81,7 +81,7 @@ func Test_pullImage(t *testing.T) {
 				}
 
 				// Try to remove image
-				err = removeImage(tt.args.component, common.HandlerArguments{})
+				err = removeImage(tt.args.component)
 				if err != nil {
 					t.Errorf("Unexpected error when removing image: %s", err.Error())
 				}
@@ -108,17 +108,17 @@ func TestComplex(t *testing.T) {
 		Image:    "nginx:stable-alpine",
 	}
 
-	err = pullImage(cmp1, common.HandlerArguments{})
+	err = pullImage(cmp1)
 	if err != nil {
 		t.Errorf("Error, expected Image to be pulled, got %s", err.Error())
 	}
 
-	err = createContainer(cmp1, common.HandlerArguments{})
-	defer removeContainer(cmp1, common.HandlerArguments{})
+	err = createContainer(cmp1)
+	defer removeContainer(cmp1)
 	if err != nil {
 		t.Errorf("Error, expected container to be created, got %s", err.Error())
 	}
-	err = startContainer(cmp1, common.HandlerArguments{})
+	err = startContainer(cmp1)
 	if err != nil {
 		t.Errorf("Error, expected container to be created, got %s", err.Error())
 	}
@@ -138,8 +138,8 @@ func TestComplex(t *testing.T) {
 			"linkedContainer:link1",
 		},
 	}
-	err = createContainer(cmp, common.HandlerArguments{})
-	defer removeContainer(cmp, common.HandlerArguments{})
+	err = createContainer(cmp)
+	defer removeContainer(cmp)
 	if err != nil {
 		t.Errorf("Error, expected container to be created, got %s", err.Error())
 	}
@@ -153,18 +153,18 @@ func TestContainerWorkflow(t *testing.T) {
 		Image:    "nginx:stable-alpine",
 	}
 
-	err := createContainer(cmp, common.HandlerArguments{})
-	defer removeContainer(cmp, common.HandlerArguments{})
+	err := createContainer(cmp)
+	defer removeContainer(cmp)
 	if err != nil {
 		t.Errorf("Expected container to be created, got %s", err.Error())
 	}
 
-	err = stopContainer(cmp, common.HandlerArguments{})
+	err = stopContainer(cmp)
 	if err != nil {
 		t.Errorf("Expected container to be stopped, got %s", err.Error())
 	}
 
-	err = startContainer(cmp, common.HandlerArguments{})
+	err = startContainer(cmp)
 	if err != nil {
 		t.Errorf("Expected container to be started, got %s", err.Error())
 	}
@@ -174,7 +174,7 @@ func TestContainerWorkflow(t *testing.T) {
 		t.Errorf("Expected container to print logs, got %s", err.Error())
 	}
 
-	err = removeContainer(cmp, common.HandlerArguments{})
+	err = removeContainer(cmp)
 	if err != nil {
 		t.Errorf("Expected container to be removed, got %s", err.Error())
 	}
