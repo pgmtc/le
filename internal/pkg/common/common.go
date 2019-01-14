@@ -9,6 +9,7 @@ import (
 type HandlerArguments struct {
 	debug bool
 }
+
 func MakeActions() map[string]func(args []string) error {
 	return make(map[string]func(args []string) error)
 }

@@ -35,5 +35,6 @@ func ComponentMap() map[string]Component {
 }
 
 func GetComponents() []Component {
-	return GetCurrentProfile().Components
+	config := FileSystemConfig("~/.orchard-zzz")
+	return config.CurrentProfile().Components
 }
