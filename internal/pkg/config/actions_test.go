@@ -2,6 +2,9 @@ package config
 
 import (
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"io/ioutil"
+	"os"
+	"path"
 	"strings"
 	"testing"
 )
@@ -125,5 +128,20 @@ func TestSwitchAction(t *testing.T) {
 	}
 	if !config.saveConfigCalled {
 		t.Errorf("Expected config's saveProfile to be called but it was not")
+	}
+}
+
+func TestUpdateCli(t *testing.T) {
+	config, logger := setUp()
+	tmpDir, err := ioutil.TempDir("", "orchard-test")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
+	}
+	defer os.RemoveAll(tmpDir) // clean up
+
+	config.setBinLocation(path.Join(tmpDir, "orchard-updated")).setReleasesUrl("https://github.com/pgmtc/orchard-cli/releases/latest")
+	err = updateCliAction.Handler(logger, config)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
 	}
 }

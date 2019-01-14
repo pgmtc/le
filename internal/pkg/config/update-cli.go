@@ -24,11 +24,7 @@ var updateCliAction = common.RawAction{
 		log.Debugf("DONE\n")
 
 		// Create temporary directory
-		tmpDir, err := ioutil.TempDir("", "orchard-update")
-		if err != nil {
-			return err
-
-		}
+		tmpDir, _ := ioutil.TempDir("", "orchard-update")
 		defer os.RemoveAll(tmpDir) // clean up
 
 		log.Debugf("Downloading %s from %s ...", fileName, url)
