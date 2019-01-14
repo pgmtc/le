@@ -14,3 +14,11 @@ type Logger interface {
 type Action interface {
 	Run(log Logger, config Configuration, args ...string) error
 }
+
+type RawAction struct {
+	Handler func(log Logger, config Configuration, args ...string) error
+}
+
+func (a *RawAction) Run(log Logger, config Configuration, args ...string) error {
+	return a.Handler(log, config, args...)
+}

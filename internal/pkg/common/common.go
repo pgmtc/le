@@ -3,7 +3,6 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/fatih/color"
 )
 
 func MakeActions() map[string]func(args []string) error {
@@ -23,47 +22,6 @@ func ParseParams(actions map[string]func(args []string) error, args []string) er
 		return actions[action](actionArgs)
 	}
 	return errors.New(fmt.Sprintf("Action '%s' does not exist. Available actions = %s", action, getActionNames(actions)))
-}
-
-func ComponentActionHandler(handler func(component Component) error, configuration Configuration) func(args []string) error {
-	return func(args []string) error {
-		if len(args) == 0 {
-			return errors.New(fmt.Sprintf("Missing component Name. Available components = %s", ComponentNames(configuration.CurrentProfile().Components)))
-		}
-
-		// If all provided, do for all components
-		if args[0] == "all" {
-			for _, cmp := range configuration.CurrentProfile().Components {
-				err := handler(cmp)
-				if err != nil {
-					color.HiBlack(err.Error())
-				}
-			}
-			return nil
-		}
-
-		for _, cmpName := range args {
-			if component, ok := (ComponentMap(configuration.CurrentProfile().Components))[cmpName]; ok {
-				err := handler(component)
-				if err != nil {
-					if len(args) > 1 {
-						color.HiBlack(err.Error())
-					} else {
-						return err
-					}
-
-				}
-			} else {
-				if len(args) > 1 { // Single use
-					color.HiBlack("Component '%s' has not been found", cmpName)
-				} else { // Multiple use
-					return errors.New(fmt.Sprintf("Component %s has not been found. Available components = %s", cmpName, ComponentNames(configuration.CurrentProfile().Components)))
-				}
-			}
-		}
-		return nil
-
-	}
 }
 
 func getActionNames(actions map[string]func(args []string) error) []string {

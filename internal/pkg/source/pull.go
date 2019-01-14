@@ -1,13 +1,12 @@
 package source
 
 import (
-	"fmt"
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 )
 
-type pullAction struct{}
-
-func (pullAction) Run(log common.Logger, config common.Configuration, args ...string) error {
-	fmt.Println("Pull latest code")
-	return nil
+var pullAction common.Action = &common.ComponentAction{
+	Handler: func(log common.Logger, config common.Configuration, cmp common.Component) error {
+		log.Debugf("Pull source for %s\n", cmp.Name)
+		return nil
+	},
 }

@@ -14,54 +14,54 @@ import (
 	"strings"
 )
 
-type updateCliAction struct{}
+var updateCliAction = common.RawAction{
+	Handler: func(log common.Logger, config common.Configuration, args ...string) error {
+		log.Debugf("Determining latest release package .. ")
+		url, fileName, err := getReleasePackagePath(config.Config().ReleasesURL, "x86", "macOS")
+		if err != nil {
+			return err
+		}
+		log.Debugf("DONE\n")
 
-func (updateCliAction) Run(log common.Logger, config common.Configuration, args ...string) error {
-	log.Debugf("Determining latest release package .. ")
-	url, fileName, err := getReleasePackagePath(config.Config().ReleasesURL, "x86", "macOS")
-	if err != nil {
-		return err
-	}
-	log.Debugf("DONE\n")
+		// Create temporary directory
+		tmpDir, err := ioutil.TempDir("", "orchard-update")
+		if err != nil {
+			return err
 
-	// Create temporary directory
-	tmpDir, err := ioutil.TempDir("", "orchard-update")
-	if err != nil {
-		return err
+		}
+		defer os.RemoveAll(tmpDir) // clean up
 
-	}
-	defer os.RemoveAll(tmpDir) // clean up
+		log.Debugf("Downloading %s from %s ...", fileName, url)
+		filePath := path.Join(tmpDir, fileName)
+		out, err := os.Create(filePath)
+		defer out.Close()
+		resp, err := http.Get(url)
+		defer resp.Body.Close()
+		_, err = io.Copy(out, resp.Body)
+		if err != nil {
+			return err
+		}
+		log.Debugf("DONE\n")
+		log.Debugf("Unzipping file %s ... ", fileName)
+		unzippedFileName, err := unzipReleasePackage(filePath)
+		if err != nil {
+			return err
+		}
 
-	log.Debugf("Downloading %s from %s ...", fileName, url)
-	filePath := path.Join(tmpDir, fileName)
-	out, err := os.Create(filePath)
-	defer out.Close()
-	resp, err := http.Get(url)
-	defer resp.Body.Close()
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return err
-	}
-	log.Debugf("DONE\n")
-	log.Debugf("Unzipping file %s ... ", fileName)
-	unzippedFileName, err := unzipReleasePackage(filePath)
-	if err != nil {
-		return err
-	}
-
-	err = untar(unzippedFileName, tmpDir)
-	if err != nil {
-		return err
-	}
-	log.Debugf("DONE\n")
-	log.Debugf("Installing orchard to %s .. ", config.Config().BinLocation)
-	newCliPath := path.Join(tmpDir, "orchard")
-	err = installCli(newCliPath, config.Config().BinLocation)
-	if err != nil {
-		return err
-	}
-	log.Debugf("DONE\n")
-	return nil
+		err = untar(unzippedFileName, tmpDir)
+		if err != nil {
+			return err
+		}
+		log.Debugf("DONE\n")
+		log.Debugf("Installing orchard to %s .. ", config.Config().BinLocation)
+		newCliPath := path.Join(tmpDir, "orchard")
+		err = installCli(newCliPath, config.Config().BinLocation)
+		if err != nil {
+			return err
+		}
+		log.Debugf("DONE\n")
+		return nil
+	},
 }
 
 func unzipReleasePackage(fileName string) (resultFileName string, resultErr error) {
