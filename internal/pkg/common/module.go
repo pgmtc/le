@@ -12,5 +12,5 @@ type Logger interface {
 }
 
 type Action interface {
-	Run(log Logger, args ...string) error
+	Run(log Logger, config Configuration, args ...string) error
 }

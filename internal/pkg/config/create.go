@@ -5,11 +5,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-type createAction struct {
-	config common.Config
-}
+type createAction struct{}
 
-func (createAction) Run(log common.Logger, args ...string) error {
+func (createAction) Run(log common.Logger, config common.Configuration, args ...string) error {
 	if len(args) < 1 {
 		return errors.Errorf("Missing parameters: profileName [sourceProfile], examples:\n" +
 			"    orchard config create my-new-profile\n" +
@@ -17,17 +15,17 @@ func (createAction) Run(log common.Logger, args ...string) error {
 	}
 
 	profileName := args[0]
-	profile := common.DefaultLocalProfile()
+	profile := common.DefaultLocalProfile
 
 	if len(args) > 1 {
-		copyFromProfile, err := common.LoadProfile(args[1])
+		copyFromProfile, err := config.LoadProfile(args[1])
 		if err != nil {
 			return errors.Errorf("Error when loading profile %s: %s", args[1], err.Error())
 		}
 		profile = copyFromProfile
 	}
 
-	fileName, err := common.SaveProfile(profileName, profile)
+	fileName, err := config.SaveProfile(profileName, profile)
 	if err != nil {
 		return errors.Errorf("Error when saving profile: %s", err.Error())
 	}

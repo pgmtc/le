@@ -7,7 +7,7 @@ import (
 
 type pullAction struct{}
 
-func (pullAction) Run(log common.Logger, args ...string) error {
+func (pullAction) Run(log common.Logger, config common.Configuration, args ...string) error {
 	fmt.Println("Pull latest code")
 	return nil
 }

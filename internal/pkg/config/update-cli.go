@@ -16,9 +16,9 @@ import (
 
 type updateCliAction struct{}
 
-func (updateCliAction) Run(log common.Logger, args ...string) error {
+func (updateCliAction) Run(log common.Logger, config common.Configuration, args ...string) error {
 	log.Debugf("Determining latest release package .. ")
-	url, fileName, err := getReleasePackagePath("x86", "macOS")
+	url, fileName, err := getReleasePackagePath(config.Config().ReleasesURL, "x86", "macOS")
 	if err != nil {
 		return err
 	}
@@ -54,9 +54,9 @@ func (updateCliAction) Run(log common.Logger, args ...string) error {
 		return err
 	}
 	log.Debugf("DONE\n")
-	log.Debugf("Installing orchard to %s .. ", common.CONFIG.BinLocation)
+	log.Debugf("Installing orchard to %s .. ", config.Config().BinLocation)
 	newCliPath := path.Join(tmpDir, "orchard")
-	err = installCli(newCliPath, common.CONFIG.BinLocation)
+	err = installCli(newCliPath, config.Config().BinLocation)
 	if err != nil {
 		return err
 	}
@@ -95,9 +95,9 @@ func unzipReleasePackage(fileName string) (resultFileName string, resultErr erro
 	return
 }
 
-func getReleasePackagePath(arch string, os string) (urlString string, fileName string, resultErr error) {
+func getReleasePackagePath(releasesUrl string, arch string, os string) (urlString string, fileName string, resultErr error) {
 	bow := surf.NewBrowser()
-	err := bow.Open(common.CONFIG.ReleasesURL)
+	err := bow.Open(releasesUrl)
 	if err != nil {
 		resultErr = err
 		return

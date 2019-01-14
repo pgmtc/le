@@ -10,10 +10,11 @@ import (
 var tmpDir string
 
 func setUp(dirSuffix string) fileSystemConfig {
-	tmpDir, _ = ioutil.TempDir("", "orchard-test-config-mock")
+	tmpDir, _ = ioutil.TempDir("", "orchard-test-Config-mock")
 	targetDir := tmpDir + "/" + dirSuffix
 	return fileSystemConfig{
 		configLocation: targetDir,
+		configFileName: "config.yaml",
 	}
 
 }
@@ -23,12 +24,12 @@ func tearDown() {
 }
 
 func TestFileSystemConfig(t *testing.T) {
-	tmpDir, _ = ioutil.TempDir("", "orchard-test-config-mock-constructor")
+	tmpDir, _ = ioutil.TempDir("", "orchard-test-Config-mock-constructor")
 	FileSystemConfig(tmpDir)
 }
 
 func TestFileSystemConfig_initConfigDir(t *testing.T) {
-	config := setUp(".orchard-config")
+	config := setUp(".orchard-Config")
 	defer tearDown()
 
 	cnfDir := config.initConfigDir(config.configLocation)
@@ -52,7 +53,7 @@ func TestFileSystemConfig_initConfigDir(t *testing.T) {
 }
 
 func TestFileSystemConfig_SaveAndLoadProfile(t *testing.T) {
-	config := setUp(".orchard-config")
+	config := setUp(".orchard-Config")
 	defer tearDown()
 
 	testProfile := Profile{
@@ -117,21 +118,22 @@ func TestFileSystemConfig_SaveAndLoadProfile(t *testing.T) {
 }
 
 func Test_fileSystemConfig_SaveConfig(t *testing.T) {
-	config := setUp(".orchard-config")
+	config := setUp(".orchard-Config")
 	defer tearDown()
 
-	fileName, err := config.SaveConfig(CONFIG_FILE_NAME)
+	fileName, err := config.SaveConfig()
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	expectedFileName := tmpDir + "/.orchard-config/config.yaml"
+	expectedFileName := tmpDir + "/.orchard-Config/config.yaml"
 	if expectedFileName != fileName {
 		t.Errorf("Expected file name %s, got %s", expectedFileName, fileName)
 	}
 
 	// Test write failure
-	fileName, err = config.SaveConfig("../../../../../../../../crap")
+	config.configFileName = "../../../../../../../../crap"
+	fileName, err = config.SaveConfig()
 	if err == nil {
 		t.Errorf("Expected rror, got nothing")
 	}
@@ -139,31 +141,31 @@ func Test_fileSystemConfig_SaveConfig(t *testing.T) {
 }
 
 func Test_fileSystemConfig_LoadConfig(t *testing.T) {
-	validConfig := setUp(".orchard-config")
+	validConfig := setUp(".orchard-Config")
 	defer tearDown()
-	validConfig.Config.Profile = "default"
-	validConfig.SaveConfig("orchard-config.yaml")
+	validConfig.config.Profile = "default"
+	validConfig.SaveConfig()
 	validConfig.SaveProfile("default", Profile{})
-	err := validConfig.LoadConfig("orchard-config.yaml")
+	err := validConfig.LoadConfig()
 	if err != nil {
 		t.Errorf("Unexpected error, got %s", err.Error())
 	}
 
-	validConfig.Config.Profile = "non-existing"
-	validConfig.SaveConfig("orchard-config.yaml")
-	err = validConfig.LoadConfig("orchard-config.yaml")
+	validConfig.config.Profile = "non-existing"
+	validConfig.SaveConfig()
+	err = validConfig.LoadConfig()
 	if err == nil {
 		t.Errorf("Expected error, got nothing")
 	}
 
-	// Load config from non-existing location
-	tempDir, _ := ioutil.TempDir("", "orchard-test-config-mock")
-	targetDirTmp := tempDir + "/.orchard-config-to-load"
+	// Load Config from non-existing location
+	tempDir, _ := ioutil.TempDir("", "orchard-test-Config-mock")
+	targetDirTmp := tempDir + "/.orchard-Config-to-load"
 	cnf := fileSystemConfig{
 		configLocation: targetDirTmp,
 	}
 
-	err = cnf.LoadConfig("config-file.yaml")
+	err = cnf.LoadConfig()
 	if err == nil {
 		t.Errorf("Expected error, got nothing")
 	}
@@ -185,6 +187,40 @@ func Test_fileSystemConfig_CurrentProfile(t *testing.T) {
 	returned := config.CurrentProfile()
 	if !reflect.DeepEqual(returned, testProfile) {
 		t.Errorf("Expected returned profile to equal testprofile")
+	}
+
+}
+
+func Test_fileSystemConfig_SetProfile(t *testing.T) {
+	testProfile := Profile{
+		Components: []Component{
+			{Name: "test-component-1"},
+			{Name: "test-component-2"},
+		},
+	}
+	config := fileSystemConfig{}
+
+	config.SetProfile("test", testProfile)
+
+	if !reflect.DeepEqual(config.currentProfile, testProfile) {
+		t.Errorf("Expected returned profile to equal testprofile")
+	}
+	if config.config.Profile != "test" {
+		t.Errorf("Expected profile name in Config to be set to test, got %s", config.config.Profile)
+	}
+}
+
+func Test_fileSystemConfig_Config(t *testing.T) {
+	config := fileSystemConfig{
+		config: Config{
+			Profile:     "test-profile",
+			BinLocation: "/usr/local/bin",
+			ReleasesURL: "http://www.google.com",
+		},
+	}
+
+	if !reflect.DeepEqual(config.config, config.Config()) {
+		t.Errorf("Expected returned config to equal provided config")
 	}
 
 }

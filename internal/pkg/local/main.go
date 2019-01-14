@@ -13,13 +13,15 @@ import (
 )
 
 func Parse(args []string) error {
+	config := common.FileSystemConfig("~/.orchard")
+
 	actions := common.MakeActions()
 	actions["status"] = status
-	actions["stop"] = common.ComponentActionHandler(stopContainer, common.HandlerArguments{})
-	actions["start"] = common.ComponentActionHandler(startContainer, common.HandlerArguments{})
-	actions["remove"] = common.ComponentActionHandler(removeContainer, common.HandlerArguments{})
-	actions["create"] = common.ComponentActionHandler(createContainer, common.HandlerArguments{})
-	actions["pull"] = common.ComponentActionHandler(pullImage, common.HandlerArguments{})
+	actions["stop"] = common.ComponentActionHandler(stopContainer, config)
+	actions["start"] = common.ComponentActionHandler(startContainer, config)
+	actions["remove"] = common.ComponentActionHandler(removeContainer, config)
+	actions["create"] = common.ComponentActionHandler(createContainer, config)
+	actions["pull"] = common.ComponentActionHandler(pullImage, config)
 	actions["logs"] = logsHandler(dockerPrintLogs, false)
 	actions["watch"] = logsHandler(dockerPrintLogs, true)
 	return common.ParseParams(actions, args)
@@ -28,7 +30,7 @@ func Parse(args []string) error {
 func logsHandler(handler func(component common.Component, follow bool) error, follow bool) func(args []string) error {
 	return func(args []string) error {
 		if len(args) == 0 {
-			return errors.New(fmt.Sprintf("Missing component Name. Available components = %s", common.ComponentNames()))
+			return errors.New(fmt.Sprintf("Missing component Name. Available components = %s", config.CurrentPro.ComponentNames()))
 		}
 		componentId := args[0]
 		componentMap := common.ComponentMap()

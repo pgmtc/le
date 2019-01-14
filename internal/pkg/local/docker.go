@@ -66,7 +66,7 @@ func dockerGetContainers() (map[string]types.Container, error) {
 	return containerMap, nil
 }
 
-func startContainer(component common.Component, handlerArguments common.HandlerArguments) error {
+func startContainer(component common.Component) error {
 	if container, err := getContainer(component); err == nil {
 		fmt.Printf("Starting container '%s' for component '%s'\n", component.DockerId, component.Name)
 
@@ -78,7 +78,7 @@ func startContainer(component common.Component, handlerArguments common.HandlerA
 	return errors.Errorf("Starting container '%s' for component '%s': Not found. Create it first\n", component.Name, component.DockerId)
 }
 
-func stopContainer(component common.Component, handlerArguments common.HandlerArguments) error {
+func stopContainer(component common.Component) error {
 	if container, err := getContainer(component); err == nil {
 		fmt.Printf("Stopping container '%s' for component '%s'\n", component.DockerId, component.Name)
 		if err := DockerGetClient().ContainerStop(context.Background(), container.ID, nil); err != nil {
@@ -89,10 +89,10 @@ func stopContainer(component common.Component, handlerArguments common.HandlerAr
 	return errors.Errorf("Stopping container '%s' for component '%s': Not found found. Nothing to stop\n", component.Name, component.DockerId)
 }
 
-func removeContainer(component common.Component, handlerArguments common.HandlerArguments) error {
+func removeContainer(component common.Component) error {
 	if container, err := getContainer(component); err == nil {
 		if container.State == "running" {
-			if err := stopContainer(component, handlerArguments); err != nil {
+			if err := stopContainer(component); err != nil {
 				return err
 			}
 		}
@@ -105,7 +105,7 @@ func removeContainer(component common.Component, handlerArguments common.Handler
 	return errors.Errorf("Removing container '%s' for component '%s': Not found. Nothing to remove\n", component.Name, component.DockerId)
 }
 
-func createContainer(component common.Component, handlerArguments common.HandlerArguments) error {
+func createContainer(component common.Component) error {
 	if component.Name == "" || component.DockerId == "" || component.Image == "" {
 		return errors.New("Missing container Name, DockerId or Image")
 	}
@@ -174,7 +174,7 @@ func DockerGetClient() *client.Client {
 	return cli
 }
 
-func removeImage(component common.Component, handlerArguments common.HandlerArguments) error {
+func removeImage(component common.Component) error {
 	fmt.Printf("removing Image for '%s' (%s) ... \n", component.Name, component.Image)
 	name := "docker"
 	args := []string{"rmi", component.Image}
@@ -185,7 +185,7 @@ func removeImage(component common.Component, handlerArguments common.HandlerArgu
 	return nil
 }
 
-func pullImage(component common.Component, handlerArguments common.HandlerArguments) error {
+func pullImage(component common.Component) error {
 	fmt.Printf("pulling Image for '%s' (%s) ... ", component.Name, component.Image)
 
 	var pullOptions types.ImagePullOptions
