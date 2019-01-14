@@ -9,16 +9,20 @@ import (
 var (
 	calledParam              string
 	handlerMethodCalledStore = map[string]bool{}
+	testConfig               = MockConfig([]Component{
+		{Name: "test-component-1", DockerId: "test-component-1-docker-id", Image: "test-component-1-image"},
+		{Name: "test-component-2", DockerId: "test-component-2-docker-id", Image: "test-component-2-image"},
+	})
 )
 
 // Method called by actionHandler test - success
-func handlerMethod_success(component Component, arguments HandlerArguments) error {
+func handlerMethod_success(component Component) error {
 	handlerMethodCalledStore[component.Name] = true
 	return nil
 }
 
 // Method called by actionHandler test - failure
-func handlerMethod_fail(component Component, arguments HandlerArguments) error {
+func handlerMethod_fail(component Component) error {
 	return errors.New("Method deliberately returned error")
 }
 
@@ -134,7 +138,7 @@ func Test_componentActionHandler_missingArguments(t *testing.T) {
 	// Reset
 	handlerMethodCalledStore = map[string]bool{}
 	// Use ComponentActionHandler wrapper to convert it to actionHandler
-	actionHandler := ComponentActionHandler(handlerMethod_success, HandlerArguments{})
+	actionHandler := ComponentActionHandler(handlerMethod_success, testConfig)
 	// Run without the arguments
 	err := actionHandler([]string{}) // Pick one of the existing components
 	if err == nil {
@@ -146,7 +150,7 @@ func Test_componentActionHandler_nonExistingComponent(t *testing.T) {
 	// Reset
 	handlerMethodCalledStore = map[string]bool{}
 	// Use ComponentActionHandler wrapper to convert it to actionHandler
-	actionHandler := ComponentActionHandler(handlerMethod_success, HandlerArguments{})
+	actionHandler := ComponentActionHandler(handlerMethod_success, testConfig)
 	// Run the test for single component
 	componentUnderTest := "nonexisting"                // Pick one of the existing components
 	err := actionHandler([]string{componentUnderTest}) // Pick one of the existing components
@@ -159,15 +163,15 @@ func Test_componentActionHandler_single(t *testing.T) {
 	// Reset
 	handlerMethodCalledStore = map[string]bool{}
 	// Use ComponentActionHandler wrapper to convert it to actionHandler
-	actionHandler := ComponentActionHandler(handlerMethod_success, HandlerArguments{})
+	actionHandler := ComponentActionHandler(handlerMethod_success, testConfig)
 	// Run the test for single component
-	componentUnderTest := "db" // Pick one of the existing components
+	componentUnderTest := "test-component-1" // Pick one of the existing components
 	err := actionHandler([]string{componentUnderTest})
 	if err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
 	// Check that handlerMethodCalled variable had been switched to true
-	if !handlerMethodCalledStore["db"] {
+	if !handlerMethodCalledStore[componentUnderTest] {
 		t.Errorf("Expected handlerMethod_success to be called for component %s, but it was not", componentUnderTest)
 	}
 	// Run the test for non-existing component
@@ -176,8 +180,8 @@ func Test_componentActionHandler_single(t *testing.T) {
 		t.Errorf("Expected error to be returned for non existing component")
 	}
 	// Test failure scenario
-	actionFailureHandler := ComponentActionHandler(handlerMethod_fail, HandlerArguments{})
-	err = actionFailureHandler([]string{"db"})
+	actionFailureHandler := ComponentActionHandler(handlerMethod_fail, testConfig)
+	err = actionFailureHandler([]string{"test-component-1"})
 	if err == nil {
 		t.Errorf("Expected error to be returned by failure handler method, but got no error")
 	}
@@ -187,9 +191,9 @@ func Test_componentActionHandler_multiple(t *testing.T) {
 	// Reset
 	handlerMethodCalledStore = map[string]bool{}
 	// Use ComponentActionHandler wrapper to convert it to actionHandler
-	actionHandler := ComponentActionHandler(handlerMethod_success, HandlerArguments{})
+	actionHandler := ComponentActionHandler(handlerMethod_success, testConfig)
 	// Run the test for single component
-	validComponents := []string{"db", "case-flow", "auth"}
+	validComponents := []string{"test-component-1", "test-component-2"}
 	allComponents := append(validComponents, "nonExisting")
 	err := actionHandler(allComponents) // Pick one of the existing components
 	if err != nil {
@@ -202,7 +206,7 @@ func Test_componentActionHandler_multiple(t *testing.T) {
 		}
 	}
 	// Check failure scenario
-	actionFailureHandler := ComponentActionHandler(handlerMethod_fail, HandlerArguments{})
+	actionFailureHandler := ComponentActionHandler(handlerMethod_fail, testConfig)
 	err = actionFailureHandler(validComponents)
 	if err != nil {
 		t.Errorf("Even though all runs for components have failed, expecting no error (those are reported as warning), but got %s", err.Error())
@@ -213,14 +217,14 @@ func Test_componentActionHandler_all(t *testing.T) {
 	// Reset
 	handlerMethodCalledStore = map[string]bool{}
 	// Use ComponentActionHandler wrapper to convert it to actionHandler
-	actionHandler := ComponentActionHandler(handlerMethod_success, HandlerArguments{})
+	actionHandler := ComponentActionHandler(handlerMethod_success, testConfig)
 	// Run for all components
 	err := actionHandler([]string{"all"}) // Pick one of the existing components
 	if err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
 	// Check that handlerMethodCalled variable had been switched to true for all provided components
-	componentsUnderTest := ComponentNames()
+	componentsUnderTest := ComponentNames(testConfig.CurrentProfile().Components)
 	for _, cmpUnderTest := range componentsUnderTest {
 		if !handlerMethodCalledStore[cmpUnderTest] {
 			t.Errorf("When using 'all' as a parameter, expected handlerMethod_success to be called for component %s, but it was not", cmpUnderTest)
@@ -228,7 +232,7 @@ func Test_componentActionHandler_all(t *testing.T) {
 	}
 
 	// Test failure scenario
-	actionFailureHandler := ComponentActionHandler(handlerMethod_fail, HandlerArguments{})
+	actionFailureHandler := ComponentActionHandler(handlerMethod_fail, testConfig)
 	// Run for all components
 	err = actionFailureHandler([]string{"all"}) // Pick one of the existing components
 	if err != nil {

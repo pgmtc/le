@@ -30,19 +30,19 @@ type fileSystemConfig struct {
 	}
 }
 
-func FileSystemConfig(configLocation string) Configuration {
+func FileSystemConfig(configLocation string) (fcs Configuration, resultErr error) {
 	fsc := &fileSystemConfig{
 		configLocation: configLocation,
 	}
-	err := fsc.LoadConfig()
+	err := fsc.LoadConfig(CONFIG_FILE_NAME)
 	if err != nil {
-		panic(err)
+		resultErr = err
 	}
-	return fsc
+	return
 }
 
 func (c *fileSystemConfig) LoadProfile(profileName string) (profile Profile, resultErr error) {
-	configDir := c.initConfigDir()
+	configDir := c.initConfigDir(c.configLocation)
 	out := Profile{}
 
 	fileName := path.Join(configDir, "profile-"+profileName+".yaml")
@@ -62,7 +62,7 @@ func (c *fileSystemConfig) LoadProfile(profileName string) (profile Profile, res
 }
 
 func (c *fileSystemConfig) SaveProfile(profileName string, profile Profile) (fileName string, resultErr error) {
-	configDir := c.initConfigDir()
+	configDir := c.initConfigDir(c.configLocation)
 	fileName = path.Join(configDir, "profile-"+profileName+".yaml")
 	if err := YamlMarshall(profile, fileName); err != nil {
 		resultErr = errors.Errorf("error writing config file: %s", err.Error())
@@ -71,14 +71,13 @@ func (c *fileSystemConfig) SaveProfile(profileName string, profile Profile) (fil
 	return
 }
 
-func (c *fileSystemConfig) SaveConfig() (fileName string, resultErr error) {
-	_, err := c.SaveProfile(c.Config.Profile, c.CurrentProfile())
-	if err != nil {
-		resultErr = errors.Errorf("error saving current profile: %s", err.Error())
-		return
-	}
-
-	fileName = path.Join(c.initConfigDir(), CONFIG_FILE_NAME)
+func (c *fileSystemConfig) SaveConfig(configFileName string) (fileName string, resultErr error) {
+	//_, err := c.SaveProfile(c.Config.Profile, c.CurrentProfile())
+	//if err != nil {
+	//	resultErr = errors.Errorf("error saving current profile: %s", err.Error())
+	//	return
+	//}
+	fileName = path.Join(c.initConfigDir(c.configLocation), configFileName)
 	if err := YamlMarshall(c.Config, fileName); err != nil {
 		resultErr = errors.Errorf("error writing config file: %s", err.Error())
 		return
@@ -86,11 +85,11 @@ func (c *fileSystemConfig) SaveConfig() (fileName string, resultErr error) {
 	return
 }
 
-func (c *fileSystemConfig) LoadConfig() (resultErr error) {
-	DO NOT CREATE AUTOMATICALY, RATHER FAIL
-	fileName := path.Join(c.initConfigDir(), CONFIG_FILE_NAME)
+func (c *fileSystemConfig) LoadConfig(configFileName string) (resultErr error) {
+	//fileName := path.Join(c.initConfigDir(), configFileName)
+	fileName := path.Join(c.configLocation, configFileName)
 	if err := YamlUnmarshall(fileName, &c.Config); err != nil {
-		resultErr = errors.Errorf("error writing config file: %s", err.Error())
+		resultErr = errors.Errorf("error reading config file %s: %s", fileName, err.Error())
 		return
 	}
 	configProfile, err := c.LoadProfile(c.Config.Profile)
@@ -103,11 +102,8 @@ func (c *fileSystemConfig) LoadConfig() (resultErr error) {
 }
 
 func (c *fileSystemConfig) GetAvailableProfiles() (profiles []string) {
-	configDir := c.initConfigDir()
-	files, returnError := filepath.Glob(configDir + "/profile-*.yaml")
-	if returnError != nil {
-		return
-	}
+	configDir := c.initConfigDir(c.configLocation)
+	files, _ := filepath.Glob(configDir + "/profile-*.yaml")
 
 	for _, file := range files {
 		profileName := strings.TrimPrefix(file, configDir+"/profile-")
@@ -117,8 +113,8 @@ func (c *fileSystemConfig) GetAvailableProfiles() (profiles []string) {
 	return
 }
 
-func (c *fileSystemConfig) initConfigDir() (configDir string) {
-	configDir = ParsePath(c.configLocation)
+func (c *fileSystemConfig) initConfigDir(configLocation string) (configDir string) {
+	configDir = ParsePath(configLocation)
 	if _, err := os.Stat(configDir); os.IsNotExist(err) {
 		color.Yellow("Config location '%s' does not exist, creating it", configDir)
 		if err := os.MkdirAll(configDir, os.ModePerm); err != nil {
@@ -132,16 +128,12 @@ func (c *fileSystemConfig) CurrentProfile() Profile {
 	return c.currentProfile
 }
 
-func DefaultLocalProfile() Profile {
-	return Profile{
-		Components: defaultComponents,
-	}
+var DefaultLocalProfile Profile = Profile{
+	Components: defaultComponents,
 }
 
-func DefaultRemoteProfile() Profile {
-	return Profile{
-		Components: defaultRemoteComponents,
-	}
+var DefaultRemoteProfile Profile = Profile{
+	Components: defaultRemoteComponents,
 }
 
 type Profile struct {

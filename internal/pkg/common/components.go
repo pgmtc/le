@@ -16,8 +16,7 @@ type Component struct {
 	BuildRoot     string   `yaml:"buildRoot,omitempty"`
 }
 
-func ComponentNames() []string {
-	components := GetComponents()
+func ComponentNames(components []Component) []string {
 	componentNames := []string{}
 	for _, component := range components {
 		componentNames = append(componentNames, component.Name)
@@ -25,16 +24,10 @@ func ComponentNames() []string {
 	return componentNames
 }
 
-func ComponentMap() map[string]Component {
-	components := GetComponents()
+func ComponentMap(components []Component) map[string]Component {
 	elementMap := make(map[string]Component)
 	for i := 0; i < len(components); i += 1 {
 		elementMap[components[i].Name] = components[i]
 	}
 	return elementMap
-}
-
-func GetComponents() []Component {
-	config := FileSystemConfig("~/.orchard-zzz")
-	return config.CurrentProfile().Components
 }

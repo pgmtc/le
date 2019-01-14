@@ -27,10 +27,7 @@ func SkipDockerTesting(t *testing.T) {
 
 /* Method replaces relative path with absolute and replace ~ with user's home dir */
 func ParsePath(path string) (result string) {
-	usr, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
+	usr, _ := user.Current()
 	result = strings.Replace(path, "~", usr.HomeDir, 1)
 
 	if !strings.HasPrefix(result, "/") {
@@ -41,12 +38,7 @@ func ParsePath(path string) (result string) {
 }
 
 func YamlMarshall(data interface{}, fileName string) (resultErr error) {
-	bytes, err := yaml.Marshal(data)
-	if err != nil {
-		resultErr = errors.Errorf("error when marshalling config: %s", err.Error())
-		return
-	}
-
+	bytes, _ := yaml.Marshal(data)
 	if err := ioutil.WriteFile(fileName, bytes, 0644); err != nil {
 		resultErr = errors.Errorf("error writing file: %s", err.Error())
 		return
