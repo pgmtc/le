@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/pgmtc/orchard-cli/internal/pkg/builder"
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"github.com/pgmtc/orchard-cli/internal/pkg/config"
 	"github.com/pgmtc/orchard-cli/internal/pkg/local"
@@ -13,9 +14,10 @@ import (
 
 var (
 	modules = map[string]common.Module{
-		"source": source.Module{},
-		"config": config.Module{},
-		"local":  local.Module{},
+		"source":  source.Module{},
+		"config":  config.Module{},
+		"local":   local.Module{},
+		"builder": builder.Module{},
 	}
 	cnf = common.FileSystemConfig("~/.orchard")
 )

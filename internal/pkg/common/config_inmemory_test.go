@@ -7,7 +7,7 @@ import (
 var config = MemoryConfig{}
 
 func TestMemoryConfig_CurrentProfileName(t *testing.T) {
-	config.CurrentProfile()
+	config.CurrentProfileName()
 	t.Skip()
 }
 
