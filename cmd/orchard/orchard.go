@@ -60,7 +60,7 @@ func runModule(module common.Module, args ...string) int {
 	}
 
 	action := actions[actionName]
-	if err := action.Run(logger, cnf, actionArgs...); err != nil {
+	if err := action.Run(common.Context{Log: logger, Config: cnf}, actionArgs...); err != nil {
 		logger.Errorf("%s", err.Error())
 		return 2
 	}
