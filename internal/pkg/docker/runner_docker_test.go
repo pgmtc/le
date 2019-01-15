@@ -60,7 +60,7 @@ func TestDockerRunner_Workflow(t *testing.T) {
 
 	runner.Remove(ctx, internalCmp) // Don't handle errors - prepare for the test
 	removeImage(internalCmp)        // Don't handle errors - prepare for the test
-	if err := runner.Pull(ctx, internalCmp); err != nil && !(os.Getenv("SKIP_AWS_TESTING") == "") {
+	if err := runner.Pull(ctx, internalCmp); err != nil && (os.Getenv("SKIP_AWS_TESTING") == "") {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 	defer removeImage(internalCmp)
