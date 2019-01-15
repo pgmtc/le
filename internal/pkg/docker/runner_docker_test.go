@@ -54,7 +54,7 @@ func TestDockerRunner_Workflow(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	if err := runner.Logs(ctx, cmp); err != nil {
+	if err := runner.Logs(ctx, cmp, false); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
