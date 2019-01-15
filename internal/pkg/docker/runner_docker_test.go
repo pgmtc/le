@@ -14,8 +14,8 @@ var ctx = common.Context{
 			DockerId:      "test-component",
 			Image:         "nginx:stable-alpine",
 			ContainerPort: 80,
-			HostPort:      9999,
-			TestUrl:       "http://localhost:9999",
+			HostPort:      9998,
+			TestUrl:       "http://localhost:9998",
 		},
 		{
 			Name:     "test-internal-component",
