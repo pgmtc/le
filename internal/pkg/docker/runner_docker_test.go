@@ -30,41 +30,36 @@ func TestDockerRunner_Pull(t *testing.T) {
 	defer removeImage(cmp)
 }
 
-func TestDockerRunner_Create(t *testing.T) {
+func TestDockerRunner_Workflow(t *testing.T) {
 	cmp := ctx.Config.CurrentProfile().Components[0]
-	runner.Remove(ctx, cmp)
+
+	runner.Remove(ctx, cmp) // Don't handle errors - prepare for the test
+	removeImage(cmp)        // Don't handle errors - prepare for the test
+
+	if err := runner.Pull(ctx, cmp); err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
+	}
+	defer removeImage(cmp)
+
 	if err := runner.Create(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 	defer runner.Remove(ctx, cmp)
-}
 
-func TestDockerRunner_Start(t *testing.T) {
-	cmp := ctx.Config.CurrentProfile().Components[0]
 	if err := runner.Start(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
-	defer runner.Stop(ctx, cmp)
-}
 
-func TestDockerRunner_Stop(t *testing.T) {
-	cmp := ctx.Config.CurrentProfile().Components[0]
-	runner.Start(ctx, cmp)
 	if err := runner.Stop(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
-}
 
-func TestDockerRunner_Logs(t *testing.T) {
-	cmp := ctx.Config.CurrentProfile().Components[0]
 	if err := runner.Logs(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
-}
 
-func TestDockerRunner_Remove(t *testing.T) {
-	cmp := ctx.Config.CurrentProfile().Components[0]
 	if err := runner.Remove(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
+
 }
