@@ -8,6 +8,6 @@ type Runner interface {
 	Start(ctx common.Context, cmp common.Component) error
 	Stop(ctx common.Context, cmp common.Component) error
 	Pull(ctx common.Context, cmp common.Component) error
-	Logs(ctx common.Context, cmp common.Component) error
+	Logs(ctx common.Context, cmp common.Component, follow bool) error
 	Status(ctx common.Context, args ...string) error
 }

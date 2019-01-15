@@ -217,7 +217,6 @@ func (DockerRunner) Pull(ctx common.Context, cmp common.Component) error {
 	return nil
 }
 
-func (DockerRunner) Logs(ctx common.Context, cmp common.Component) error {
-	follow := false
+func (DockerRunner) Logs(ctx common.Context, cmp common.Component, follow bool) error {
 	return dockerPrintLogs(cmp, follow)
 }

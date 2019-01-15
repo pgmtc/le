@@ -17,7 +17,16 @@ func (Module) GetActions() map[string]common.Action {
 		"start":   getComponentAction(runner.Start),
 		"stop":    getComponentAction(runner.Stop),
 		"pull":    getComponentAction(runner.Pull),
-		"logs":    getComponentAction(runner.Logs),
+		"logs":    logsComponentAction(runner, false),
+		"watch":   logsComponentAction(runner, true),
+	}
+}
+
+func logsComponentAction(runner Runner, follow bool) common.Action {
+	return &common.ComponentAction{
+		Handler: func(ctx common.Context, cmp common.Component) error {
+			return runner.Logs(ctx, cmp, follow)
+		},
 	}
 }
 

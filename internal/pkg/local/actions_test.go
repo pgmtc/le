@@ -7,13 +7,13 @@ import (
 
 type MockRunner struct{}
 
-func (MockRunner) Create(ctx common.Context, cmp common.Component) error { return nil }
-func (MockRunner) Remove(ctx common.Context, cmp common.Component) error { return nil }
-func (MockRunner) Start(ctx common.Context, cmp common.Component) error  { return nil }
-func (MockRunner) Stop(ctx common.Context, cmp common.Component) error   { return nil }
-func (MockRunner) Pull(ctx common.Context, cmp common.Component) error   { return nil }
-func (MockRunner) Logs(ctx common.Context, cmp common.Component) error   { return nil }
-func (MockRunner) Status(ctx common.Context, args ...string) error       { return nil }
+func (MockRunner) Create(ctx common.Context, cmp common.Component) error            { return nil }
+func (MockRunner) Remove(ctx common.Context, cmp common.Component) error            { return nil }
+func (MockRunner) Start(ctx common.Context, cmp common.Component) error             { return nil }
+func (MockRunner) Stop(ctx common.Context, cmp common.Component) error              { return nil }
+func (MockRunner) Pull(ctx common.Context, cmp common.Component) error              { return nil }
+func (MockRunner) Logs(ctx common.Context, cmp common.Component, follow bool) error { return nil }
+func (MockRunner) Status(ctx common.Context, args ...string) error                  { return nil }
 
 func setUp() (ctx common.Context, runner Runner) {
 	config := common.CreateMockConfig([]common.Component{
@@ -40,6 +40,7 @@ func TestCreateAction(t *testing.T) {
 	startAction := getComponentAction(runner.Start)
 	stopAction := getComponentAction(runner.Stop)
 	removeAction := getComponentAction(runner.Remove)
+	logsAction := logsComponentAction(runner, false)
 
 	err := createAction.Run(ctx, "test-component")
 	if err != nil {
@@ -60,6 +61,12 @@ func TestCreateAction(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
+
+	err = logsAction.Run(ctx, "test-component")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
+	}
+
 }
 
 func Test_status(t *testing.T) {
