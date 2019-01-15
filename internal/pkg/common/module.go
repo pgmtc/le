@@ -1,7 +1,7 @@
 package common
 
 type Module interface {
-	//Run(log Logger, args ...string) error
+	//Run(Log Logger, args ...string) error
 	GetActions() map[string]Action
 }
 
@@ -11,14 +11,20 @@ type Logger interface {
 	Infof(format string, a ...interface{})
 }
 
+type Context struct {
+	Log    Logger
+	Config Configuration
+	Module Module
+}
+
 type Action interface {
-	Run(log Logger, config Configuration, args ...string) error
+	Run(ctx Context, args ...string) error
 }
 
 type RawAction struct {
-	Handler func(log Logger, config Configuration, args ...string) error
+	Handler func(ctx Context, args ...string) error
 }
 
-func (a *RawAction) Run(log Logger, config Configuration, args ...string) error {
-	return a.Handler(log, config, args...)
+func (a *RawAction) Run(ctx Context, args ...string) error {
+	return a.Handler(ctx, args...)
 }

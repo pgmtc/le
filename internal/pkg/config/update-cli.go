@@ -15,7 +15,9 @@ import (
 )
 
 var updateCliAction = common.RawAction{
-	Handler: func(log common.Logger, config common.Configuration, args ...string) error {
+	Handler: func(ctx common.Context, args ...string) error {
+		log := ctx.Log
+		config := ctx.Config
 		log.Debugf("Determining latest release package .. ")
 		url, fileName, err := getReleasePackagePath(config.Config().ReleasesURL, "x86", "macOS")
 		if err != nil {

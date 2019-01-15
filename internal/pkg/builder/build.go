@@ -17,7 +17,8 @@ import (
 )
 
 var buildAction = common.ComponentAction{
-	Handler: func(log common.Logger, config common.Configuration, cmp common.Component) error {
+	Handler: func(ctx common.Context, cmp common.Component) error {
+		log := ctx.Log
 		if cmp.BuildRoot == "" || cmp.DockerFile == "" {
 			return errors.Errorf("Can't build %s, no dockerfile or build root defined for the component", cmp.Name)
 		}

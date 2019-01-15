@@ -19,7 +19,7 @@ type fileSystemConfig struct {
 func FileSystemConfig(configLocation string) Configuration {
 	return &fileSystemConfig{
 		configLocation: configLocation,
-		configFileName: "config.yaml",
+		configFileName: "Config.yaml",
 	}
 }
 

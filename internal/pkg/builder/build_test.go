@@ -102,9 +102,14 @@ func Test_build(t *testing.T) {
 		},
 	})
 
+	ctx := common.Context{
+		Log:    common.ConsoleLogger{},
+		Config: config,
+	}
+
 	var err error
 	cmp := common.ComponentMap(config.CurrentProfile().Components)["test-component"]
-	err = buildAction.Handler(common.ConsoleLogger{}, config, cmp)
+	err = buildAction.Handler(ctx, cmp)
 	if err != nil {
 		t.Errorf("Expected no error, got %s", err.Error())
 	}
@@ -112,14 +117,14 @@ func Test_build(t *testing.T) {
 
 	// Test invalid docker file
 	cmp = common.ComponentMap(config.CurrentProfile().Components)["test-dockerfile-invalid"]
-	err = buildAction.Handler(common.ConsoleLogger{}, config, cmp)
+	err = buildAction.Handler(ctx, cmp)
 	if err == nil {
 		t.Errorf("Expected to get error, but nothing came back")
 	}
 
 	// Test invalid component
 	cmp = common.ComponentMap(config.CurrentProfile().Components)["test-component-invalid"]
-	err = buildAction.Handler(common.ConsoleLogger{}, config, cmp)
+	err = buildAction.Handler(ctx, cmp)
 	if err == nil {
 		t.Errorf("Expected to get error, but nothing came back")
 	}

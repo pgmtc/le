@@ -12,7 +12,8 @@ import (
 )
 
 var statusAction = common.RawAction{
-	Handler: func(log common.Logger, config common.Configuration, args ...string) error {
+	Handler: func(ctx common.Context, args ...string) error {
+		config := ctx.Config
 		var verbose bool
 		var follow bool
 		var followLength int

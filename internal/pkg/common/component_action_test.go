@@ -14,13 +14,13 @@ var (
 	})
 )
 
-func actionHandlerMethod_success(log Logger, config Configuration, component Component) error {
+func actionHandlerMethod_success(ctx Context, component Component) error {
 	handlerMethodCalledStore[component.Name] = true
 	return nil
 }
 
 // Method called by actionHandler test - failure
-func actionHandlerMethod_fail(log Logger, config Configuration, component Component) error {
+func actionHandlerMethod_fail(ctx Context, component Component) error {
 	return errors.New("Method deliberately returned error")
 }
 
@@ -32,7 +32,7 @@ func Test_componentAction_missingArguments(t *testing.T) {
 		Handler: actionHandlerMethod_success,
 	}
 
-	err := action.Run(ConsoleLogger{}, testConfig)
+	err := action.Run(Context{Log: ConsoleLogger{}, Config: testConfig})
 	if err == nil {
 		t.Errorf("Expected error to be returned when no component provided")
 	}
@@ -47,7 +47,7 @@ func Test_componentAction_nonExistingComponent(t *testing.T) {
 	}
 	// Run the test for single component
 	componentUnderTest := "nonexisting" // Pick one of the existing components
-	err := action.Run(ConsoleLogger{}, testConfig, componentUnderTest)
+	err := action.Run(Context{Log: ConsoleLogger{}, Config: testConfig}, componentUnderTest)
 	if err == nil {
 		t.Errorf("Expected error to be returned for non-existing component")
 	}
@@ -62,7 +62,7 @@ func Test_componentAction_single(t *testing.T) {
 	}
 	// Run the test for single component
 	componentUnderTest := "test-component-1" // Pick one of the existing components
-	err := action.Run(ConsoleLogger{}, testConfig, componentUnderTest)
+	err := action.Run(Context{Log: ConsoleLogger{}, Config: testConfig}, componentUnderTest)
 	if err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
@@ -71,7 +71,7 @@ func Test_componentAction_single(t *testing.T) {
 		t.Errorf("Expected handlerMethod_success to be called for component %s, but it was not", componentUnderTest)
 	}
 	// Run the test for non-existing component
-	err = action.Run(ConsoleLogger{}, testConfig, "nonExisting")
+	err = action.Run(Context{Log: ConsoleLogger{}, Config: testConfig}, "nonExisting")
 	if err == nil {
 		t.Errorf("Expected error to be returned for non existing component")
 	}
@@ -79,7 +79,7 @@ func Test_componentAction_single(t *testing.T) {
 	actionFailure := ComponentAction{
 		Handler: actionHandlerMethod_fail,
 	}
-	err = actionFailure.Run(ConsoleLogger{}, testConfig, "test-component-1")
+	err = actionFailure.Run(Context{Log: ConsoleLogger{}, Config: testConfig}, "test-component-1")
 	if err == nil {
 		t.Errorf("Expected error to be returned by failure handler method, but got no error")
 	}
@@ -96,7 +96,7 @@ func Test_componentActionHandler_multiple(t *testing.T) {
 	// Run the test for single component
 	validComponents := []string{"test-component-1", "test-component-2"}
 	allComponents := append(validComponents, "nonExisting")
-	err := action.Run(ConsoleLogger{}, testConfig, allComponents...) // Pick one of the existing components
+	err := action.Run(Context{Log: ConsoleLogger{}, Config: testConfig}, allComponents...) // Pick one of the existing components
 	if err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
@@ -110,7 +110,7 @@ func Test_componentActionHandler_multiple(t *testing.T) {
 	actionFailure := ComponentAction{
 		Handler: actionHandlerMethod_fail,
 	}
-	err = actionFailure.Run(ConsoleLogger{}, testConfig, validComponents...)
+	err = actionFailure.Run(Context{Log: ConsoleLogger{}, Config: testConfig}, validComponents...)
 	if err != nil {
 		t.Errorf("Even though all runs for components have failed, expecting no error (those are reported as warning), but got %s", err.Error())
 	}
@@ -124,7 +124,7 @@ func Test_componentActionHandler_all(t *testing.T) {
 		Handler: actionHandlerMethod_success,
 	}
 	// Run for all components
-	err := action.Run(ConsoleLogger{}, testConfig, "all") // Pick one of the existing components
+	err := action.Run(Context{Log: ConsoleLogger{}, Config: testConfig}, "all") // Pick one of the existing components
 	if err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
@@ -141,7 +141,7 @@ func Test_componentActionHandler_all(t *testing.T) {
 		Handler: actionHandlerMethod_fail,
 	}
 	// Run for all components
-	err = actionFailure.Run(ConsoleLogger{}, testConfig, "all")
+	err = actionFailure.Run(Context{Log: ConsoleLogger{}, Config: testConfig}, "all")
 	if err != nil {
 		t.Errorf("Even though all runs for components have failed, expecting no error (those are reported as warning), but got %s", err.Error())
 	}

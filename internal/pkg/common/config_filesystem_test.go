@@ -14,7 +14,7 @@ func setUp(dirSuffix string) fileSystemConfig {
 	targetDir := tmpDir + "/" + dirSuffix
 	return fileSystemConfig{
 		configLocation: targetDir,
-		configFileName: "config.yaml",
+		configFileName: "Config.yaml",
 	}
 
 }
@@ -126,7 +126,7 @@ func Test_fileSystemConfig_SaveConfig(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	expectedFileName := tmpDir + "/.orchard-Config/config.yaml"
+	expectedFileName := tmpDir + "/.orchard-Config/Config.yaml"
 	if expectedFileName != fileName {
 		t.Errorf("Expected file name %s, got %s", expectedFileName, fileName)
 	}
@@ -220,7 +220,7 @@ func Test_fileSystemConfig_Config(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(config.config, config.Config()) {
-		t.Errorf("Expected returned config to equal provided config")
+		t.Errorf("Expected returned Config to equal provided Config")
 	}
 
 }

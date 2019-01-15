@@ -7,7 +7,9 @@ import (
 )
 
 var createAction = common.RawAction{
-	Handler: func(log common.Logger, config common.Configuration, args ...string) error {
+	Handler: func(ctx common.Context, args ...string) error {
+		config := ctx.Config
+		log := ctx.Log
 		if len(args) < 1 {
 			return errors.Errorf("Missing parameters: profileName [sourceProfile], examples:\n" +
 				"    orchard config create my-new-profile\n" +
@@ -36,7 +38,10 @@ var createAction = common.RawAction{
 }
 
 var initAction = common.RawAction{
-	Handler: func(log common.Logger, config common.Configuration, args ...string) error {
+	Handler: func(ctx common.Context, args ...string) error {
+		config := ctx.Config
+		log := ctx.Log
+
 		config.SetProfile("default", common.DefaultLocalProfile)
 
 		fileName, err := config.SaveConfig()
@@ -56,7 +61,10 @@ var initAction = common.RawAction{
 }
 
 var statusAction = common.RawAction{
-	Handler: func(log common.Logger, config common.Configuration, args ...string) error {
+	Handler: func(ctx common.Context, args ...string) error {
+		log := ctx.Log
+		config := ctx.Config
+
 		log.Infof("Current profile: %s\n", config.Config().Profile)
 		log.Infof("Available profiles: %s\n", config.GetAvailableProfiles())
 		if len(args) > 0 && args[0] == "-v" {
@@ -74,7 +82,9 @@ var statusAction = common.RawAction{
 }
 
 var switchAction = common.RawAction{
-	Handler: func(log common.Logger, config common.Configuration, args ...string) error {
+	Handler: func(ctx common.Context, args ...string) error {
+		config := ctx.Config
+		log := ctx.Log
 		if len(args) < 1 {
 			return errors.Errorf("Missing parameter: profileName. Example: orchard config switch my-profile")
 		}

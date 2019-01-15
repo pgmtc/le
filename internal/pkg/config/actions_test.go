@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func setUp() (config *DummyConfig, log *common.StringLogger) {
+func setUp() (config *DummyConfig, log *common.StringLogger, ctx common.Context) {
 	config = &DummyConfig{
 		currentProfile: common.Profile{
 			Components: []common.Component{
@@ -20,32 +20,37 @@ func setUp() (config *DummyConfig, log *common.StringLogger) {
 		},
 	}
 	log = &common.StringLogger{}
+	ctx = common.Context{
+		Config: config,
+		Log:    log,
+	}
 	return
 }
 
 func TestCreateAction(t *testing.T) {
-	config, logger := setUp()
+	config, _, ctx := setUp()
+
 	// Fail on missing parameter
 	config.reset()
-	if err := createAction.Handler(logger, config); err == nil {
+	if err := createAction.Handler(ctx); err == nil {
 		t.Errorf("Expected error, got nothing")
 	}
 
 	// Fail in underlying config methods - one parameter
 	config.reset().setSaveToFail()
-	if err := createAction.Handler(logger, config, "sourceprofile"); err == nil {
+	if err := createAction.Handler(ctx, "sourceprofile"); err == nil {
 		t.Errorf("Expected error, got nothing")
 	}
 
 	// Fail in underlying config methods - two parameters
 	config.reset().setLoadToFail()
-	if err := createAction.Handler(logger, config, "sourceprofile", "destinationprofile"); err == nil {
+	if err := createAction.Handler(ctx, "sourceprofile", "destinationprofile"); err == nil {
 		t.Errorf("Expected error, got nothing")
 	}
 
 	// Success - one parameter
 	config.reset()
-	if err := createAction.Handler(logger, config, "sourceprofile"); err != nil {
+	if err := createAction.Handler(ctx, "sourceprofile"); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 	if !config.saveProfileCalled {
@@ -54,7 +59,7 @@ func TestCreateAction(t *testing.T) {
 
 	// Success - two parameters
 	config.reset()
-	if err := createAction.Handler(logger, config, "sourceprofile", "destinationprofile"); err != nil {
+	if err := createAction.Handler(ctx, "sourceprofile", "destinationprofile"); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 	if !config.saveProfileCalled {
@@ -64,8 +69,9 @@ func TestCreateAction(t *testing.T) {
 }
 
 func TestInitAction(t *testing.T) {
-	config, logger := setUp()
-	if err := initAction.Handler(logger, config); err != nil {
+	config, _, ctx := setUp()
+
+	if err := initAction.Handler(ctx); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 	if !config.saveConfigCalled {
@@ -77,10 +83,10 @@ func TestInitAction(t *testing.T) {
 }
 
 func TestStatusAction(t *testing.T) {
-	config, logger := setUp()
-	logger = &common.StringLogger{}
+	_, logger, ctx := setUp()
+
 	// Normal
-	if err := statusAction.Handler(logger, config); err != nil {
+	if err := statusAction.Handler(ctx); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
@@ -90,7 +96,7 @@ func TestStatusAction(t *testing.T) {
 	}
 
 	// Verbose
-	if err := statusAction.Handler(logger, config, "-v"); err != nil {
+	if err := statusAction.Handler(ctx, "-v"); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 	if len(logger.InfoMessages) == 0 {
@@ -100,24 +106,25 @@ func TestStatusAction(t *testing.T) {
 
 func TestSwitchAction(t *testing.T) {
 	// Missing parameters
-	config, logger := setUp()
-	if err := switchAction.Handler(logger, config); err == nil {
+	config, _, ctx := setUp()
+
+	if err := switchAction.Handler(ctx); err == nil {
 		t.Errorf("Expected error, got nothing")
 	}
 
 	// Test of failures
 	config.reset().setLoadToFail()
-	if err := switchAction.Handler(logger, config, "new-profile"); err == nil {
+	if err := switchAction.Handler(ctx, "new-profile"); err == nil {
 		t.Errorf("Expected error, got nothing")
 	}
 	config.reset().setSaveToFail()
-	if err := switchAction.Handler(logger, config, "new-profile"); err == nil {
+	if err := switchAction.Handler(ctx, "new-profile"); err == nil {
 		t.Errorf("Expected error, got nothing")
 	}
 
 	// Test of success
 	config.reset()
-	if err := switchAction.Handler(logger, config, "new-profile"); err != nil {
+	if err := switchAction.Handler(ctx, "new-profile"); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 	if !config.loadProfileCalled {
@@ -132,7 +139,7 @@ func TestSwitchAction(t *testing.T) {
 }
 
 func TestUpdateCli(t *testing.T) {
-	config, logger := setUp()
+	config, _, ctx := setUp()
 	tmpDir, err := ioutil.TempDir("", "orchard-test")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
@@ -140,7 +147,7 @@ func TestUpdateCli(t *testing.T) {
 	defer os.RemoveAll(tmpDir) // clean up
 
 	config.setBinLocation(path.Join(tmpDir, "orchard-updated")).setReleasesUrl("https://github.com/pgmtc/orchard-cli/releases/latest")
-	err = updateCliAction.Handler(logger, config)
+	err = updateCliAction.Handler(ctx)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}

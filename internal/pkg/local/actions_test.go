@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func setUp() (config common.Configuration, log common.Logger) {
+func setUp() (config common.Configuration, log common.Logger, ctx common.Context) {
 	config = common.CreateMockConfig([]common.Component{
 		{
 			Name:     "test-component",
@@ -14,28 +14,32 @@ func setUp() (config common.Configuration, log common.Logger) {
 		},
 	})
 	log = common.ConsoleLogger{}
+	ctx = common.Context{
+		Log:    log,
+		Config: config,
+	}
 	return
 }
 
 func TestCreateAction(t *testing.T) {
-	config, log := setUp()
+	config, _, ctx := setUp()
 	cmp := config.CurrentProfile().Components[0]
-	err := createAction.Handler(log, config, cmp)
+	err := createAction.Handler(ctx, cmp)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	err = startAction.Handler(log, config, cmp)
+	err = startAction.Handler(ctx, cmp)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	err = stopAction.Handler(log, config, cmp)
+	err = stopAction.Handler(ctx, cmp)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	err = removeAction.Handler(log, config, cmp)
+	err = removeAction.Handler(ctx, cmp)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}

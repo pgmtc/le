@@ -4,9 +4,11 @@ import (
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 )
 
+var pullAcrtion common.Action = &common.ComponentAction{}
 var pullAction common.Action = &common.ComponentAction{
-	Handler: func(log common.Logger, config common.Configuration, cmp common.Component) error {
-		log.Debugf("Pull source for %s\n", cmp.Name)
+
+	Handler: func(ctx common.Context, cmp common.Component) error {
+		ctx.Log.Debugf("Pull source for %s\n", cmp.Name)
 		return nil
 	},
 }

@@ -36,55 +36,60 @@ func Test_status(t *testing.T) {
 		},
 	})
 
+	ctx := common.Context{
+		Log:    common.ConsoleLogger{},
+		Config: config,
+	}
+
 	cmp := common.ComponentMap(config.CurrentProfile().Components)[COMPONENT_NAME]
-	removeAction.Handler(common.ConsoleLogger{}, config, cmp) // Ignore error if it does not exist
+	removeAction.Handler(ctx, cmp) // Ignore error if it does not exist
 
 	// Test - no image present
-	if err := statusAction.Handler(common.ConsoleLogger{}, config); err != nil {
+	if err := statusAction.Handler(ctx); err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
 
 	// Pull image and run status
-	if err := pullAction.Handler(common.ConsoleLogger{}, config, cmp); err != nil {
+	if err := pullAction.Handler(ctx, cmp); err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
-	defer removeAction.Handler(common.ConsoleLogger{}, config, cmp)
-	if err := statusAction.Handler(common.ConsoleLogger{}, config); err != nil {
+	defer removeAction.Handler(ctx, cmp)
+	if err := statusAction.Handler(ctx); err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
 
 	// Create container and run status
-	if err := createAction.Handler(common.ConsoleLogger{}, config, cmp); err != nil {
+	if err := createAction.Handler(ctx, cmp); err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
-	defer removeAction.Handler(common.ConsoleLogger{}, config, cmp)
-	if err := statusAction.Handler(common.ConsoleLogger{}, config); err != nil {
+	defer removeAction.Handler(ctx, cmp)
+	if err := statusAction.Handler(ctx); err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
 
 	// Start container
-	if err := startAction.Handler(common.ConsoleLogger{}, config, cmp); err != nil {
+	if err := startAction.Handler(ctx, cmp); err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
-	if err := statusAction.Handler(common.ConsoleLogger{}, config); err != nil {
+	if err := statusAction.Handler(ctx); err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
 
 	// Stop container
-	if err := stopAction.Handler(common.ConsoleLogger{}, config, cmp); err != nil {
+	if err := stopAction.Handler(ctx, cmp); err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
-	if err := statusAction.Handler(common.ConsoleLogger{}, config); err != nil {
+	if err := statusAction.Handler(ctx); err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
 
 	// Verbose and follow
-	if err := statusAction.Handler(common.ConsoleLogger{}, config, "-v", "-f", "5"); err != nil {
+	if err := statusAction.Handler(ctx, "-v", "-f", "5"); err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
 
 	// Follow only
-	if err := statusAction.Handler(common.ConsoleLogger{}, config, "-f", "1"); err != nil {
+	if err := statusAction.Handler(ctx, "-f", "1"); err != nil {
 		t.Errorf("Expected no error to be returned, but got %s", err.Error())
 	}
 }

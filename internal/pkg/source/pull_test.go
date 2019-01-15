@@ -15,7 +15,7 @@ var config = common.CreateMockConfig([]common.Component{
 
 func Test_pullAction_Run(t *testing.T) {
 	logger := common.ConsoleLogger{}
-	err := pullAction.Run(logger, config, "testComponent")
+	err := pullAction.Run(common.Context{Log: logger, Config: config}, "testComponent")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
