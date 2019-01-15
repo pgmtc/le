@@ -19,40 +19,52 @@ var ctx = common.Context{
 
 func TestDockerRunner_Status(t *testing.T) {
 	runner.Status(ctx)
+	runner.Status(ctx, "-v")
 }
 
 func TestDockerRunner_Pull(t *testing.T) {
-	if err := runner.Pull(ctx, ctx.Config.CurrentProfile().Components[0]); err != nil {
+	cmp := ctx.Config.CurrentProfile().Components[0]
+	if err := runner.Pull(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
+	defer removeImage(cmp)
 }
 
 func TestDockerRunner_Create(t *testing.T) {
-	if err := runner.Create(ctx, ctx.Config.CurrentProfile().Components[0]); err != nil {
+	cmp := ctx.Config.CurrentProfile().Components[0]
+	runner.Remove(ctx, cmp)
+	if err := runner.Create(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
+	defer runner.Remove(ctx, cmp)
 }
 
 func TestDockerRunner_Start(t *testing.T) {
-	if err := runner.Start(ctx, ctx.Config.CurrentProfile().Components[0]); err != nil {
+	cmp := ctx.Config.CurrentProfile().Components[0]
+	if err := runner.Start(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
+	defer runner.Stop(ctx, cmp)
 }
 
 func TestDockerRunner_Stop(t *testing.T) {
-	if err := runner.Stop(ctx, ctx.Config.CurrentProfile().Components[0]); err != nil {
+	cmp := ctx.Config.CurrentProfile().Components[0]
+	runner.Start(ctx, cmp)
+	if err := runner.Stop(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 }
 
 func TestDockerRunner_Logs(t *testing.T) {
-	if err := runner.Logs(ctx, ctx.Config.CurrentProfile().Components[0]); err != nil {
+	cmp := ctx.Config.CurrentProfile().Components[0]
+	if err := runner.Logs(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 }
 
 func TestDockerRunner_Remove(t *testing.T) {
-	if err := runner.Remove(ctx, ctx.Config.CurrentProfile().Components[0]); err != nil {
+	cmp := ctx.Config.CurrentProfile().Components[0]
+	if err := runner.Remove(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 }
