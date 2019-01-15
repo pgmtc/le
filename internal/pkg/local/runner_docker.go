@@ -3,6 +3,7 @@ package local
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
@@ -15,9 +16,55 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type DockerRunner struct {
+}
+
+func (DockerRunner) Status(ctx common.Context, args ...string) error {
+	config := ctx.Config
+	var verbose bool
+	var follow bool
+	var followLength int
+
+	if len(args) > 0 && args[0] == "-v" || len(args) > 1 && args[1] == "-v" {
+		verbose = true
+	}
+
+	// This could be improved - generalized
+	if len(args) > 0 && args[0] == "-f" || len(args) > 1 && args[1] == "-f" {
+		follow = true
+		switch true {
+		case len(args) > 1 && args[0] == "-f":
+			i, err := strconv.Atoi(args[1])
+			if err == nil {
+				followLength = i
+			}
+		case len(args) > 2 && args[1] == "-f":
+			i, err := strconv.Atoi(args[2])
+			if err == nil {
+				followLength = i
+			}
+		}
+		follow = true
+	}
+
+	if !follow {
+		return printStatus(config.CurrentProfile().Components, verbose, follow, followLength)
+	}
+	counter := 0
+	for {
+		printStatus(config.CurrentProfile().Components, verbose, follow, followLength)
+		fmt.Println("Orchard local status: ", time.Now().Format("2006-01-02 15:04:05"))
+		counter++
+		time.Sleep(1 * time.Second)
+		if counter == followLength {
+			break
+		}
+	}
+
+	return nil
 }
 
 func (DockerRunner) Create(ctx common.Context, cmp common.Component) error {

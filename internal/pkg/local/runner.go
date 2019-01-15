@@ -9,4 +9,5 @@ type Runner interface {
 	Stop(ctx common.Context, cmp common.Component) error
 	Pull(ctx common.Context, cmp common.Component) error
 	Logs(ctx common.Context, cmp common.Component) error
+	Status(ctx common.Context, args ...string) error
 }

@@ -6,57 +6,8 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"os"
-	"strconv"
 	"strings"
-	"time"
 )
-
-var statusAction = common.RawAction{
-	Handler: func(ctx common.Context, args ...string) error {
-		config := ctx.Config
-		var verbose bool
-		var follow bool
-		var followLength int
-
-		if len(args) > 0 && args[0] == "-v" || len(args) > 1 && args[1] == "-v" {
-			verbose = true
-		}
-
-		// This could be improved - generalized
-		if len(args) > 0 && args[0] == "-f" || len(args) > 1 && args[1] == "-f" {
-			follow = true
-			switch true {
-			case len(args) > 1 && args[0] == "-f":
-				i, err := strconv.Atoi(args[1])
-				if err == nil {
-					followLength = i
-				}
-			case len(args) > 2 && args[1] == "-f":
-				i, err := strconv.Atoi(args[2])
-				if err == nil {
-					followLength = i
-				}
-			}
-			follow = true
-		}
-
-		if !follow {
-			return printStatus(config.CurrentProfile().Components, verbose, follow, followLength)
-		}
-		counter := 0
-		for {
-			printStatus(config.CurrentProfile().Components, verbose, follow, followLength)
-			fmt.Println("Orchard local status: ", time.Now().Format("2006-01-02 15:04:05"))
-			counter++
-			time.Sleep(1 * time.Second)
-			if counter == followLength {
-				break
-			}
-		}
-
-		return nil
-	},
-}
 
 func printStatus(allComponents []common.Component, verbose bool, follow bool, followLength int) error {
 
