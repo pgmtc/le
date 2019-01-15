@@ -5,8 +5,8 @@ import (
 )
 
 func Test_componentNames(t *testing.T) {
-	components := GetComponents()
-	componentNames := ComponentNames()
+	components := testConfig.CurrentProfile().Components
+	componentNames := ComponentNames(components)
 	for _, cmp := range components {
 		if !ArrContains(componentNames, cmp.Name) {
 			t.Errorf("Component %s had not been found in list of component names", cmp.Name)
@@ -15,8 +15,8 @@ func Test_componentNames(t *testing.T) {
 }
 
 func Test_componentMap(t *testing.T) {
-	components := GetComponents()
-	componentMap := ComponentMap()
+	components := testConfig.CurrentProfile().Components
+	componentMap := ComponentMap(components)
 	for _, cmp := range components {
 		if _, ok := componentMap[cmp.Name]; !ok {
 			t.Errorf("Component %s had not been found in the map", cmp.Name)
@@ -26,7 +26,7 @@ func Test_componentMap(t *testing.T) {
 }
 
 func Test_getComponents(t *testing.T) {
-	components := GetComponents()
+	components := testConfig.CurrentProfile().Components
 	if len(components) == 0 {
 		t.Errorf("Expected to get list of components, get empty array")
 	}
