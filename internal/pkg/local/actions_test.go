@@ -24,4 +24,19 @@ func TestCreateAction(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
+
+	err = startAction.Handler(log, config, cmp)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
+	}
+
+	err = stopAction.Handler(log, config, cmp)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
+	}
+
+	err = removeAction.Handler(log, config, cmp)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
+	}
 }
