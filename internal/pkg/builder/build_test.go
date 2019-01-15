@@ -83,7 +83,7 @@ func extractAndCompare(tarFileName string, testRootDirectory string) bool {
 func Test_build(t *testing.T) {
 	common.SkipDockerTesting(t)
 	testingRoot := mockupDir()
-	var config = common.MockConfig([]common.Component{
+	var config = common.CreateMockConfig([]common.Component{
 		{
 			Name:       "test-component",
 			Image:      "orchard-cli/test-image",

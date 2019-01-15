@@ -6,7 +6,7 @@ import (
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 )
 
-var config = common.MockConfig([]common.Component{
+var config = common.CreateMockConfig([]common.Component{
 	{
 		Name:  "testComponent",
 		Image: "iron/go",

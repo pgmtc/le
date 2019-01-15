@@ -25,7 +25,7 @@ func Test_status(t *testing.T) {
 	IMAGE_NAME := "nginx:alpine"
 	DOCKER_ID := "test-status-container"
 
-	var config = common.MockConfig([]common.Component{
+	var config = common.CreateMockConfig([]common.Component{
 		common.Component{
 			Name:          COMPONENT_NAME,
 			Image:         IMAGE_NAME,

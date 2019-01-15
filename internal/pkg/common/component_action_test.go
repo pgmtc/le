@@ -8,7 +8,7 @@ import (
 var (
 	calledParam              string
 	handlerMethodCalledStore = map[string]bool{}
-	testConfig               = MockConfig([]Component{
+	testConfig               = CreateMockConfig([]Component{
 		{Name: "test-component-1", DockerId: "test-component-1-docker-id", Image: "test-component-1-image"},
 		{Name: "test-component-2", DockerId: "test-component-2-docker-id", Image: "test-component-2-image"},
 	})

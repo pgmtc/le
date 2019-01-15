@@ -10,7 +10,7 @@ func TestRawAction_Run(t *testing.T) {
 			return nil
 		},
 	}
-	err := action.Run(ConsoleLogger{}, MockConfig([]Component{}))
+	err := action.Run(ConsoleLogger{}, CreateMockConfig([]Component{}))
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
