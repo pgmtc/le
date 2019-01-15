@@ -7,7 +7,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/jhoonb/archivex"
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
-	"github.com/pgmtc/orchard-cli/internal/pkg/local"
+	"github.com/pgmtc/orchard-cli/internal/pkg/docker"
 	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
@@ -36,7 +36,7 @@ var buildAction = common.ComponentAction{
 			return returnError
 		}
 		defer dockerBuildContext.Close()
-		cli := local.DockerGetClient()
+		cli := docker.DockerGetClient()
 
 		artifactoryPassword := os.Getenv("ARTIFACTORY_PASSWORD")
 
@@ -167,7 +167,7 @@ func mkContextTar(contextDir string, dockerFile string) (string, error) {
 }
 
 func RemoveImage(imageId string) {
-	local.DockerGetClient().ImageRemove(context.Background(), imageId, types.ImageRemoveOptions{
+	docker.DockerGetClient().ImageRemove(context.Background(), imageId, types.ImageRemoveOptions{
 		Force:         true,
 		PruneChildren: true,
 	})

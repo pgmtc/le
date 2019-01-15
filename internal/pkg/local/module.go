@@ -1,11 +1,14 @@
 package local
 
-import "github.com/pgmtc/orchard-cli/internal/pkg/common"
+import (
+	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"github.com/pgmtc/orchard-cli/internal/pkg/docker"
+)
 
 type Module struct{}
 
 func (Module) GetActions() map[string]common.Action {
-	runner := DockerRunner{}
+	runner := docker.DockerRunner{}
 	return map[string]common.Action{
 		"default": getRawAction(runner.Status),
 		"status":  getRawAction(runner.Status),
