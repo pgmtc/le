@@ -1,4 +1,4 @@
-package local
+package docker
 
 import (
 	"encoding/base64"
@@ -10,6 +10,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/fatih/color"
+	"github.com/olekukonko/tablewriter"
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
@@ -66,7 +67,7 @@ func dockerGetContainers() (map[string]types.Container, error) {
 	return containerMap, nil
 }
 
-func startContainer(component common.Component, handlerArguments common.HandlerArguments) error {
+func startContainer(component common.Component) error {
 	if container, err := getContainer(component); err == nil {
 		fmt.Printf("Starting container '%s' for component '%s'\n", component.DockerId, component.Name)
 
@@ -78,7 +79,7 @@ func startContainer(component common.Component, handlerArguments common.HandlerA
 	return errors.Errorf("Starting container '%s' for component '%s': Not found. Create it first\n", component.Name, component.DockerId)
 }
 
-func stopContainer(component common.Component, handlerArguments common.HandlerArguments) error {
+func stopContainer(component common.Component) error {
 	if container, err := getContainer(component); err == nil {
 		fmt.Printf("Stopping container '%s' for component '%s'\n", component.DockerId, component.Name)
 		if err := DockerGetClient().ContainerStop(context.Background(), container.ID, nil); err != nil {
@@ -89,10 +90,10 @@ func stopContainer(component common.Component, handlerArguments common.HandlerAr
 	return errors.Errorf("Stopping container '%s' for component '%s': Not found found. Nothing to stop\n", component.Name, component.DockerId)
 }
 
-func removeContainer(component common.Component, handlerArguments common.HandlerArguments) error {
+func removeContainer(component common.Component) error {
 	if container, err := getContainer(component); err == nil {
 		if container.State == "running" {
-			if err := stopContainer(component, handlerArguments); err != nil {
+			if err := stopContainer(component); err != nil {
 				return err
 			}
 		}
@@ -105,7 +106,7 @@ func removeContainer(component common.Component, handlerArguments common.Handler
 	return errors.Errorf("Removing container '%s' for component '%s': Not found. Nothing to remove\n", component.Name, component.DockerId)
 }
 
-func createContainer(component common.Component, handlerArguments common.HandlerArguments) error {
+func createContainer(component common.Component) error {
 	if component.Name == "" || component.DockerId == "" || component.Image == "" {
 		return errors.New("Missing container Name, DockerId or Image")
 	}
@@ -174,7 +175,7 @@ func DockerGetClient() *client.Client {
 	return cli
 }
 
-func removeImage(component common.Component, handlerArguments common.HandlerArguments) error {
+func removeImage(component common.Component) error {
 	fmt.Printf("removing Image for '%s' (%s) ... \n", component.Name, component.Image)
 	name := "docker"
 	args := []string{"rmi", component.Image}
@@ -185,7 +186,7 @@ func removeImage(component common.Component, handlerArguments common.HandlerArgu
 	return nil
 }
 
-func pullImage(component common.Component, handlerArguments common.HandlerArguments) error {
+func pullImage(component common.Component) error {
 	fmt.Printf("pulling Image for '%s' (%s) ... ", component.Name, component.Image)
 
 	var pullOptions types.ImagePullOptions
@@ -281,4 +282,89 @@ func parseAwsLogin(loginOutput string) (authString string, resultError error) {
 
 	authString = base64.URLEncoding.EncodeToString(encodedJSON)
 	return
+}
+
+func printStatus(allComponents []common.Component, verbose bool, follow bool, followLength int) error {
+
+	containerMap, err := dockerGetContainers()
+	images, err := dockerGetImages()
+
+	if err != nil {
+		return err
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	if verbose {
+		table.SetHeader([]string{"Component", "Image (built or pulled)", "Container Exists (created)", "State", "HTTP"})
+	} else {
+		table.SetHeader([]string{"Component", "Image (built or pulled)", "Container Exists (created)", "HTTP"})
+	}
+
+	for _, cmp := range allComponents {
+		exists := "NO"
+		imageExists := "NO"
+		state := "missing"
+		responding := ""
+		if container, ok := containerMap[cmp.DockerId]; ok {
+			exists = "YES"
+			state = container.State
+			//if state == "running" {
+			//	responding, _ = isResponding(cmp)
+			//}
+		}
+
+		if common.ArrContains(images, cmp.Image) {
+			imageExists = "YES"
+		}
+
+		// Some formatting
+		var imageString string = cmp.Image
+		if !verbose {
+			imageSplit := strings.Split(imageString, "/")
+			imageString = imageSplit[len(imageSplit)-1]
+		}
+		switch imageExists {
+		case "YES":
+			imageExists = color.HiWhiteString(imageString)
+		case "NO":
+			imageExists = color.HiBlackString(imageString)
+		}
+
+		switch exists {
+		case "YES":
+			exists = color.HiWhiteString(cmp.DockerId)
+		case "NO":
+			exists = color.HiBlackString(cmp.DockerId)
+		}
+
+		switch state {
+		case "running":
+			state = color.HiWhiteString(state)
+		case "exited":
+			state = color.YellowString(state)
+		case "missing":
+			state = color.HiBlackString(state)
+		}
+
+		switch responding {
+		case "200":
+			responding = color.HiGreenString(responding)
+		default:
+			responding = color.HiRedString(responding)
+		}
+
+		if verbose {
+			table.Append([]string{color.YellowString(cmp.Name), imageExists, color.YellowString(exists), state, responding})
+		} else {
+			table.Append([]string{color.YellowString(cmp.Name), imageExists, color.YellowString(exists), responding})
+		}
+
+	}
+
+	if follow {
+		print("\033[H\033[2J") // Clear screen
+	}
+	fmt.Printf("\r")
+	table.Render()
+	return nil
 }
