@@ -1,4 +1,4 @@
-package local
+package docker
 
 import (
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"

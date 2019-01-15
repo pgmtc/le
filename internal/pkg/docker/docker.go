@@ -308,9 +308,9 @@ func printStatus(allComponents []common.Component, verbose bool, follow bool, fo
 		if container, ok := containerMap[cmp.DockerId]; ok {
 			exists = "YES"
 			state = container.State
-			//if state == "running" {
-			//	responding, _ = isResponding(cmp)
-			//}
+			if state == "running" {
+				responding, _ = isResponding(cmp)
+			}
 		}
 
 		if common.ArrContains(images, cmp.Image) {
