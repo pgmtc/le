@@ -158,7 +158,7 @@ func (DockerRunner) Stop(ctx common.Context, cmp common.Component) error {
 
 func (DockerRunner) Pull(ctx common.Context, cmp common.Component) error {
 	log := ctx.Log
-	log.Infof("pulling Image for '%s' (%s) ... ", cmp.Name, cmp.Image)
+	log.Infof("pulling Image for '%s' (%s) ... \n", cmp.Name, cmp.Image)
 
 	var pullOptions types.ImagePullOptions
 

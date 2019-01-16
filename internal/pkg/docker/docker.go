@@ -187,8 +187,6 @@ func removeImage(component common.Component) error {
 }
 
 func pullImage(component common.Component) error {
-	fmt.Printf("pulling Image for '%s' (%s) ... ", component.Name, component.Image)
-
 	var pullOptions types.ImagePullOptions
 
 	if strings.Contains(component.Image, "dkr.ecr.eu-west-1.amazonaws.com") {
@@ -294,11 +292,7 @@ func printStatus(allComponents []common.Component, verbose bool, follow bool, fo
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	if verbose {
-		table.SetHeader([]string{"Component", "Image (built or pulled)", "Container Exists (created)", "State", "HTTP"})
-	} else {
-		table.SetHeader([]string{"Component", "Image (built or pulled)", "Container Exists (created)", "HTTP"})
-	}
+	table.SetHeader([]string{"Component", "Image (built or pulled)", "Container Exists (created)", "State", "HTTP"})
 
 	for _, cmp := range allComponents {
 		exists := "NO"
@@ -353,11 +347,7 @@ func printStatus(allComponents []common.Component, verbose bool, follow bool, fo
 			responding = color.HiRedString(responding)
 		}
 
-		if verbose {
-			table.Append([]string{color.YellowString(cmp.Name), imageExists, color.YellowString(exists), state, responding})
-		} else {
-			table.Append([]string{color.YellowString(cmp.Name), imageExists, color.YellowString(exists), responding})
-		}
+		table.Append([]string{color.YellowString(cmp.Name), imageExists, color.YellowString(exists), state, responding})
 
 	}
 

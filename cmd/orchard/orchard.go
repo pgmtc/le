@@ -10,6 +10,7 @@ import (
 	"github.com/pgmtc/orchard-cli/internal/pkg/source"
 	"os"
 	"reflect"
+	"strings"
 )
 
 var (
@@ -19,14 +20,15 @@ var (
 		"local":   local.Module{},
 		"builder": builder.Module{},
 	}
-	cnf = common.FileSystemConfig("~/.orchard")
+	cnf    = common.FileSystemConfig("~/.orchard")
+	logger = common.ConsoleLogger{}
 )
 
 func main() {
 	args := os.Args[1:]
 	if err := cnf.LoadConfig(); err != nil && !(len(args) == 2 && args[0] == "config" && args[1] == "init") {
-		color.HiRed("Error when loading config: %s", err.Error())
-		color.HiRed("Try initializing config directory by running '%s config init'", os.Args[0])
+		logger.Errorf("%s\n", err.Error())
+		logger.Errorf("Try initializing config directory by running '%s config init'\n", os.Args[0])
 		os.Exit(1)
 	}
 	if len(args) == 0 {
@@ -44,7 +46,6 @@ func main() {
 }
 
 func runModule(module common.Module, args ...string) int {
-	logger := common.ConsoleLogger{}
 	actions := module.GetActions()
 	actionName := "default"
 	var actionArgs []string
@@ -55,13 +56,15 @@ func runModule(module common.Module, args ...string) int {
 	}
 
 	if _, ok := actions[actionName]; !ok {
-		logger.Errorf("%s action does not exist. ", actionName)
+		availableActions := reflect.ValueOf(actions).MapKeys()
+		logger.Errorf("Missing action '%s'. Available actions: %s\n", actionName, availableActions)
 		return 1
 	}
 
+	logger.Infof("Current profile: %s\n", cnf.Config().Profile)
 	action := actions[actionName]
 	if err := action.Run(common.Context{Log: logger, Config: cnf}, actionArgs...); err != nil {
-		logger.Errorf("%s", err.Error())
+		logger.Errorf("Action Error: %s\n", strings.Replace(err.Error(), "\n", "", -1))
 		return 2
 	}
 	return 0
