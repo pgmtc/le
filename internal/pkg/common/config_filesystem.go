@@ -61,7 +61,7 @@ func (c *fileSystemConfig) SaveConfig() (fileName string, resultErr error) {
 	//}
 	fileName = path.Join(c.initConfigDir(c.configLocation), c.configFileName)
 	if err := YamlMarshall(c.config, fileName); err != nil {
-		resultErr = errors.Errorf("error writing Config file: %s", err.Error())
+		resultErr = errors.Errorf("Error writing Config file\n- %s", err.Error())
 		return
 	}
 	return
@@ -71,7 +71,7 @@ func (c *fileSystemConfig) LoadConfig() (resultErr error) {
 	//fileName := path.Join(c.initConfigDir(), configFileName)
 	fileName := path.Join(ParsePath(c.configLocation), c.configFileName)
 	if err := YamlUnmarshall(fileName, &c.config); err != nil {
-		resultErr = errors.Errorf("error reading Config file %s: %s", fileName, err.Error())
+		resultErr = errors.Errorf("Error reading Config file %s:\n- %s", fileName, err.Error())
 		return
 	}
 	configProfile, err := c.LoadProfile(c.config.Profile)

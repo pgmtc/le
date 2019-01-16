@@ -45,16 +45,16 @@ var initAction = common.RawAction{
 		config.SetProfile("default", common.DefaultLocalProfile)
 
 		fileName, err := config.SaveConfig()
-		log.Infof("Config written to %s", fileName)
+		log.Infof("Config written to %s\n", fileName)
 
 		fileName, err = config.SaveProfile("default", common.DefaultRemoteProfile)
-		log.Infof("Profile written to %s", fileName)
+		log.Infof("Profile written to %s\n", fileName)
 
 		fileName, err = config.SaveProfile("local", common.DefaultLocalProfile)
-		log.Infof("Profile written to %s", fileName)
+		log.Infof("Profile written to %s\n", fileName)
 
 		fileName, err = config.SaveProfile("remote", common.DefaultRemoteProfile)
-		log.Infof("Profile written to %s", fileName)
+		log.Infof("Profile written to %s\n", fileName)
 
 		return err
 	},

@@ -130,20 +130,6 @@ func TestMockConfig_Set_Current_Available_Profiles(t *testing.T) {
 	}
 }
 
-func TestSetBinLocation(t *testing.T) {
-	mockConfig.setBinLocation("bin-location")
-	if mockConfig.Config().BinLocation != "bin-location" {
-		t.Errorf("Expected BinLocation to be %s, got %s", "bin-location", mockConfig.Config().BinLocation)
-	}
-}
-
-func TestSetReleasesUrl(t *testing.T) {
-	mockConfig.setReleasesUrl("releases-url")
-	if mockConfig.Config().ReleasesURL != "releases-url" {
-		t.Errorf("Expected ReleasesUrl to be %s, got %s", "releases-url", mockConfig.Config().ReleasesURL)
-	}
-}
-
 func TestMockConfig_Config(t *testing.T) {
 	mockConfig.Config()
 	t.Skip()

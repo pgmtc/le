@@ -100,16 +100,6 @@ func (c *MockConfig) setSaveToFail() *MockConfig {
 	return c
 }
 
-func (c *MockConfig) setBinLocation(binLocation string) *MockConfig {
-	c.config.BinLocation = binLocation
-	return c
-}
-
-func (c *MockConfig) setReleasesUrl(releasesUrl string) *MockConfig {
-	c.config.ReleasesURL = releasesUrl
-	return c
-}
-
 func CreateMockConfig(components []Component) Configuration {
 	config := MockConfig{
 		currentProfile: Profile{
