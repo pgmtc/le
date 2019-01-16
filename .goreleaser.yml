@@ -4,7 +4,7 @@ before:
   hooks:
 builds:
   -
-    main: ./cmd/orchard/orchard.go
+    main: ./cmd/orchard/
     binary: orchard
     goos:
       - linux
