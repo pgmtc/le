@@ -153,7 +153,7 @@ var defaultRemoteComponents = []Component{
 	},
 	{
 		Name:          "Config",
-		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-Config-msvc:0.0.198",
+		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-Config-msvc:latest",
 		DockerId:      "dcmp_orchard-Config-msvc_1",
 		ContainerPort: 8080,
 		HostPort:      8080,
@@ -162,7 +162,7 @@ var defaultRemoteComponents = []Component{
 	},
 	{
 		Name:          "auth",
-		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-auth-msvc:0.0.164",
+		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-auth-msvc:latest",
 		DockerId:      "dcmp_orchard-auth-msvc_1",
 		ContainerPort: 8080,
 		HostPort:      50170,
@@ -176,7 +176,7 @@ var defaultRemoteComponents = []Component{
 	},
 	{
 		Name:          "doc-analysis",
-		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-doc-analysis-msvc:0.0.263",
+		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-doc-analysis-msvc:latest",
 		DockerId:      "dcmp_orchard-doc-analysis-msvc_1",
 		ContainerPort: 8080,
 		HostPort:      50130,
@@ -190,7 +190,7 @@ var defaultRemoteComponents = []Component{
 	},
 	{
 		Name:          "case-flow",
-		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-case-flow-msvc:0.0.323",
+		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-case-flow-msvc:latest",
 		DockerId:      "dcmp_orchard-case-flow-msvc_1",
 		ContainerPort: 8080,
 		HostPort:      50160,
@@ -205,7 +205,7 @@ var defaultRemoteComponents = []Component{
 	},
 	{
 		Name:          "gateway",
-		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-gateway-msvc:0.0.131",
+		Image:         "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-gateway-msvc:latest",
 		DockerId:      "dcmp_orchard-gateway-msvc_1",
 		Env:           []string{"SPRING_PROFILES_ACTIVE=dcmp"},
 		ContainerPort: 8080,

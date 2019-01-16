@@ -24,7 +24,7 @@ var (
 
 func main() {
 	args := os.Args[1:]
-	if err := cnf.LoadConfig(); err != nil && (len(args) < 2 || args[0] != "config" || args[1] == "init") {
+	if err := cnf.LoadConfig(); err != nil && !(len(args) == 2 && args[0] == "config" && args[1] == "init") {
 		color.HiRed("Error when loading config: %s", err.Error())
 		color.HiRed("Try initializing config directory by running '%s config init'", os.Args[0])
 		os.Exit(1)
