@@ -19,6 +19,7 @@ var (
 		"config":  config.Module{},
 		"local":   local.Module{},
 		"builder": builder.Module{},
+		"version": VersionModule{},
 	}
 	cnf    = common.FileSystemConfig("~/.orchard")
 	logger = common.ConsoleLogger{}
@@ -37,7 +38,7 @@ func main() {
 	}
 	moduleName := args[0]
 	if _, ok := modules[moduleName]; !ok {
-		printHelp(fmt.Sprintf("Module %s does not exist", moduleName))
+		logger.Errorf("Module %s does not exist", moduleName)
 		os.Exit(1)
 	}
 
