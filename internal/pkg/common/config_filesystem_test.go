@@ -213,9 +213,7 @@ func Test_fileSystemConfig_SetProfile(t *testing.T) {
 func Test_fileSystemConfig_Config(t *testing.T) {
 	config := fileSystemConfig{
 		config: Config{
-			Profile:     "test-profile",
-			BinLocation: "/usr/local/bin",
-			ReleasesURL: "http://www.google.com",
+			Profile: "test-profile",
 		},
 	}
 

@@ -100,13 +100,3 @@ func (c *DummyConfig) setSaveToFail() *DummyConfig {
 	c.failSaveRequired = true
 	return c
 }
-
-func (c *DummyConfig) setBinLocation(binLocation string) *DummyConfig {
-	c.config.BinLocation = binLocation
-	return c
-}
-
-func (c *DummyConfig) setReleasesUrl(releasesUrl string) *DummyConfig {
-	c.config.ReleasesURL = releasesUrl
-	return c
-}

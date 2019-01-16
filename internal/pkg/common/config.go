@@ -14,9 +14,7 @@ type Configuration interface {
 }
 
 type Config struct {
-	Profile     string
-	ReleasesURL string
-	BinLocation string
+	Profile string
 }
 
 var DefaultLocalProfile Profile = Profile{

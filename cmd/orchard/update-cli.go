@@ -17,9 +17,8 @@ import (
 var updateCliAction = common.RawAction{
 	Handler: func(ctx common.Context, args ...string) error {
 		log := ctx.Log
-		config := ctx.Config
 		log.Debugf("Determining latest release package .. ")
-		url, fileName, err := getReleasePackagePath(config.Config().ReleasesURL, "x86", "macOS")
+		url, fileName, err := getReleasePackagePath(RELEASES_URL, "x86", "macOS")
 		if err != nil {
 			return err
 		}
@@ -51,9 +50,9 @@ var updateCliAction = common.RawAction{
 			return err
 		}
 		log.Debugf("DONE\n")
-		log.Debugf("Installing orchard to %s .. ", config.Config().BinLocation)
+		log.Debugf("Installing orchard to %s .. ", BIN_LOCATION)
 		newCliPath := path.Join(tmpDir, "orchard")
-		err = installCli(newCliPath, config.Config().BinLocation)
+		err = installCli(newCliPath, BIN_LOCATION)
 		if err != nil {
 			return err
 		}
