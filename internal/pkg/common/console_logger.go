@@ -12,9 +12,9 @@ func (ConsoleLogger) Errorf(format string, a ...interface{}) {
 }
 
 func (ConsoleLogger) Debugf(format string, a ...interface{}) {
-	fmt.Printf(color.HiBlackString(format, a...))
+	fmt.Printf(color.WhiteString(format, a...))
 }
 
 func (ConsoleLogger) Infof(format string, a ...interface{}) {
-	fmt.Printf(color.WhiteString(format, a...))
+	fmt.Printf(color.HiWhiteString(format, a...))
 }

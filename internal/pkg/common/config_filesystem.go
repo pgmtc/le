@@ -98,7 +98,7 @@ func (c *fileSystemConfig) GetAvailableProfiles() (profiles []string) {
 func (c *fileSystemConfig) initConfigDir(configLocation string) (configDir string) {
 	configDir = ParsePath(configLocation)
 	if _, err := os.Stat(configDir); os.IsNotExist(err) {
-		color.Yellow("Config location '%s' does not exist, creating it", configDir)
+		color.Magenta("Config location '%s' does not exist, creating it", configDir)
 		if err := os.MkdirAll(configDir, os.ModePerm); err != nil {
 			panic(err)
 		}

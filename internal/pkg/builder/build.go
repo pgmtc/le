@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/docker/docker/api/types"
-	"github.com/fatih/color"
 	"github.com/jhoonb/archivex"
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"github.com/pgmtc/orchard-cli/internal/pkg/docker"
@@ -46,7 +45,7 @@ var buildAction = common.ComponentAction{
 		}
 
 		if jarFile != "" {
-			color.Yellow("JAR_FILE used: %s", jarFile)
+			log.Debugf("JAR_FILE used: %s\n", jarFile)
 		}
 
 		args := map[string]*string{

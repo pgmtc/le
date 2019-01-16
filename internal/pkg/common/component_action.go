@@ -19,7 +19,7 @@ func (a *ComponentAction) Run(ctx Context, args ...string) error {
 		for _, cmp := range ctx.Config.CurrentProfile().Components {
 			err := a.Handler(ctx, cmp)
 			if err != nil {
-				color.HiBlack(err.Error())
+				color.Magenta(err.Error())
 			}
 		}
 		return nil
@@ -30,7 +30,7 @@ func (a *ComponentAction) Run(ctx Context, args ...string) error {
 			err := a.Handler(ctx, component)
 			if err != nil {
 				if len(args) > 1 {
-					color.HiBlack(err.Error())
+					color.Magenta(err.Error())
 				} else {
 					return err
 				}
@@ -38,7 +38,7 @@ func (a *ComponentAction) Run(ctx Context, args ...string) error {
 			}
 		} else {
 			if len(args) > 1 { // Single use
-				color.HiBlack("Component '%s' has not been found", cmpName)
+				color.Magenta("Component '%s' has not been found", cmpName)
 			} else { // Multiple use
 				return errors.Errorf("Component %s has not been found. Available components = %s", cmpName, ComponentNames(ctx.Config.CurrentProfile().Components))
 			}

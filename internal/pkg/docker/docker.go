@@ -319,35 +319,35 @@ func printStatus(allComponents []common.Component, verbose bool, follow bool, fo
 		}
 		switch imageExists {
 		case "YES":
-			imageExists = color.HiWhiteString(imageString)
+			imageExists = color.WhiteString(imageString)
 		case "NO":
-			imageExists = color.HiBlackString(imageString)
+			imageExists = color.MagentaString(imageString)
 		}
 
 		switch exists {
 		case "YES":
-			exists = color.HiWhiteString(cmp.DockerId)
+			exists = color.WhiteString(cmp.DockerId)
 		case "NO":
-			exists = color.HiBlackString(cmp.DockerId)
+			exists = color.MagentaString(cmp.DockerId)
 		}
 
 		switch state {
 		case "running":
 			state = color.HiWhiteString(state)
 		case "exited":
-			state = color.YellowString(state)
+			state = color.WhiteString(state)
 		case "missing":
-			state = color.HiBlackString(state)
+			state = color.MagentaString(state)
 		}
 
 		switch responding {
 		case "200":
 			responding = color.HiGreenString(responding)
 		default:
-			responding = color.HiRedString(responding)
+			responding = color.MagentaString(responding)
 		}
 
-		table.Append([]string{color.YellowString(cmp.Name), imageExists, color.YellowString(exists), state, responding})
+		table.Append([]string{color.HiWhiteString(cmp.Name), imageExists, color.HiWhiteString(exists), state, responding})
 
 	}
 
