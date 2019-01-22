@@ -18,7 +18,7 @@ type Config struct {
 }
 
 var DefaultLocalProfile Profile = Profile{
-	Components: defaultComponents,
+	Components: defaultLocalComponents,
 }
 
 var DefaultRemoteProfile Profile = Profile{
@@ -29,7 +29,7 @@ type Profile struct {
 	Components []Component
 }
 
-var defaultComponents = []Component{
+var defaultLocalComponents = []Component{
 	{
 		Name:          "db",
 		Image:         "orchard/orchard-local-db:latest",
@@ -37,10 +37,8 @@ var defaultComponents = []Component{
 		HostPort:      3306,
 		DockerId:      "local_orchard-db",
 		TestUrl:       "",
-		DockerFile:    "modules/orchard-docker-local-db/Dockerfile",
-		//DockerFile: "/Users/mfa/orchard/orchard-poc-umbrella/modules/orchard-docker-local-db/Dockerfile",
-		BuildRoot: "modules/orchard-docker-local-db",
-		//BuildRoot: "/Users/mfa/orchard/orchard-poc-umbrella/modules/orchard-docker-local-db",
+		DockerFile:    ".orchard/Dockerfile",
+		BuildRoot:     ".",
 	},
 	{
 		Name:          "redis",
@@ -58,8 +56,8 @@ var defaultComponents = []Component{
 		HostPort:      8080,
 		Env:           []string{"SPRING_PROFILES_ACTIVE=native,dcmp"},
 		TestUrl:       "http://localhost:8080/orchard-config-msvc/health",
-		DockerFile:    "docker/Dockerfile-msvc",
-		BuildRoot:     "modules/orchard-config-msvc",
+		DockerFile:    ".orchard/Dockerfile",
+		BuildRoot:     ".",
 	},
 	{
 		Name:          "auth",
@@ -74,8 +72,8 @@ var defaultComponents = []Component{
 			"local_orchard-config-msvc:config",
 		},
 		TestUrl:    "http://localhost:50170/orchard-auth-msvc/health",
-		DockerFile: "docker/Dockerfile-msvc",
-		BuildRoot:  "modules/orchard-auth-msvc",
+		DockerFile: ".orchard/Dockerfile",
+		BuildRoot:  ".",
 	},
 	{
 		Name:          "doc-analysis",
@@ -90,8 +88,8 @@ var defaultComponents = []Component{
 			"local_orchard-config-msvc:config",
 		},
 		TestUrl:    "http://localhost:50130/orchard-doc-analysis-msvc/health",
-		DockerFile: "docker/Dockerfile-msvc",
-		BuildRoot:  "modules/orchard-doc-analysis-msvc",
+		DockerFile: ".orchard/Dockerfile",
+		BuildRoot:  ".",
 	},
 	{
 		Name:          "case-flow",
@@ -107,8 +105,8 @@ var defaultComponents = []Component{
 			"local_orchard-doc-analysis-msvc:doc-analysis",
 		},
 		TestUrl:    "http://localhost:50160/orchard-case-flow-msvc/health",
-		DockerFile: "docker/Dockerfile-msvc",
-		BuildRoot:  "modules/orchard-case-flow-msvc",
+		DockerFile: ".orchard/Dockerfile",
+		BuildRoot:  ".",
 	},
 	{
 		Name:          "gateway",
@@ -126,8 +124,8 @@ var defaultComponents = []Component{
 			"local_orchard-doc-analysis-msvc:doc-analysis",
 		},
 		TestUrl:    "http://localhost:8765/orchard-gateway-msvc/health",
-		DockerFile: "docker/Dockerfile-msvc",
-		BuildRoot:  "modules/orchard-gateway-msvc",
+		DockerFile: ".orchard/Dockerfile",
+		BuildRoot:  ".",
 	},
 	{
 		Name:          "ui",
@@ -136,8 +134,8 @@ var defaultComponents = []Component{
 		ContainerPort: 80,
 		HostPort:      3000,
 		TestUrl:       "http://localhost:3000/",
-		DockerFile:    "docker/Dockerfile-orchard-doc-analysis-ui",
-		BuildRoot:     "modules/orchard-doc-analysis-ui/",
+		DockerFile:    ".orchard/Dockerfile",
+		BuildRoot:     ".",
 	},
 }
 

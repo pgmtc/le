@@ -66,6 +66,16 @@ func TestParsePath(t *testing.T) {
 			args: args{path: "~/somedir/path.txt"},
 			want: usr.HomeDir + "/somedir/path.txt",
 		},
+		{
+			name: "test-cwd",
+			args: args{path: "."},
+			want: cwd,
+		},
+		{
+			name: "test-cwd-2",
+			args: args{path: ""},
+			want: cwd + "/",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

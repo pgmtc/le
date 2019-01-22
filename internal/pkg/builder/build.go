@@ -3,6 +3,7 @@ package builder
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/fatih/color"
 	"github.com/jhoonb/archivex"
@@ -19,7 +20,7 @@ import (
 var buildAction = common.ComponentAction{
 	Handler: func(ctx common.Context, cmp common.Component) error {
 		log := ctx.Log
-		if cmp.BuildRoot == "" || cmp.DockerFile == "" {
+		if cmp.DockerFile == "" {
 			return errors.Errorf("Can't build %s, no dockerfile or build root defined for the component", cmp.Name)
 		}
 		log.Debugf("Building image for component '%s'\n", cmp.Name)
@@ -44,6 +45,9 @@ var buildAction = common.ComponentAction{
 		if err != nil {
 			return errors.Errorf("problem determining jar file for msvc: %s", err.Error())
 		}
+
+		jarFile = strings.Replace(jarFile, buildRoot, "", 1)
+		fmt.Println(jarFile, buildRoot)
 
 		if jarFile != "" {
 			color.Yellow("JAR_FILE used: %s", jarFile)
