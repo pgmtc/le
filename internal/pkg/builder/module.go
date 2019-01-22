@@ -9,6 +9,6 @@ type Module struct{}
 func (Module) GetActions() map[string]common.Action {
 	return map[string]common.Action{
 		"build": &buildAction,
-		"pull":  &buildAction,
+		"init":  &initAction,
 	}
 }
