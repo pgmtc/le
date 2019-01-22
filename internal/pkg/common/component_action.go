@@ -5,8 +5,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+type ComponentActionHandler func(ctx Context, cmp Component) error
+
 type ComponentAction struct {
-	Handler func(ctx Context, cmp Component) error
+	Handler ComponentActionHandler
 }
 
 func (a *ComponentAction) Run(ctx Context, args ...string) error {
@@ -45,4 +47,17 @@ func (a *ComponentAction) Run(ctx Context, args ...string) error {
 		}
 	}
 	return nil
+}
+
+func CompositeComponentAction(actions ...ComponentActionHandler) Action {
+	return &ComponentAction{
+		Handler: func(ctx Context, cmp Component) error {
+			for _, action := range actions {
+				if err := action(ctx, cmp); err != nil {
+					return err
+				}
+			}
+			return nil
+		},
+	}
 }

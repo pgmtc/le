@@ -19,6 +19,8 @@ func (Module) GetActions() map[string]common.Action {
 		"pull":    getComponentAction(runner.Pull),
 		"logs":    logsComponentAction(runner, false),
 		"watch":   logsComponentAction(runner, true),
+		"replace": common.CompositeComponentAction(runner.Stop, runner.Remove, runner.Create, runner.Start),
+		"raise":   common.CompositeComponentAction(runner.Create, runner.Start),
 	}
 }
 
@@ -30,13 +32,13 @@ func logsComponentAction(runner Runner, follow bool) common.Action {
 	}
 }
 
-func getComponentAction(handler func(ctx common.Context, cmp common.Component) error) common.Action {
+func getComponentAction(handler common.ComponentActionHandler) common.Action {
 	return &common.ComponentAction{
 		Handler: handler,
 	}
 }
 
-func getRawAction(handler func(ctx common.Context, args ...string) error) common.Action {
+func getRawAction(handler common.RawActionhandler) common.Action {
 	return &common.RawAction{
 		Handler: handler,
 	}

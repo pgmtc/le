@@ -1,13 +1,15 @@
 package common
 
 import (
-	"github.com/pkg/errors"
 	"testing"
+
+	"github.com/pkg/errors"
 )
 
 var (
 	calledParam              string
 	handlerMethodCalledStore = map[string]bool{}
+	handlerMethodCalledCount = 0
 	testConfig               = CreateMockConfig([]Component{
 		{Name: "test-component-1", DockerId: "test-component-1-docker-id", Image: "test-component-1-image"},
 		{Name: "test-component-2", DockerId: "test-component-2-docker-id", Image: "test-component-2-image"},
@@ -16,6 +18,7 @@ var (
 
 func actionHandlerMethod_success(ctx Context, component Component) error {
 	handlerMethodCalledStore[component.Name] = true
+	handlerMethodCalledCount++
 	return nil
 }
 
@@ -144,5 +147,29 @@ func Test_componentActionHandler_all(t *testing.T) {
 	err = actionFailure.Run(Context{Log: ConsoleLogger{}, Config: testConfig}, "all")
 	if err != nil {
 		t.Errorf("Even though all runs for components have failed, expecting no error (those are reported as warning), but got %s", err.Error())
+	}
+}
+
+func TestCompositeComponentAction(t *testing.T) {
+	handlerMethodCalledCount = 0
+	ca := CompositeComponentAction(actionHandlerMethod_success, actionHandlerMethod_success, actionHandlerMethod_success)
+	err := ca.Run(Context{Log: ConsoleLogger{}, Config: testConfig}, "test-component-1")
+
+	if err != nil {
+		t.Errorf("Expected no error, got %s", err.Error())
+	}
+	if handlerMethodCalledCount != 3 {
+		t.Errorf("Expected 3 runs, got %d", handlerMethodCalledCount)
+	}
+
+	// Test failure
+	handlerMethodCalledCount = 0
+	ca = CompositeComponentAction(actionHandlerMethod_success, actionHandlerMethod_fail, actionHandlerMethod_success)
+	err = ca.Run(Context{Log: ConsoleLogger{}, Config: testConfig}, "test-component-1")
+	if err == nil {
+		t.Errorf("Expected error, got nothing")
+	}
+	if handlerMethodCalledCount != 1 {
+		t.Errorf("Expected 3 runs, got %d", handlerMethodCalledCount)
 	}
 }

@@ -21,8 +21,10 @@ type Action interface {
 	Run(ctx Context, args ...string) error
 }
 
+type RawActionhandler func(ctx Context, args ...string) error
+
 type RawAction struct {
-	Handler func(ctx Context, args ...string) error
+	Handler RawActionhandler
 }
 
 func (a *RawAction) Run(ctx Context, args ...string) error {

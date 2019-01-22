@@ -312,21 +312,21 @@ func printStatus(allComponents []common.Component, verbose bool, follow bool, fo
 		}
 
 		// Some formatting
-		var imageString string = cmp.Image
+		var imageString = cmp.Image
 		if !verbose {
 			imageSplit := strings.Split(imageString, "/")
 			imageString = imageSplit[len(imageSplit)-1]
 		}
 		switch imageExists {
 		case "YES":
-			imageExists = color.WhiteString(imageString)
+			imageExists = color.HiWhiteString(imageString)
 		case "NO":
 			imageExists = color.MagentaString(imageString)
 		}
 
 		switch exists {
 		case "YES":
-			exists = color.WhiteString(cmp.DockerId)
+			exists = color.HiWhiteString(cmp.DockerId)
 		case "NO":
 			exists = color.MagentaString(cmp.DockerId)
 		}

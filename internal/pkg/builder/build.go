@@ -3,6 +3,7 @@ package builder
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/fatih/color"
 	"github.com/jhoonb/archivex"
@@ -15,6 +16,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 var buildAction = common.RawAction{
@@ -125,6 +127,8 @@ func buildImage(ctx common.Context, image string, buildRoot string, dockerFile s
 	cli := docker.DockerGetClient()
 	artifactoryPassword := os.Getenv("ARTIFACTORY_PASSWORD")
 
+	cacheBust := fmt.Sprint(int32(time.Now().Unix()))
+
 	jarFile, err := findMsvcJar(buildRoot)
 	if err != nil {
 		return errors.Errorf("problem determining jar file for msvc: %s", err.Error())
@@ -138,6 +142,7 @@ func buildImage(ctx common.Context, image string, buildRoot string, dockerFile s
 	args := map[string]*string{
 		"mvn_password": &artifactoryPassword,
 		"JAR_FILE":     &jarFile,
+		"CACHEBUST":    &cacheBust,
 	}
 
 	options := types.ImageBuildOptions{
