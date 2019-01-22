@@ -28,6 +28,9 @@ func SkipDockerTesting(t *testing.T) {
 /* Method replaces relative path with absolute and replace ~ with user's home dir */
 func ParsePath(path string) (result string) {
 	usr, _ := user.Current()
+	if path == "." {
+		path, _ = os.Getwd()
+	}
 	result = strings.Replace(path, "~", usr.HomeDir, 1)
 
 	if !strings.HasPrefix(result, "/") {

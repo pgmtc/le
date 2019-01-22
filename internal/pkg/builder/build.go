@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/docker/docker/api/types"
+	"github.com/fatih/color"
 	"github.com/jhoonb/archivex"
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"github.com/pgmtc/orchard-cli/internal/pkg/docker"
@@ -11,112 +12,39 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
 
-var buildAction = common.ComponentAction{
-	Handler: func(ctx common.Context, cmp common.Component) error {
-		log := ctx.Log
-		if cmp.BuildRoot == "" || cmp.DockerFile == "" {
-			return errors.Errorf("Can't build %s, no dockerfile or build root defined for the component", cmp.Name)
-		}
-		log.Debugf("Building image for component '%s'\n", cmp.Name)
-		buildRoot := common.ParsePath(cmp.BuildRoot)
-		dockerFile := common.ParsePath(cmp.DockerFile)
-		contextTarFileName, returnError := mkContextTar(buildRoot, dockerFile)
-		if returnError != nil {
-			return returnError
-		}
-		defer os.Remove(contextTarFileName)
-
-		dockerBuildContext, returnError := os.Open(contextTarFileName)
-		if returnError != nil {
-			return returnError
-		}
-		defer dockerBuildContext.Close()
-		cli := docker.DockerGetClient()
-
-		artifactoryPassword := os.Getenv("ARTIFACTORY_PASSWORD")
-
-		jarFile, err := findMsvcJar(buildRoot)
+var buildAction = common.RawAction{
+	Handler: func(ctx common.Context, args ...string) error {
+		err, image, buildRoot, dockerFile := parseBuildProperties()
 		if err != nil {
-			return errors.Errorf("problem determining jar file for msvc: %s", err.Error())
+			return err
 		}
-
-		if jarFile != "" {
-			log.Debugf("JAR_FILE used: %s\n", jarFile)
-		}
-
-		args := map[string]*string{
-			"mvn_password": &artifactoryPassword,
-			"JAR_FILE":     &jarFile,
-		}
-
-		options := types.ImageBuildOptions{
-			SuppressOutput: false,
-			Remove:         true,
-			ForceRemove:    true,
-			PullParent:     false,
-			Tags:           []string{cmp.Image},
-			Dockerfile:     "Dockerfile",
-			BuildArgs:      args,
-		}
-		buildResponse, err := cli.ImageBuild(context.Background(), dockerBuildContext, options)
-		if err != nil {
-			log.Errorf("%s", err.Error())
-		}
-		defer buildResponse.Body.Close()
-
-		//log.Debugf("********* %s **********\n", buildResponse.OSType)
-		//_, err = io.Copy(os.Stdout, buildResponse.Body)
-		//if err != nil {
-		//	log.Fatal(err, " :unable to read image build response")
-		//}
-
-		d := json.NewDecoder(buildResponse.Body)
-
-		type Event struct {
-			Stream         string `json:"stream"`
-			Status         string `json:"status"`
-			Error          string `json:"error"`
-			Progress       string `json:"progress"`
-			ProgressDetail struct {
-				Current int `json:"current"`
-				Total   int `json:"total"`
-			} `json:"progressDetail"`
-		}
-
-		var event *Event
-		for {
-			if err := d.Decode(&event); err != nil {
-				if err == io.EOF {
-					break
-				}
-				panic(err)
-			}
-
-			//log.Debugf("%+v\n", event)
-			switch true {
-			case event.Error != "":
-				return errors.Errorf("\nbuild error: %s", event.Error)
-			case event.Progress != "" || event.Status != "":
-				log.Debugf("\r%s: %s", event.Status, event.Progress)
-				if event.ProgressDetail.Current == 0 {
-					log.Debugf("\n")
-				}
-
-			case strings.TrimSuffix(event.Stream, "\n") != "":
-				log.Debugf("%s", event.Stream)
-				if strings.HasPrefix(event.Stream, "Successfully built ") {
-					// Fish for image id
-					//imageId = strings.Replace(event.Stream, "Successfully built ", "", 1)
-					//imageId = strings.TrimSuffix(imageId, "\n")
-				}
-			}
-		}
-		return nil
+		return buildImage(ctx, image, buildRoot, dockerFile)
 	},
+}
+
+func parseBuildProperties() (resultErr error, image string, buildRoot string, dockerFile string) {
+	// Try to read builder config
+	configDirPath := common.ParsePath(BUILDER_DIR)
+	if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
+		resultErr = errors.Errorf("Unable to determine build configuration: %s", err.Error())
+		return
+	}
+
+	bcnf := buildConfig{}
+	bcnfPath := path.Join(BUILDER_DIR, CONFIG_FILENAME)
+	err := common.YamlUnmarshall(bcnfPath, &bcnf)
+	if err != nil {
+		resultErr = errors.Errorf("Unable to parse config file %s: %s", bcnfPath, err.Error())
+	}
+	image = bcnf.Image
+	buildRoot = common.ParsePath(bcnf.BuildRoot)
+	dockerFile = common.ParsePath(bcnf.Dockerfile)
+	return
 }
 
 func findMsvcJar(path string) (fileName string, returnError error) {
@@ -170,4 +98,112 @@ func RemoveImage(imageId string) {
 		Force:         true,
 		PruneChildren: true,
 	})
+}
+
+func buildImage(ctx common.Context, image string, buildRoot string, dockerFile string) error {
+	log := ctx.Log
+	if dockerFile == "" || image == "" || buildRoot == "" {
+		return errors.Errorf("Missing parameters: image: %s, buildRoot: %s, dockerFile: %s", image, buildRoot, dockerFile)
+	}
+	log.Debugf("Building image for component '%s'\n")
+
+	log.Debugf("Creating context tar ... \n")
+	contextTarFileName, returnError := mkContextTar(buildRoot, dockerFile)
+	if returnError != nil {
+		return returnError
+	}
+	defer os.Remove(contextTarFileName)
+	log.Debugf("Context tar: %s\n", contextTarFileName)
+
+	log.Debugf("Building docker context from %s\n", contextTarFileName)
+	dockerBuildContext, returnError := os.Open(contextTarFileName)
+	if returnError != nil {
+		return returnError
+	}
+	defer dockerBuildContext.Close()
+
+	cli := docker.DockerGetClient()
+	artifactoryPassword := os.Getenv("ARTIFACTORY_PASSWORD")
+
+	jarFile, err := findMsvcJar(buildRoot)
+	if err != nil {
+		return errors.Errorf("problem determining jar file for msvc: %s", err.Error())
+	}
+	jarFile = strings.Replace(jarFile, buildRoot, "", 1)
+
+	if jarFile != "" {
+		color.Yellow("JAR_FILE used: %s", jarFile)
+	}
+
+	args := map[string]*string{
+		"mvn_password": &artifactoryPassword,
+		"JAR_FILE":     &jarFile,
+	}
+
+	options := types.ImageBuildOptions{
+		SuppressOutput: false,
+		Remove:         true,
+		ForceRemove:    true,
+		PullParent:     false,
+		Tags:           []string{image},
+		Dockerfile:     "Dockerfile",
+		BuildArgs:      args,
+	}
+
+	log.Debugf("Starting docker build ...\n")
+	buildResponse, err := cli.ImageBuild(context.Background(), dockerBuildContext, options)
+	if err != nil {
+		log.Errorf("%s", err.Error())
+	}
+	log.Debugf("Finished with build\n")
+	//defer buildResponse.Body.Close()
+
+	//log.Debugf("********* %s **********\n", buildResponse.OSType)
+	//_, err = io.Copy(os.Stdout, buildResponse.Body)
+	//if err != nil {
+	//	log.Fatal(err, " :unable to read image build response")
+	//}
+
+	d := json.NewDecoder(buildResponse.Body)
+
+	type Event struct {
+		Stream         string `json:"stream"`
+		Status         string `json:"status"`
+		Error          string `json:"error"`
+		Progress       string `json:"progress"`
+		ProgressDetail struct {
+			Current int `json:"current"`
+			Total   int `json:"total"`
+		} `json:"progressDetail"`
+	}
+
+	var event *Event
+	for {
+		if err := d.Decode(&event); err != nil {
+			if err == io.EOF {
+				break
+			}
+			panic(err)
+		}
+
+		//log.Debugf("%+v\n", event)
+		switch true {
+		case event.Error != "":
+			return errors.Errorf("\nbuild error: %s", event.Error)
+		case event.Progress != "" || event.Status != "":
+			log.Debugf("\r%s: %s", event.Status, event.Progress)
+			if event.ProgressDetail.Current == 0 {
+				log.Debugf("\n")
+			}
+
+		case strings.TrimSuffix(event.Stream, "\n") != "":
+			log.Debugf("%s", event.Stream)
+			if strings.HasPrefix(event.Stream, "Successfully built ") {
+				// Fish for image id
+				//imageId = strings.Replace(event.Stream, "Successfully built ", "", 1)
+				//imageId = strings.TrimSuffix(imageId, "\n")
+			}
+		}
+	}
+	return nil
 }
