@@ -11,10 +11,12 @@ type Configuration interface {
 	CurrentProfile() Profile
 	SetProfile(profileName string, profile Profile)
 	Config() Config
+	SetRepositoryPrefix(url string)
 }
 
 type Config struct {
-	Profile string
+	Profile          string
+	RepositoryPrefix string
 }
 
 var DefaultLocalProfile Profile = Profile{

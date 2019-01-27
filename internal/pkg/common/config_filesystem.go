@@ -16,6 +16,10 @@ type fileSystemConfig struct {
 	config         Config
 }
 
+func (c *fileSystemConfig) SetRepositoryPrefix(url string) {
+	c.config.RepositoryPrefix = url
+}
+
 func FileSystemConfig(configLocation string) Configuration {
 	return &fileSystemConfig{
 		configLocation: configLocation,

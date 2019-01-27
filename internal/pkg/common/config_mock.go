@@ -21,6 +21,10 @@ type MockConfig struct {
 	config             Config
 }
 
+func (c *MockConfig) SetRepositoryPrefix(url string) {
+	c.config.RepositoryPrefix = url
+}
+
 func (c *MockConfig) SaveConfig() (fileName string, resultErr error) {
 	c.saveConfigCalled = true
 	if c.failSaveRequired {
