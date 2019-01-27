@@ -12,6 +12,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 )
 
 var (
@@ -66,10 +67,13 @@ func runModule(module common.Module, args ...string) int {
 
 	logger.Infof("Current profile: %s\n", cnf.Config().Profile)
 	action := actions[actionName]
+	start := time.Now()
 	if err := action.Run(common.Context{Log: logger, Config: cnf}, actionArgs...); err != nil {
 		logger.Errorf("Action Error: %s\n", strings.Replace(err.Error(), "\n", "", -1))
 		return 2
 	}
+	elapsed := time.Since(start)
+	logger.Debugf("Action took %s\n", elapsed)
 	return 0
 }
 
