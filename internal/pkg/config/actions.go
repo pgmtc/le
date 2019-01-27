@@ -43,6 +43,7 @@ var initAction = common.RawAction{
 		log := ctx.Log
 
 		config.SetProfile("default", common.DefaultLocalProfile)
+		config.SetRepositoryPrefix("https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/")
 
 		fileName, err := config.SaveConfig()
 		log.Infof("Config written to %s\n", fileName)
@@ -65,6 +66,7 @@ var statusAction = common.RawAction{
 		log := ctx.Log
 		config := ctx.Config
 
+		log.Infof("Repository Prefix: %s\n", config.Config().RepositoryPrefix)
 		log.Infof("Current profile: %s\n", config.Config().Profile)
 		log.Infof("Available profiles: %s\n", config.GetAvailableProfiles())
 		if len(args) > 0 && args[0] == "-v" {
