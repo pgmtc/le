@@ -7,6 +7,7 @@ import (
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"github.com/pgmtc/orchard-cli/internal/pkg/config"
 	"github.com/pgmtc/orchard-cli/internal/pkg/local"
+	"github.com/pgmtc/orchard-cli/internal/pkg/repo"
 	"github.com/pgmtc/orchard-cli/internal/pkg/source"
 	"os"
 	"reflect"
@@ -20,6 +21,7 @@ var (
 		"local":   local.Module{},
 		"builder": builder.Module{},
 		"version": VersionModule{},
+		"repo":    repo.Module{},
 	}
 	cnf    = common.FileSystemConfig("~/.orchard")
 	logger = common.ConsoleLogger{}
