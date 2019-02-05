@@ -22,10 +22,25 @@ import (
 var buildAction = common.RawAction{
 	Handler: func(ctx common.Context, args ...string) error {
 		noCache := false
-		err, image, buildRoot, dockerFile := parseBuildProperties()
+		specDir := BUILDER_DIR
+
+		for idx, arg := range args {
+			if arg == "--nocache" {
+				noCache = true
+			}
+			if arg == "--specdir" {
+				if len(args) <= idx+1 {
+					return fmt.Errorf("missing parameter for --specdir")
+				}
+				specDir = args[idx+1]
+			}
+		}
+
+		err, image, buildRoot, dockerFile := parseBuildProperties(specDir)
 		if err != nil {
 			return err
 		}
+
 		if len(args) > 0 && args[0] == "--nocache" {
 			noCache = true
 		}
@@ -33,16 +48,16 @@ var buildAction = common.RawAction{
 	},
 }
 
-func parseBuildProperties() (resultErr error, image string, buildRoot string, dockerFile string) {
+func parseBuildProperties(builderDir string) (resultErr error, image string, buildRoot string, dockerFile string) {
 	// Try to read builder config
-	configDirPath := common.ParsePath(BUILDER_DIR)
+	configDirPath := common.ParsePath(builderDir)
 	if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
 		resultErr = errors.Errorf("Unable to determine build configuration: %s", err.Error())
 		return
 	}
 
 	bcnf := buildConfig{}
-	bcnfPath := path.Join(BUILDER_DIR, CONFIG_FILENAME)
+	bcnfPath := path.Join(builderDir, CONFIG_FILENAME)
 	err := common.YamlUnmarshall(bcnfPath, &bcnf)
 	if err != nil {
 		resultErr = errors.Errorf("Unable to parse config file %s: %s", bcnfPath, err.Error())
