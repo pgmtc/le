@@ -21,11 +21,15 @@ import (
 
 var buildAction = common.RawAction{
 	Handler: func(ctx common.Context, args ...string) error {
+		noCache := false
 		err, image, buildRoot, dockerFile := parseBuildProperties()
 		if err != nil {
 			return err
 		}
-		return buildImage(ctx, image, buildRoot, dockerFile)
+		if len(args) > 0 && args[0] == "--nocache" {
+			noCache = true
+		}
+		return buildImage(ctx, image, buildRoot, dockerFile, noCache)
 	},
 }
 
@@ -102,7 +106,7 @@ func RemoveImage(imageId string) {
 	})
 }
 
-func buildImage(ctx common.Context, image string, buildRoot string, dockerFile string) error {
+func buildImage(ctx common.Context, image string, buildRoot string, dockerFile string, noCache bool) error {
 	log := ctx.Log
 	if dockerFile == "" || image == "" || buildRoot == "" {
 		return errors.Errorf("Missing parameters: image: %s, buildRoot: %s, dockerFile: %s", image, buildRoot, dockerFile)
@@ -153,6 +157,7 @@ func buildImage(ctx common.Context, image string, buildRoot string, dockerFile s
 		Tags:           []string{image},
 		Dockerfile:     "Dockerfile",
 		BuildArgs:      args,
+		NoCache:        noCache,
 	}
 
 	log.Debugf("Starting docker build ...\n")
