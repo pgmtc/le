@@ -33,6 +33,7 @@ var buildAction = common.RawAction{
 					return fmt.Errorf("missing parameter for --specdir")
 				}
 				specDir = args[idx+1]
+				ctx.Log.Debugf("Using %s as build spec dir\n", specDir)
 			}
 		}
 
@@ -126,7 +127,7 @@ func buildImage(ctx common.Context, image string, buildRoot string, dockerFile s
 	if dockerFile == "" || image == "" || buildRoot == "" {
 		return errors.Errorf("Missing parameters: image: %s, buildRoot: %s, dockerFile: %s", image, buildRoot, dockerFile)
 	}
-	log.Debugf("Building image %s'\n")
+	log.Debugf("Building image %s'\n - Build Root: %s\n - Dockerfile: %s\n - No Cache: %s\n", image, buildRoot, dockerFile, noCache)
 
 	log.Debugf("Creating context tar ... \n")
 	contextTarFileName, returnError := mkContextTar(buildRoot, dockerFile)
