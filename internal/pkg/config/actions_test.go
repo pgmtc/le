@@ -87,8 +87,8 @@ func TestStatusAction(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	if len(logger.InfoMessages) != 4 {
-		t.Errorf("Expected 4 info messages, got %d", len(logger.InfoMessages))
+	if len(logger.InfoMessages) != 5 {
+		t.Errorf("Expected 5 info messages, got %d", len(logger.InfoMessages))
 		t.Errorf(strings.Join(logger.InfoMessages, ""))
 	}
 

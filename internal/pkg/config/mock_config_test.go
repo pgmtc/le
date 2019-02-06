@@ -22,6 +22,10 @@ type DummyConfig struct {
 	config             common.Config
 }
 
+func (c *DummyConfig) SetRepositoryPrefix(url string) {
+	c.config.RepositoryPrefix = url
+}
+
 func (c *DummyConfig) SaveConfig() (fileName string, resultErr error) {
 	c.saveConfigCalled = true
 	if c.failSaveRequired {
