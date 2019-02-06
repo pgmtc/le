@@ -1,6 +1,9 @@
 # orchard-cli
-[![Build Status](https://travis-ci.com/pgmtc/orchard-cli.svg?branch=master)](https://travis-ci.com/pgmtc/orchard-cli)
-[![codecov](https://codecov.io/gh/pgmtc/orchard-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/pgmtc/orchard-cli)
+###### master
+| | | |
+--- | --- | ---
+master  | [![Build Status](https://travis-ci.com/pgmtc/orchard-cli.svg?branch=master)](https://travis-ci.com/pgmtc/orchard-cli) | [![codecov](https://codecov.io/gh/pgmtc/orchard-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/pgmtc/orchard-cli) | 
+develop | [![Build Status](https://travis-ci.com/pgmtc/orchard-cli.svg?branch=develop)](https://travis-ci.com/pgmtc/orchard-cli) | [![codecov](https://codecov.io/gh/pgmtc/orchard-cli/branch/develop/graph/badge.svg)](https://codecov.io/gh/pgmtc/orchard-cli) |
 
 ## Prerequisites
 1. Running docker daemon
