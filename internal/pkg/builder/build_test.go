@@ -11,6 +11,15 @@ import (
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 )
 
+func mockContext() common.Context {
+	config := common.CreateMockConfig([]common.Component{})
+	ctx := common.Context{
+		Config: config,
+		Log:    &common.StringLogger{},
+	}
+	return ctx
+}
+
 func mockupDir() string {
 	tmpDir, _ := ioutil.TempDir("", "orchard-test-mock")
 	os.MkdirAll(tmpDir+"/src", os.ModePerm)
@@ -41,6 +50,10 @@ func mockupDir() string {
 	os.MkdirAll(tmpDir+"/buildtest", os.ModePerm)
 	ioutil.WriteFile(tmpDir+"/buildtest/Dockerfile", []byte("FROM scratch\nADD . ."), 0644)
 	ioutil.WriteFile(tmpDir+"/buildtest/Dockerfile-invalid", []byte("FROM rubbish\nADD . ."), 0644)
+	ioutil.WriteFile(tmpDir+"/buildtest/config.yaml", []byte(""+
+		"image: test-image\n"+
+		"buildroot: "+tmpDir+"/buildtest/\n"+
+		"dockerfile: "+tmpDir+"/buildtest/Dockerfile\n"), 0644)
 
 	return tmpDir
 }
@@ -214,5 +227,55 @@ func Test_findMsvcJar(t *testing.T) {
 				t.Errorf("findMsvcJar() = %v, want %v", gotFileName, tt.wantFileName)
 			}
 		})
+	}
+}
+
+func Test_parseBuildProperties(t *testing.T) {
+	tmpDir := mockupDir()
+	buildDir := tmpDir + "/buildtest"
+	err, image, buildDir, dockerFile := parseBuildProperties(buildDir)
+	expectedImage := "some-image"
+	expectedBuildDir := "some-builddir"
+	expectedDockerfile := "some-dockerfile"
+	if err != nil {
+		t.Errorf("Unexpected error returned: %s", err.Error())
+	}
+	if image == "" {
+		t.Errorf("Expected %s, got %s", expectedImage, image)
+	}
+	if buildDir == "" {
+		t.Errorf("Expected %s, got %s", expectedBuildDir, buildDir)
+	}
+	if dockerFile == "" {
+		t.Errorf("Expected %s, got %s", expectedDockerfile, dockerFile)
+	}
+
+	// Test error
+	buildDir = tmpDir + "/non-existing"
+	err, image, buildDir, dockerFile = parseBuildProperties(buildDir)
+	if err == nil {
+		t.Errorf("Expected error, got nothing")
+	}
+
+}
+
+func Test_buildImage(t *testing.T) {
+	mockDir := mockupDir()
+	ctx := mockContext()
+	image := "test-image"
+	buildRoot := mockDir + "/buildtest"
+	dockerFile := mockDir + "/buildtest/Dockerfile"
+	noCache := true
+	err := buildImage(ctx, image, buildRoot, dockerFile, noCache)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
+	}
+}
+
+func Test_buildAction(t *testing.T) {
+	buildContext := mockupDir() + "/buildtest"
+	err := buildAction.Run(mockContext(), "--specdir", buildContext)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
 	}
 }

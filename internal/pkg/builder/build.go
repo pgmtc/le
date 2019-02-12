@@ -115,13 +115,6 @@ func mkContextTar(contextDir string, dockerFile string) (string, error) {
 	return tar.Name, nil
 }
 
-func RemoveImage(imageId string) {
-	docker.DockerGetClient().ImageRemove(context.Background(), imageId, types.ImageRemoveOptions{
-		Force:         true,
-		PruneChildren: true,
-	})
-}
-
 func buildImage(ctx common.Context, image string, buildRoot string, dockerFile string, noCache bool) error {
 	log := ctx.Log
 	if dockerFile == "" || image == "" || buildRoot == "" {
