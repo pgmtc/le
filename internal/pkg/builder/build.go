@@ -41,10 +41,6 @@ var buildAction = common.RawAction{
 		if err != nil {
 			return err
 		}
-
-		if len(args) > 0 && args[0] == "--nocache" {
-			noCache = true
-		}
 		return buildImage(ctx, image, buildRoot, dockerFile, noCache)
 	},
 }

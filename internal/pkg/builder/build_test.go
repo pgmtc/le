@@ -93,12 +93,6 @@ func extractAndCompare(tarFileName string, testRootDirectory string) bool {
 	return reflect.DeepEqual(findSource, findDest)
 }
 
-func Test_build(t *testing.T) {
-	common.SkipDockerTesting(t)
-	//testingRoot := mockupDir()
-	t.Skip("WIP")
-}
-
 func Test_mkContextTar(t *testing.T) {
 	testRootDir := mockupDir()
 	defer os.RemoveAll(testRootDir)
