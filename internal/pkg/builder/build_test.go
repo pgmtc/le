@@ -274,8 +274,12 @@ func Test_buildImage(t *testing.T) {
 
 func Test_buildAction(t *testing.T) {
 	buildContext := mockupDir() + "/buildtest"
-	err := buildAction.Run(mockContext(), "--specdir", buildContext)
-	if err != nil {
+	if err := buildAction.Run(mockContext(), "--specdir", buildContext, "--nocache"); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
+	// Try missing specdir
+	if err := buildAction.Run(mockContext(), "--specdir"); err == nil {
+		t.Errorf("Expected error, got nothing")
+	}
+
 }
