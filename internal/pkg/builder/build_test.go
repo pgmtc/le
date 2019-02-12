@@ -281,5 +281,9 @@ func Test_buildAction(t *testing.T) {
 	if err := buildAction.Run(mockContext(), "--specdir"); err == nil {
 		t.Errorf("Expected error, got nothing")
 	}
+	// Test non-existing specdir
+	if err := buildAction.Run(mockContext(), "--nocache"); err == nil {
+		t.Errorf("Expected error, got nothing")
+	}
 
 }
