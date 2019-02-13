@@ -17,6 +17,7 @@ type buildConfig struct {
 	Image      string
 	BuildRoot  string
 	Dockerfile string
+	BuildArgs  []string
 }
 
 var initAction = common.RawAction{
@@ -39,6 +40,7 @@ var initAction = common.RawAction{
 			Image:      "my-image",
 			BuildRoot:  DEFAULT_BUILDROOT,
 			Dockerfile: DEFAULT_DOCKERFILE,
+			BuildArgs:  []string{"build_arg_1:example_value"},
 		}
 
 		if err := common.YamlMarshall(bcnf, configPath); err != nil {

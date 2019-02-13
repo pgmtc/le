@@ -14,7 +14,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"time"
 )
 
 var buildAction = common.RawAction{
@@ -35,15 +34,15 @@ var buildAction = common.RawAction{
 			}
 		}
 
-		err, image, buildRoot, dockerFile := parseBuildProperties(specDir)
+		err, image, buildRoot, dockerFile, buildArgs := parseBuildProperties(specDir)
 		if err != nil {
 			return err
 		}
-		return buildImage(ctx, image, buildRoot, dockerFile, noCache)
+		return buildImage(ctx, image, buildRoot, dockerFile, buildArgs, noCache)
 	},
 }
 
-func parseBuildProperties(builderDir string) (resultErr error, image string, buildRoot string, dockerFile string) {
+func parseBuildProperties(builderDir string) (resultErr error, image string, buildRoot string, dockerFile string, buildArgs []string) {
 	// Try to read builder config
 	configDirPath := common.ParsePath(builderDir)
 	if _, err := os.Stat(configDirPath); os.IsNotExist(err) {
@@ -61,6 +60,7 @@ func parseBuildProperties(builderDir string) (resultErr error, image string, bui
 	image = bcnf.Image
 	buildRoot = common.ParsePath(bcnf.BuildRoot)
 	dockerFile = common.ParsePath(bcnf.Dockerfile)
+	buildArgs = bcnf.BuildArgs
 	return
 }
 
@@ -74,7 +74,35 @@ func mkContextTar(contextDir string, dockerFile string) (tarFile string, resultE
 	return
 }
 
-func buildImage(ctx common.Context, image string, buildRoot string, dockerFile string, noCache bool) error {
+func parseBuildArgs(buildArgs []string) (result map[string]*string) {
+	result = map[string]*string{}
+	for _, buildArg := range buildArgs {
+		var argName, argValue string
+		argSplit := strings.Split(buildArg, ":")
+		switch len(argSplit) {
+		case 0:
+			argName = ""
+			argValue = ""
+		case 1:
+			argName = argSplit[0]
+			argValue = argSplit[0]
+		default:
+			argName = argSplit[0]
+			argValue = argSplit[1]
+		}
+		argName = strings.Trim(argName, " ")
+		argValue = strings.Trim(argValue, " ")
+		if strings.HasPrefix(argValue, "$") {
+			argValue = os.Getenv(argValue[1:])
+		}
+		if argName != "" {
+			result[argName] = &argValue
+		}
+	}
+	return
+}
+
+func buildImage(ctx common.Context, image string, buildRoot string, dockerFile string, buildArgs []string, noCache bool) error {
 	log := ctx.Log
 	if dockerFile == "" || image == "" || buildRoot == "" {
 		return errors.Errorf("Missing parameters: image: %s, buildRoot: %s, dockerFile: %s", image, buildRoot, dockerFile)
@@ -97,14 +125,8 @@ func buildImage(ctx common.Context, image string, buildRoot string, dockerFile s
 	defer dockerBuildContext.Close()
 
 	cli := docker.DockerGetClient()
-	artifactoryPassword := os.Getenv("ARTIFACTORY_PASSWORD")
 
-	cacheBust := fmt.Sprint(int32(time.Now().Unix()))
-
-	args := map[string]*string{
-		"mvn_password": &artifactoryPassword,
-		"CACHEBUST":    &cacheBust,
-	}
+	args := parseBuildArgs(buildArgs)
 
 	options := types.ImageBuildOptions{
 		SuppressOutput: false,

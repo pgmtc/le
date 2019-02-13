@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -164,26 +165,30 @@ func Test_relativeOrAbsolute(t *testing.T) {
 func Test_parseBuildProperties(t *testing.T) {
 	tmpDir := mockupDir()
 	buildDir := tmpDir + "/buildtest"
-	err, image, buildDir, dockerFile := parseBuildProperties(buildDir)
-	expectedImage := "some-image"
-	expectedBuildDir := "some-builddir"
-	expectedDockerfile := "some-dockerfile"
+	err, image, buildDir, dockerFile, buildArgs := parseBuildProperties(buildDir)
+	expectedImage := "test-image"
+	expectedBuildDir := tmpDir + "/buildtest/"
+	expectedDockerfile := tmpDir + "/buildtest/Dockerfile"
+	expectedBuildArgs := []string{"arg1:value1"}
 	if err != nil {
 		t.Errorf("Unexpected error returned: %s", err.Error())
 	}
-	if image == "" {
+	if image != expectedImage {
 		t.Errorf("Expected %s, got %s", expectedImage, image)
 	}
-	if buildDir == "" {
+	if buildDir != expectedBuildDir {
 		t.Errorf("Expected %s, got %s", expectedBuildDir, buildDir)
 	}
-	if dockerFile == "" {
+	if dockerFile != expectedDockerfile {
 		t.Errorf("Expected %s, got %s", expectedDockerfile, dockerFile)
 	}
+	if reflect.DeepEqual(expectedBuildArgs, []string{"arg1:value1", "arg2:value2"}) {
+		t.Errorf("Expected %s, got %s", expectedBuildArgs, buildArgs)
 
+	}
 	// Test error
 	buildDir = tmpDir + "/non-existing"
-	err, image, buildDir, dockerFile = parseBuildProperties(buildDir)
+	err, image, buildDir, dockerFile, buildArgs = parseBuildProperties(buildDir)
 	if err == nil {
 		t.Errorf("Expected error, got nothing")
 	}
@@ -196,8 +201,9 @@ func Test_buildImage(t *testing.T) {
 	image := "test-image"
 	buildRoot := mockDir + "/buildtest"
 	dockerFile := mockDir + "/buildtest/Dockerfile"
+	buildArgs := []string{"arg1:value1"}
 	noCache := true
-	err := buildImage(ctx, image, buildRoot, dockerFile, noCache)
+	err := buildImage(ctx, image, buildRoot, dockerFile, buildArgs, noCache)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
@@ -215,6 +221,28 @@ func Test_buildAction(t *testing.T) {
 	// Test non-existing specdir
 	if err := buildAction.Run(mockContext(), "--nocache"); err == nil {
 		t.Errorf("Expected error, got nothing")
+	}
+
+}
+
+func Test_parseBuildArgs(t *testing.T) {
+	os.Setenv("TEST_VAR", "value4")
+	buildArgs := []string{"arg1:value1", "arg2:value2", "arg3:value3", "arg4:$TEST_VAR"}
+	parsed := parseBuildArgs(buildArgs)
+	if len(parsed) != 4 {
+		t.Errorf("Unexpected length, expected 4, got %d", len(parsed))
+	}
+	if *parsed["arg1"] != "value1" {
+		t.Errorf("Expected %s, got %s", "value1", *parsed["arg1"])
+	}
+	if *parsed["arg2"] != "value2" {
+		t.Errorf("Expected %s, got %s", "value2", *parsed["arg2"])
+	}
+	if *parsed["arg3"] != "value3" {
+		t.Errorf("Expected %s, got %s", "value3", *parsed["arg3"])
+	}
+	if *parsed["arg4"] != "value4" {
+		t.Errorf("Expected %s, got %s", "value4", *parsed["arg4"])
 	}
 
 }
