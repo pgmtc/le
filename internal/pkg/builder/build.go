@@ -5,8 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/docker/docker/api/types"
-	"github.com/fatih/color"
-	"github.com/jhoonb/archivex"
+	"github.com/mholt/archiver"
 	"github.com/pgmtc/orchard-cli/internal/pkg/common"
 	"github.com/pgmtc/orchard-cli/internal/pkg/docker"
 	"github.com/pkg/errors"
@@ -14,7 +13,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -65,50 +63,14 @@ func parseBuildProperties(builderDir string) (resultErr error, image string, bui
 	return
 }
 
-func findMsvcJar(path string) (fileName string, returnError error) {
-	files, returnError := filepath.Glob(path + "/target/*.jar")
-	if returnError != nil {
+func mkContextTar(contextDir string, dockerFile string) (tarFile string, resultErr error) {
+	tmpDir, resultErr := ioutil.TempDir("", "")
+	if resultErr != nil {
 		return
 	}
-
-	if len(files) > 1 {
-		returnError = errors.Errorf("Unexpected number of jar files found - expecting only one in '%s'", path+"/target/")
-		return
-	}
-
-	for _, file := range files {
-		fileName = strings.Replace(file, path+"/", "", 1)
-	}
+	tarFile = tmpDir + "/docker-context.tar"
+	resultErr = archiver.Archive([]string{contextDir + "/", dockerFile}, tarFile)
 	return
-}
-
-func mkContextTar(contextDir string, dockerFile string) (string, error) {
-	if _, err := os.Stat(contextDir); os.IsNotExist(err) {
-		return "", errors.Errorf("Context directory '%s' does not exist", contextDir)
-	}
-	// Create temporary file
-	tmpfile, err := ioutil.TempFile("", "context-")
-	if err != nil {
-		return "", errors.Errorf("problem when creating temporary file: %s", err.Error())
-	}
-
-	// Create tar
-	tarFileName := tmpfile.Name() + ".tar"
-	tar := new(archivex.TarFile)
-	if err := tar.Create(tarFileName); err != nil {
-		return "", errors.Errorf("error creating tar file: %s", err.Error())
-	}
-
-	fr, err := os.Open(dockerFile)
-	if err != nil {
-		return "", errors.Errorf("error when reading dockerfile: %s", err.Error())
-	}
-
-	tar.AddAll(contextDir, false)
-	tar.Add("Dockerfile", fr, nil)
-	tar.Close()
-
-	return tar.Name, nil
 }
 
 func buildImage(ctx common.Context, image string, buildRoot string, dockerFile string, noCache bool) error {
@@ -138,19 +100,8 @@ func buildImage(ctx common.Context, image string, buildRoot string, dockerFile s
 
 	cacheBust := fmt.Sprint(int32(time.Now().Unix()))
 
-	jarFile, err := findMsvcJar(buildRoot)
-	if err != nil {
-		return errors.Errorf("problem determining jar file for msvc: %s", err.Error())
-	}
-	jarFile = strings.Replace(jarFile, buildRoot, "", 1)
-
-	if jarFile != "" {
-		color.Yellow("JAR_FILE used: %s", jarFile)
-	}
-
 	args := map[string]*string{
 		"mvn_password": &artifactoryPassword,
-		"JAR_FILE":     &jarFile,
 		"CACHEBUST":    &cacheBust,
 	}
 
