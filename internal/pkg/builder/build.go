@@ -56,6 +56,7 @@ func parseBuildProperties(builderDir string) (resultErr error, image string, bui
 	err := common.YamlUnmarshall(bcnfPath, &bcnf)
 	if err != nil {
 		resultErr = errors.Errorf("Unable to parse config file %s: %s", bcnfPath, err.Error())
+		return
 	}
 	image = bcnf.Image
 	buildRoot = common.ParsePath(bcnf.BuildRoot)
