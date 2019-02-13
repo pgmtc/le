@@ -227,10 +227,10 @@ func Test_buildAction(t *testing.T) {
 
 func Test_parseBuildArgs(t *testing.T) {
 	os.Setenv("TEST_VAR", "value4")
-	buildArgs := []string{"arg1:value1", "arg2:value2", "arg3:value3", "arg4:$TEST_VAR"}
+	buildArgs := []string{"arg1:value1", "arg2:value2", "arg3:value3", "arg4:$TEST_VAR", "arg5", "arg6:", ":value7", ""}
 	parsed := parseBuildArgs(buildArgs)
-	if len(parsed) != 4 {
-		t.Errorf("Unexpected length, expected 4, got %d", len(parsed))
+	if len(parsed) != 6 {
+		t.Errorf("Unexpected length, expected 6, got %d", len(parsed))
 	}
 	if *parsed["arg1"] != "value1" {
 		t.Errorf("Expected %s, got %s", "value1", *parsed["arg1"])
@@ -243,6 +243,12 @@ func Test_parseBuildArgs(t *testing.T) {
 	}
 	if *parsed["arg4"] != "value4" {
 		t.Errorf("Expected %s, got %s", "value4", *parsed["arg4"])
+	}
+	if *parsed["arg5"] != "arg5" {
+		t.Errorf("Expected %s, got %s", "arg5", *parsed["arg5"])
+	}
+	if *parsed["arg6"] != "" {
+		t.Errorf("Expected %s, got %s", "", *parsed["arg6"])
 	}
 
 }

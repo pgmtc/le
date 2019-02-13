@@ -80,9 +80,6 @@ func parseBuildArgs(buildArgs []string) (result map[string]*string) {
 		var argName, argValue string
 		argSplit := strings.Split(buildArg, ":")
 		switch len(argSplit) {
-		case 0:
-			argName = ""
-			argValue = ""
 		case 1:
 			argName = argSplit[0]
 			argValue = argSplit[0]
