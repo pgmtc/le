@@ -125,7 +125,6 @@ func buildImage(ctx common.Context, image string, buildRoot string, dockerFile s
 	defer dockerBuildContext.Close()
 
 	cli := docker.DockerGetClient()
-
 	args := parseBuildArgs(buildArgs)
 
 	options := types.ImageBuildOptions{
