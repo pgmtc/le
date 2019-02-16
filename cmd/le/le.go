@@ -30,7 +30,9 @@ var (
 
 func main() {
 	args := os.Args[1:]
-	if err := cnf.LoadConfig(); err != nil && !(len(args) == 2 && args[0] == "version" && args[1] == "update") {
+	if err := cnf.LoadConfig(); err != nil &&
+		!(len(args) == 2 && args[0] == "config" && args[1] == "init") &&
+		!(len(args) == 2 && args[0] == "version" && args[1] == "update") {
 		logger.Errorf("%s\n", err.Error())
 		logger.Errorf("Try initializing config directory by running '%s config init'\n", os.Args[0])
 		os.Exit(1)
