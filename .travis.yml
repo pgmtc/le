@@ -1,6 +1,6 @@
 language: go
-#env:
-#  - GO111MODULE=on
+env:
+  - GO111MODULE=on
 go:
   - 1.11.x
 git:
@@ -10,14 +10,14 @@ notifications:
   email: false
 
 install:
-  - env GO111MODULE=on go mod download
+  - go mod download
 #  - go get github.com/Microsoft/go-winio
 #  - go get golang.org/x/sys/windows
 #  - go get github.com/jstemmer/go-junit-report
 
 
 script:
-  - env GO111MODULE=on ./scripts/coverage.sh
+  - ./scripts/coverage.sh
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

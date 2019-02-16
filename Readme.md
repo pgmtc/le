@@ -1,9 +1,9 @@
-# orchard-cli
+# local environment (le)
 ###### master
 | | | |
 --- | --- | ---
-master  | [![Build Status](https://travis-ci.com/pgmtc/orchard-cli.svg?branch=master)](https://travis-ci.com/pgmtc/orchard-cli) | [![codecov](https://codecov.io/gh/pgmtc/orchard-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/pgmtc/orchard-cli) | 
-develop | [![Build Status](https://travis-ci.com/pgmtc/orchard-cli.svg?branch=develop)](https://travis-ci.com/pgmtc/orchard-cli) | [![codecov](https://codecov.io/gh/pgmtc/orchard-cli/branch/develop/graph/badge.svg)](https://codecov.io/gh/pgmtc/orchard-cli) |
+master  | [![Build Status](https://travis-ci.com/pgmtc/le.svg?branch=master)](https://travis-ci.com/pgmtc/le) | [![codecov](https://codecov.io/gh/pgmtc/orchard-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/pgmtc/orchard-cli) | 
+develop | [![Build Status](https://travis-ci.com/pgmtc/le.svg?branch=develop)](https://travis-ci.com/pgmtc/le) | [![codecov](https://codecov.io/gh/pgmtc/le/branch/develop/graph/badge.svg)](https://codecov.io/gh/pgmtc/le) |
 
 ## Prerequisites
 1. Running docker daemon
@@ -13,7 +13,7 @@ develop | [![Build Status](https://travis-ci.com/pgmtc/orchard-cli.svg?branch=de
 ### Semi-automatic (experimental to be used on macOS)
 * Download 1.0.1 package and store in /tmp
 
-`curl -L  "https://github.com/pgmtc/orchard-cli/releases/download/1.0.1/orchard-cli_1.0.1_macOS_x86_64.tar.gz" | gunzip -c | tar -C /tmp -xvf -`
+`curl -L  "https://github.com/pgmtc/le/releases/download/1.0.1/le_1.0.1_macOS_x86_64.tar.gz" | gunzip -c | tar -C /tmp -xvf -`
 
 * Run update which should self-update and install into /usr/local/bin. Ignore errors about missing config for now
 
@@ -24,7 +24,7 @@ develop | [![Build Status](https://travis-ci.com/pgmtc/orchard-cli.svg?branch=de
 `orchard config init`
 
 ### Manual
-1. Download appropriate package from [releases page](https://github.com/pgmtc/orchard-cli/releases)
+1. Download appropriate package from [releases page](https://github.com/pgmtc/le/releases)
 2. Unzip it, there should be an executable inside
 3. Put it somewhere to path, potentially chmod a+x it
 4. Run it from the terminal / command line
