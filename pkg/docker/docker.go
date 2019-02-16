@@ -11,7 +11,7 @@ import (
 	"github.com/docker/go-connections/nat"
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
-	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"github.com/pgmtc/le/pkg/common"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"io"
@@ -168,7 +168,9 @@ func getContainer(component common.Component) (types.Container, error) {
 }
 
 func DockerGetClient() *client.Client {
-	cli, err := client.NewClientWithOpts(client.WithVersion("1.39"))
+	cli, err := client.NewEnvClient()
+	//cli.UpdateClientVersion()
+	//cli, err := client.NewClientWithOpts(client.WithVersion("1.39"))
 	if err != nil {
 		panic(err)
 	}

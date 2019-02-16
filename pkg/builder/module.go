@@ -1,14 +1,14 @@
-package source
+package builder
 
 import (
-	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"github.com/pgmtc/le/pkg/common"
 )
 
 type Module struct{}
 
 func (Module) GetActions() map[string]common.Action {
 	return map[string]common.Action{
-		"default": pullAction,
-		"pull":    pullAction,
+		"build": &buildAction,
+		"pull":  &buildAction,
 	}
 }

@@ -3,7 +3,7 @@ package source
 import (
 	"testing"
 
-	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"github.com/pgmtc/le/pkg/common"
 )
 
 var config = common.CreateMockConfig([]common.Component{

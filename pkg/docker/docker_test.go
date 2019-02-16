@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"github.com/pgmtc/le/pkg/common"
 )
 
 func TestMissingParameters(t *testing.T) {
@@ -29,32 +29,12 @@ func Test_pullImage(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		//{
-		//	name: "testIronGo",
-		//	args: args{
-		//		component: common.Component{
-		//			Name:  "ironGo",
-		//			Image: "iron/go:latest",
-		//		},
-		//	},
-		//	wantErr: false,
-		//},
-		//{
-		//	name: "testNonExisting",
-		//	args: args{
-		//		component: common.Component{
-		//			Name:  "nonExisting",
-		//			Image: "whatever-nonexisting",
-		//		},
-		//	},
-		//	wantErr: true,
-		//},
 		{
 			name: "testECRWithLogin",
 			args: args{
 				component: common.Component{
 					Name:  "local-db",
-					Image: "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-local-db:latest",
+					Image: "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
 				},
 			},
 			wantErr: !(os.Getenv("SKIP_AWS_TESTING") == ""),
@@ -105,7 +85,7 @@ func TestComplex(t *testing.T) {
 	cmp1 := common.Component{
 		Name:     "linkedContainer",
 		DockerId: "linkedContainer",
-		Image:    "nginx:stable-alpine",
+		Image:    "docker.io/library/nginx:stable-alpine",
 	}
 
 	err = pullImage(cmp1)
@@ -150,7 +130,7 @@ func TestContainerWorkflow(t *testing.T) {
 	cmp := common.Component{
 		Name:     "test",
 		DockerId: "test-container",
-		Image:    "nginx:stable-alpine",
+		Image:    "docker.io/library/nginx:stable-alpine",
 	}
 
 	err := createContainer(cmp)

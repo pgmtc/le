@@ -1,7 +1,7 @@
 package local
 
 import (
-	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"github.com/pgmtc/le/pkg/common"
 	"testing"
 )
 

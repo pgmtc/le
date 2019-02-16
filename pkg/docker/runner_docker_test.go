@@ -1,7 +1,7 @@
 package docker
 
 import (
-	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"github.com/pgmtc/le/pkg/common"
 	"os"
 	"testing"
 )
@@ -12,7 +12,7 @@ var ctx = common.Context{
 		{
 			Name:          "test-component",
 			DockerId:      "test-component",
-			Image:         "nginx:stable-alpine",
+			Image:         "docker.io/library/nginx:stable-alpine",
 			ContainerPort: 80,
 			HostPort:      9998,
 			TestUrl:       "http://localhost:9998",
@@ -20,7 +20,7 @@ var ctx = common.Context{
 		{
 			Name:     "test-internal-component",
 			DockerId: "test-component",
-			Image:    "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-local-db:latest",
+			Image: "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
 		},
 		{
 			Name:     "test-invalid",

@@ -1,7 +1,7 @@
 package source
 
 import (
-	"github.com/pgmtc/orchard-cli/internal/pkg/common"
+	"github.com/pgmtc/le/pkg/common"
 )
 
 var pullAcrtion common.Action = &common.ComponentAction{}

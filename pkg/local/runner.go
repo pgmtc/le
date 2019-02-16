@@ -1,6 +1,6 @@
 package local
 
-import "github.com/pgmtc/orchard-cli/internal/pkg/common"
+import "github.com/pgmtc/le/pkg/common"
 
 type Runner interface {
 	Create(ctx common.Context, cmp common.Component) error

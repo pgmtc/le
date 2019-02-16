@@ -1,8 +1,8 @@
 package local
 
 import (
-	"github.com/pgmtc/orchard-cli/internal/pkg/common"
-	"github.com/pgmtc/orchard-cli/internal/pkg/docker"
+	"github.com/pgmtc/le/pkg/common"
+	"github.com/pgmtc/le/pkg/docker"
 )
 
 type Module struct{}

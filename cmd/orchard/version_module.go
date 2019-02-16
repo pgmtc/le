@@ -1,6 +1,6 @@
 package main
 
-import "github.com/pgmtc/orchard-cli/internal/pkg/common"
+import "github.com/pgmtc/le/pkg/common"
 
 type VersionModule struct{}
 
