@@ -24,7 +24,7 @@ var (
 		"version": VersionModule{},
 		"repo":    repo.Module{},
 	}
-	cnf    = common.FileSystemConfig("~/.orchard")
+	cnf    = common.FileSystemConfig("~/.le")
 	logger = common.ConsoleLogger{}
 )
 

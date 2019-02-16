@@ -13,15 +13,15 @@ develop | [![Build Status](https://travis-ci.com/pgmtc/le.svg?branch=develop)](h
 ### Semi-automatic (experimental to be used on macOS)
 * Download 1.0.1 package and store in /tmp
 
-`curl -L  "https://github.com/pgmtc/le/releases/download/1.0.1/le_1.0.1_macOS_x86_64.tar.gz" | gunzip -c | tar -C /tmp -xvf -`
+`curl -L  "https://github.com/pgmtc/le/releases/download/1.2.0/le_1.2.0_macOS_i386.tar.gz" | gunzip -c | tar -C /tmp -xvf -`
 
 * Run update which should self-update and install into /usr/local/bin. Ignore errors about missing config for now
 
-`/tmp/orchard config update-cli`
+`/tmp/le config update-cli`
 
 * Init config
 
-`orchard config init`
+`le config init`
 
 ### Manual
 1. Download appropriate package from [releases page](https://github.com/pgmtc/le/releases)
@@ -33,13 +33,13 @@ develop | [![Build Status](https://travis-ci.com/pgmtc/le.svg?branch=develop)](h
 ## Usage 
 Syntax:
 
-`orchard [module] [action] parameters`
+`le [module] [action] parameters`
 
 In cases related to containers (vast majority), syntax is as follows:
 
-- `orchard [module] [action] component` : runs action for component
-- `orchard [module] [action] component1 component2 ... componentN` : runs for component1 .. componentN
-- `orchard [module] [action] all` : runs for all available components
+- `le [module] [action] component` : runs action for component
+- `le [module] [action] component1 component2 ... componentN` : runs for component1 .. componentN
+- `le [module] [action] all` : runs for all available components
 
 
 ## Modules
@@ -47,35 +47,38 @@ In cases related to containers (vast majority), syntax is as follows:
 Local module is responsible for running local environments
 It has the following actions
 
-`orchard local status`: prints status of the local environment
+`le local status`: prints status of the local environment
 
-`orchard local pull [component]`: used for components with remote docker images
+`le local pull [component]`: used for components with remote docker images
 
-`orchard local create [component]`: create a docker container for the component
+`le local create [component]`: create a docker container for the component
 
-`orchard local remove [component]`: removes docker container of the component
+`le local remove [component]`: removes docker container of the component
 
-`orchard local start [component]`: starts docker container for the component
+`le local start [component]`: starts docker container for the component
 
-`orchard local stop [component]`: stops the docker container for the component
+`le local stop [component]`: stops the docker container for the component
 
-`orchard local logs [component]`: shows logs of the related docker container
+`le local logs [component]`: shows logs of the related docker container
 
-`orchard local watch [component]`: shows logs on the 'follow' basis
+`le local watch [component]`: shows logs on the 'follow' basis
 
 ### builder
-Builder module is used for building containers. It has to be run from orchard-poc-umbrella directory
-
 `orchard builder build [component]`: builds a docker image for the component
+
+Build definition is stored in .builder directory inside the project.
+It can be override by providing --specdir argument.
+To create empty build definition directory, run 
+`le builder init`
 
 
 ### config
 Config is a centralized storage used by other modules.
 
-`orchard config init`: Run after the installation. Creates ~/.orchard, config file and default profile
+`le config init`: Run after the installation. Creates ~/.le, config file and default profile
 
-`orchard config status'`: Prints out information about the current profile. Adding -v makes it more verbose
+`le config status'`: Prints out information about the current profile. Adding -v makes it more verbose
 
-`orchard config create [profile] [source-profile]`: Creates a new profile. By passing source-profile parameter (not mandatory), it uses it as a base for copy
+`le config create [profile] [source-profile]`: Creates a new profile. By passing source-profile parameter (not mandatory), it uses it as a base for copy
 
-`orchard config switch [profile]`: Switches current profile to another one
+`le config switch [profile]`: Switches current profile to another one
