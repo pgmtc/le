@@ -56,7 +56,7 @@ func (DockerRunner) Status(ctx common.Context, args ...string) error {
 	counter := 0
 	for {
 		printStatus(config.CurrentProfile().Components, verbose, follow, followLength)
-		fmt.Println("Orchard local status: ", time.Now().Format("2006-01-02 15:04:05"))
+		fmt.Println("local status: ", time.Now().Format("2006-01-02 15:04:05"))
 		counter++
 		time.Sleep(1 * time.Second)
 		if counter == followLength {

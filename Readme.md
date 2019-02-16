@@ -64,7 +64,7 @@ It has the following actions
 `le local watch [component]`: shows logs on the 'follow' basis
 
 ### builder
-`orchard builder build [component]`: builds a docker image for the component
+`le builder build [component]`: builds a docker image for the component
 
 Build definition is stored in .builder directory inside the project.
 It can be override by providing --specdir argument.
