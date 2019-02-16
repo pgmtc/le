@@ -2,7 +2,7 @@
 ###### master
 | | | |
 --- | --- | ---
-master  | [![Build Status](https://travis-ci.com/pgmtc/le.svg?branch=master)](https://travis-ci.com/pgmtc/le) | [![codecov](https://codecov.io/gh/pgmtc/orchard-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/pgmtc/orchard-cli) | 
+master  | [![Build Status](https://travis-ci.com/pgmtc/le.svg?branch=master)](https://travis-ci.com/pgmtc/le) | [![codecov](https://codecov.io/gh/pgmtc/le/branch/master/graph/badge.svg)](https://codecov.io/gh/pgmtc/le) | 
 develop | [![Build Status](https://travis-ci.com/pgmtc/le.svg?branch=develop)](https://travis-ci.com/pgmtc/le) | [![codecov](https://codecov.io/gh/pgmtc/le/branch/develop/graph/badge.svg)](https://codecov.io/gh/pgmtc/le) |
 
 ## Prerequisites
