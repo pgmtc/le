@@ -10,7 +10,7 @@ notifications:
   email: false
 
 install:
-  - go build
+  - go mod download
   - go get github.com/Microsoft/go-winio
   - go get golang.org/x/sys/windows
   - go get github.com/jstemmer/go-junit-report
