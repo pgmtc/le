@@ -4,8 +4,8 @@ before:
   hooks:
 builds:
   -
-    main: ./cmd/orchard/
-    binary: orchard
+    main: ./cmd/le/
+    binary: le
     goos:
       - linux
       - windows

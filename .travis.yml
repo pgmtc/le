@@ -10,20 +10,10 @@ notifications:
   email: false
 
 install:
-  - go get github.com/docker/docker/api
-  - go get github.com/docker/docker/client
-  - rm -rf ${TRAVIS_HOME}/gopath/src/github.com/docker/docker/vendor/github.com/docker/go-connections
-  - go get -t -v ./...
+  - go build
   - go get github.com/Microsoft/go-winio
   - go get golang.org/x/sys/windows
   - go get github.com/jstemmer/go-junit-report
-
-#  - go get github.com/pkg/errors
-#  - go get golang.org/x/net/context
-#  - go get github.com/docker/go-connections/nat
-#  - go get github.com/fatih/color
-#  - go get github.com/olekukonko/tablewriter
-#  - go get github.com/jhoonb/archivex
 
 
 script:
