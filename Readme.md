@@ -17,7 +17,7 @@ develop | [![Build Status](https://travis-ci.com/pgmtc/le.svg?branch=develop)](h
 
 * Run update which should self-update and install into /usr/local/bin. Ignore errors about missing config for now
 
-`/tmp/le config update-cli`
+`/tmp/le version update`
 
 * Init config
 
