@@ -24,7 +24,7 @@ func Test_getAuthString(t *testing.T) {
 				repository: "ecr:eu-west-1",
 			},
 			wantErr:        !(os.Getenv("SKIP_AWS_TESTING") == ""),
-			wantAuthString: true,
+			wantAuthString: os.Getenv("SKIP_AWS_TESTING") == "",
 		},
 		{
 			name: "unknown-repo",
