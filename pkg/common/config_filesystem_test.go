@@ -10,7 +10,7 @@ import (
 var tmpDir string
 
 func setUp(dirSuffix string) fileSystemConfig {
-	tmpDir, _ = ioutil.TempDir("", "orchard-test-Config-mock")
+	tmpDir, _ = ioutil.TempDir("", "le-test-Config-mock")
 	targetDir := tmpDir + "/" + dirSuffix
 	return fileSystemConfig{
 		configLocation: targetDir,
@@ -24,12 +24,12 @@ func tearDown() {
 }
 
 func TestFileSystemConfig(t *testing.T) {
-	tmpDir, _ = ioutil.TempDir("", "orchard-test-Config-mock-constructor")
+	tmpDir, _ = ioutil.TempDir("", "le-test-Config-mock-constructor")
 	FileSystemConfig(tmpDir)
 }
 
 func TestFileSystemConfig_initConfigDir(t *testing.T) {
-	config := setUp(".orchard-Config")
+	config := setUp(".le-Config")
 	defer tearDown()
 
 	cnfDir := config.initConfigDir(config.configLocation)
@@ -53,7 +53,7 @@ func TestFileSystemConfig_initConfigDir(t *testing.T) {
 }
 
 func TestFileSystemConfig_SaveAndLoadProfile(t *testing.T) {
-	config := setUp(".orchard-Config")
+	config := setUp(".le-Config")
 	defer tearDown()
 
 	testProfile := Profile{
@@ -118,7 +118,7 @@ func TestFileSystemConfig_SaveAndLoadProfile(t *testing.T) {
 }
 
 func Test_fileSystemConfig_SaveConfig(t *testing.T) {
-	config := setUp(".orchard-Config")
+	config := setUp(".le-Config")
 	defer tearDown()
 
 	fileName, err := config.SaveConfig()
@@ -126,7 +126,7 @@ func Test_fileSystemConfig_SaveConfig(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	expectedFileName := tmpDir + "/.orchard-Config/Config.yaml"
+	expectedFileName := tmpDir + "/.le-Config/Config.yaml"
 	if expectedFileName != fileName {
 		t.Errorf("Expected file name %s, got %s", expectedFileName, fileName)
 	}
@@ -141,7 +141,7 @@ func Test_fileSystemConfig_SaveConfig(t *testing.T) {
 }
 
 func Test_fileSystemConfig_LoadConfig(t *testing.T) {
-	validConfig := setUp(".orchard-Config")
+	validConfig := setUp(".le-Config")
 	defer tearDown()
 	validConfig.config.Profile = "default"
 	validConfig.SaveConfig()
@@ -159,8 +159,8 @@ func Test_fileSystemConfig_LoadConfig(t *testing.T) {
 	}
 
 	// Load Config from non-existing location
-	tempDir, _ := ioutil.TempDir("", "orchard-test-Config-mock")
-	targetDirTmp := tempDir + "/.orchard-Config-to-load"
+	tempDir, _ := ioutil.TempDir("", "le-test-Config-mock")
+	targetDirTmp := tempDir + "/.le-Config-to-load"
 	cnf := fileSystemConfig{
 		configLocation: targetDirTmp,
 	}

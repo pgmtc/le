@@ -20,6 +20,9 @@ func TestMissingParameters(t *testing.T) {
 }
 
 func Test_pullImage(t *testing.T) {
+	if os.Getenv("NO_NETWORK") == "true" {
+		t.Skipf("NO_NETWORK set to true, skipping")
+	}
 	common.SkipDockerTesting(t)
 	type args struct {
 		component common.Component
@@ -79,6 +82,9 @@ func Test_pullImage(t *testing.T) {
 }
 
 func TestComplex(t *testing.T) {
+	if os.Getenv("NO_NETWORK") == "true" {
+		t.Skipf("NO_NETWORK set to true, skipping")
+	}
 	common.SkipDockerTesting(t)
 	var err error
 
@@ -126,6 +132,9 @@ func TestComplex(t *testing.T) {
 }
 
 func TestContainerWorkflow(t *testing.T) {
+	if os.Getenv("NO_NETWORK") == "true" {
+		t.Skipf("NO_NETWORK set to true, skipping")
+	}
 	common.SkipDockerTesting(t)
 	cmp := common.Component{
 		Name:     "test",

@@ -17,7 +17,7 @@ var createAction = common.RawAction{
 		}
 
 		profileName := args[0]
-		profile := common.DefaultLocalProfile
+		profile := common.DefaultProfile
 
 		if len(args) > 1 {
 			copyFromProfile, err := config.LoadProfile(args[1])
@@ -42,19 +42,13 @@ var initAction = common.RawAction{
 		config := ctx.Config
 		log := ctx.Log
 
-		config.SetProfile("default", common.DefaultLocalProfile)
+		config.SetProfile("default", common.DefaultProfile)
 		config.SetRepositoryPrefix("https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/")
 
 		fileName, err := config.SaveConfig()
 		log.Infof("Config written to %s\n", fileName)
 
-		fileName, err = config.SaveProfile("default", common.DefaultRemoteProfile)
-		log.Infof("Profile written to %s\n", fileName)
-
-		fileName, err = config.SaveProfile("local", common.DefaultLocalProfile)
-		log.Infof("Profile written to %s\n", fileName)
-
-		fileName, err = config.SaveProfile("remote", common.DefaultRemoteProfile)
+		fileName, err = config.SaveProfile("local", common.DefaultProfile)
 		log.Infof("Profile written to %s\n", fileName)
 
 		return err

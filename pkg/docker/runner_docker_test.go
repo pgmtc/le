@@ -20,7 +20,7 @@ var ctx = common.Context{
 		{
 			Name:     "test-internal-component",
 			DockerId: "test-component",
-			Image: "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
+			Image:    "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
 		},
 		{
 			Name:     "test-invalid",
@@ -38,6 +38,9 @@ func TestDockerRunner_Status(t *testing.T) {
 }
 
 func TestDockerRunner_Pull(t *testing.T) {
+	if os.Getenv("NO_NETWORK") == "true" {
+		t.Skipf("NO_NETWORK set to true, skipping")
+	}
 	cmp := ctx.Config.CurrentProfile().Components[0]
 	if err := runner.Pull(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
@@ -46,6 +49,9 @@ func TestDockerRunner_Pull(t *testing.T) {
 }
 
 func TestDockerRunner_Workflow(t *testing.T) {
+	if os.Getenv("NO_NETWORK") == "true" {
+		t.Skipf("NO_NETWORK set to true, skipping")
+	}
 	cmp := ctx.Config.CurrentProfile().Components[0]
 	internalCmp := ctx.Config.CurrentProfile().Components[1]
 	invalidCmp := ctx.Config.CurrentProfile().Components[2]

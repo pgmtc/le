@@ -11,9 +11,6 @@ type Component struct {
 	HostPort      int      `yaml:"hostPort,omitempty"`
 	Env           []string `yaml:"env,omitempty"`
 	Links         []string `yaml:"links,omitempty"`
-	Volumes       []string `yaml:"volumes,omitempty"`
-	DockerFile    string   `yaml:"dockerFile,omitempty"`
-	BuildRoot     string   `yaml:"buildRoot,omitempty"`
 }
 
 func ComponentNames(components []Component) []string {
