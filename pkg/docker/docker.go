@@ -189,11 +189,11 @@ func removeImage(component common.Component, logger func(format string, a ...int
 
 func pullImage(component common.Component, logger func(format string, a ...interface{})) error {
 	var pullOptions types.ImagePullOptions
-	if strings.Contains(component.Image, "dkr.ecr.eu-west-1.amazonaws.com") {
-		authString, err := getEcrAuth()
-		if err != nil {
-			return errors.Errorf("problem when obtaining ecr authentication: %s", err.Error())
-		}
+	authString, err := getAuthString(component)
+	if err != nil {
+		return errors.Errorf("error when obtaining authentication details: %s", err.Error())
+	}
+	if authString != "" {
 		pullOptions = types.ImagePullOptions{
 			RegistryAuth: authString,
 		}
@@ -241,6 +241,14 @@ func pullImage(component common.Component, logger func(format string, a ...inter
 
 	logger("\n")
 	return nil
+}
+
+func getAuthString(component common.Component) (authString string, resultErr error) {
+	if strings.Contains(component.Image, "dkr.ecr.eu-west-1.amazonaws.com") {
+		authString, resultErr = getEcrAuth()
+		return
+	}
+	return
 }
 
 func getEcrAuth() (authString string, resultError error) {
