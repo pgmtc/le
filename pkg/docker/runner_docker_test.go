@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-var runner = DockerRunner{}
+var runner = Runner{}
 var ctx = common.Context{
 	Config: common.CreateMockConfig([]common.Component{
 		{
@@ -38,6 +38,7 @@ func TestDockerRunner_Status(t *testing.T) {
 }
 
 func TestDockerRunner_Pull(t *testing.T) {
+	logger := setUp()
 	if os.Getenv("NO_NETWORK") == "true" {
 		t.Skipf("NO_NETWORK set to true, skipping")
 	}
@@ -45,10 +46,11 @@ func TestDockerRunner_Pull(t *testing.T) {
 	if err := runner.Pull(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
-	defer removeImage(cmp)
+	defer removeImage(cmp, logger.Infof)
 }
 
 func TestDockerRunner_Workflow(t *testing.T) {
+	logger := setUp()
 	if os.Getenv("NO_NETWORK") == "true" {
 		t.Skipf("NO_NETWORK set to true, skipping")
 	}
@@ -56,27 +58,27 @@ func TestDockerRunner_Workflow(t *testing.T) {
 	internalCmp := ctx.Config.CurrentProfile().Components[1]
 	invalidCmp := ctx.Config.CurrentProfile().Components[2]
 
-	runner.Remove(ctx, cmp) // Don't handle errors - prepare for the test
-	removeImage(cmp)        // Don't handle errors - prepare for the test
+	runner.Remove(ctx, cmp)        // Don't handle errors - prepare for the test
+	removeImage(cmp, logger.Infof) // Don't handle errors - prepare for the test
 
 	if err := runner.Pull(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
-	defer removeImage(cmp)
+	defer removeImage(cmp, logger.Infof)
 
-	runner.Remove(ctx, internalCmp) // Don't handle errors - prepare for the test
-	removeImage(internalCmp)        // Don't handle errors - prepare for the test
+	runner.Remove(ctx, internalCmp)        // Don't handle errors - prepare for the test
+	removeImage(internalCmp, logger.Infof) // Don't handle errors - prepare for the test
 	if err := runner.Pull(ctx, internalCmp); err != nil && (os.Getenv("SKIP_AWS_TESTING") == "") {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
-	defer removeImage(internalCmp)
+	defer removeImage(internalCmp, logger.Infof)
 
-	runner.Remove(ctx, invalidCmp) // Don't handle errors - prepare for the test
-	removeImage(invalidCmp)        // Don't handle errors - prepare for the test
+	runner.Remove(ctx, invalidCmp)        // Don't handle errors - prepare for the test
+	removeImage(invalidCmp, logger.Infof) // Don't handle errors - prepare for the test
 	if err := runner.Pull(ctx, invalidCmp); err == nil {
 		t.Errorf("Expected error, got nothing")
 	}
-	defer removeImage(invalidCmp)
+	defer removeImage(invalidCmp, logger.Infof)
 
 	if err := runner.Create(ctx, cmp); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())

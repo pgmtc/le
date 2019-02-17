@@ -22,3 +22,8 @@ func (l *StringLogger) Debugf(format string, a ...interface{}) {
 func (l *StringLogger) Infof(format string, a ...interface{}) {
 	l.InfoMessages = append(l.InfoMessages, fmt.Sprintf(color.HiRedString(format, a...)))
 }
+
+func (l *StringLogger) Write(p []byte) (n int, err error) {
+	l.Infof("%s", p)
+	return 0, nil
+}

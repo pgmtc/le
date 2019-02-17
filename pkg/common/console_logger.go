@@ -18,3 +18,7 @@ func (ConsoleLogger) Debugf(format string, a ...interface{}) {
 func (ConsoleLogger) Infof(format string, a ...interface{}) {
 	fmt.Printf(color.HiWhiteString(format, a...))
 }
+
+func (ConsoleLogger) Write(p []byte) (n int, err error) {
+	return fmt.Printf("%s", p)
+}

@@ -8,7 +8,7 @@ import (
 type Module struct{}
 
 func (Module) GetActions() map[string]common.Action {
-	runner := docker.DockerRunner{}
+	runner := docker.Runner{}
 	return map[string]common.Action{
 		"default": getRawAction(runner.Status),
 		"status":  getRawAction(runner.Status),

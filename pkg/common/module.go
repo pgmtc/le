@@ -9,6 +9,7 @@ type Logger interface {
 	Errorf(format string, a ...interface{})
 	Debugf(format string, a ...interface{})
 	Infof(format string, a ...interface{})
+	Write(p []byte) (n int, err error)
 }
 
 type Context struct {

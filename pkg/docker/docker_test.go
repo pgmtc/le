@@ -8,18 +8,25 @@ import (
 	"github.com/pgmtc/le/pkg/common"
 )
 
+func setUp() (logger common.Logger) {
+	logger = &common.StringLogger{}
+	return
+}
+
 func TestMissingParameters(t *testing.T) {
+	logger := setUp()
 	cmp := common.Component{
 		Name:     "test",
 		DockerId: "test-container",
 	}
-	err := createContainer(cmp)
+	err := createContainer(cmp, logger.Infof)
 	if err == nil {
 		t.Errorf("Expected to fail due to mandatory missing")
 	}
 }
 
 func Test_pullImage(t *testing.T) {
+	logger := setUp()
 	if os.Getenv("NO_NETWORK") == "true" {
 		t.Skipf("NO_NETWORK set to true, skipping")
 	}
@@ -45,9 +52,9 @@ func Test_pullImage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			removeImage(tt.args.component) // Ignore errors, image may not exist
+			removeImage(tt.args.component, logger.Infof) // Ignore errors, image may not exist
 
-			err := pullImage(tt.args.component)
+			err := pullImage(tt.args.component, logger.Infof)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("pullImage() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -64,7 +71,7 @@ func Test_pullImage(t *testing.T) {
 				}
 
 				// Try to remove image
-				err = removeImage(tt.args.component)
+				err = removeImage(tt.args.component, logger.Infof)
 				if err != nil {
 					t.Errorf("Unexpected error when removing image: %s", err.Error())
 				}
@@ -82,6 +89,7 @@ func Test_pullImage(t *testing.T) {
 }
 
 func TestComplex(t *testing.T) {
+	logger := setUp()
 	if os.Getenv("NO_NETWORK") == "true" {
 		t.Skipf("NO_NETWORK set to true, skipping")
 	}
@@ -94,17 +102,17 @@ func TestComplex(t *testing.T) {
 		Image:    "docker.io/library/nginx:stable-alpine",
 	}
 
-	err = pullImage(cmp1)
+	err = pullImage(cmp1, logger.Infof)
 	if err != nil {
 		t.Errorf("Error, expected Image to be pulled, got %s", err.Error())
 	}
 
-	err = createContainer(cmp1)
-	defer removeContainer(cmp1)
+	err = createContainer(cmp1, logger.Infof)
+	defer removeComponent(cmp1, logger.Infof)
 	if err != nil {
 		t.Errorf("Error, expected container to be created, got %s", err.Error())
 	}
-	err = startContainer(cmp1)
+	err = startComponent(cmp1, logger.Infof)
 	if err != nil {
 		t.Errorf("Error, expected container to be created, got %s", err.Error())
 	}
@@ -124,14 +132,15 @@ func TestComplex(t *testing.T) {
 			"linkedContainer:link1",
 		},
 	}
-	err = createContainer(cmp)
-	defer removeContainer(cmp)
+	err = createContainer(cmp, logger.Infof)
+	defer removeComponent(cmp, logger.Infof)
 	if err != nil {
 		t.Errorf("Error, expected container to be created, got %s", err.Error())
 	}
 }
 
 func TestContainerWorkflow(t *testing.T) {
+	logger := setUp()
 	if os.Getenv("NO_NETWORK") == "true" {
 		t.Skipf("NO_NETWORK set to true, skipping")
 	}
@@ -142,18 +151,18 @@ func TestContainerWorkflow(t *testing.T) {
 		Image:    "docker.io/library/nginx:stable-alpine",
 	}
 
-	err := createContainer(cmp)
-	defer removeContainer(cmp)
+	err := createContainer(cmp, logger.Infof)
+	defer removeComponent(cmp, logger.Infof)
 	if err != nil {
 		t.Errorf("Expected container to be created, got %s", err.Error())
 	}
 
-	err = stopContainer(cmp)
+	err = stopContainer(cmp, logger.Infof)
 	if err != nil {
 		t.Errorf("Expected container to be stopped, got %s", err.Error())
 	}
 
-	err = startContainer(cmp)
+	err = startComponent(cmp, logger.Infof)
 	if err != nil {
 		t.Errorf("Expected container to be started, got %s", err.Error())
 	}
@@ -163,7 +172,7 @@ func TestContainerWorkflow(t *testing.T) {
 		t.Errorf("Expected container to print logs, got %s", err.Error())
 	}
 
-	err = removeContainer(cmp)
+	err = removeComponent(cmp, logger.Infof)
 	if err != nil {
 		t.Errorf("Expected container to be removed, got %s", err.Error())
 	}

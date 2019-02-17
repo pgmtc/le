@@ -3,7 +3,6 @@ package docker
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
@@ -67,9 +66,9 @@ func dockerGetContainers() (map[string]types.Container, error) {
 	return containerMap, nil
 }
 
-func startContainer(component common.Component) error {
+func startComponent(component common.Component, logger func(format string, a ...interface{})) error {
 	if container, err := getContainer(component); err == nil {
-		fmt.Printf("Starting container '%s' for component '%s'\n", component.DockerId, component.Name)
+		logger("Starting container '%s' for component '%s'\n", component.DockerId, component.Name)
 
 		if err := DockerGetClient().ContainerStart(context.Background(), container.ID, types.ContainerStartOptions{}); err != nil {
 			return err
@@ -79,9 +78,9 @@ func startContainer(component common.Component) error {
 	return errors.Errorf("Starting container '%s' for component '%s': Not found. Create it first\n", component.Name, component.DockerId)
 }
 
-func stopContainer(component common.Component) error {
+func stopContainer(component common.Component, logger func(format string, a ...interface{})) error {
 	if container, err := getContainer(component); err == nil {
-		fmt.Printf("Stopping container '%s' for component '%s'\n", component.DockerId, component.Name)
+		logger("Stopping container '%s' for component '%s'\n", component.DockerId, component.Name)
 		if err := DockerGetClient().ContainerStop(context.Background(), container.ID, nil); err != nil {
 			return err
 		}
@@ -90,14 +89,14 @@ func stopContainer(component common.Component) error {
 	return errors.Errorf("Stopping container '%s' for component '%s': Not found found. Nothing to stop\n", component.Name, component.DockerId)
 }
 
-func removeContainer(component common.Component) error {
+func removeComponent(component common.Component, logger func(format string, a ...interface{})) error {
 	if container, err := getContainer(component); err == nil {
 		if container.State == "running" {
-			if err := stopContainer(component); err != nil {
+			if err := stopContainer(component, logger); err != nil {
 				return err
 			}
 		}
-		fmt.Printf("Removing container '%s' for component '%s'\n", component.DockerId, component.Name)
+		logger("Removing container '%s' for component '%s'\n", component.DockerId, component.Name)
 		if err := DockerGetClient().ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{}); err != nil {
 			return err
 		}
@@ -106,15 +105,15 @@ func removeContainer(component common.Component) error {
 	return errors.Errorf("Removing container '%s' for component '%s': Not found. Nothing to remove\n", component.Name, component.DockerId)
 }
 
-func createContainer(component common.Component) error {
+func createContainer(component common.Component, logger func(format string, a ...interface{})) error {
 	if component.Name == "" || component.DockerId == "" || component.Image == "" {
 		return errors.New("Missing container Name, DockerId or Image")
 	}
 
 	if _, err := getContainer(component); err == nil {
-		return errors.New(fmt.Sprintf("Component %s already exist (%s). If you want to recreate, then please stop and remove it first", component.Name, component.DockerId))
+		return errors.Errorf("Component %s already exist (%s). If you want to recreate, then please stop and remove it first", component.Name, component.DockerId)
 	}
-	fmt.Printf("Creating container '%s' for component '%s': ", component.DockerId, component.Name)
+	logger("Creating container '%s' for component '%s': ", component.DockerId, component.Name)
 	exposePort := strconv.Itoa(component.ContainerPort)
 	mapPort := strconv.Itoa(component.HostPort)
 	var exposedPorts nat.PortSet
@@ -123,7 +122,7 @@ func createContainer(component common.Component) error {
 	if component.ContainerPort > 0 && component.HostPort > 0 {
 		exposedPorts = nat.PortSet{nat.Port(exposePort): struct{}{}}
 		portMap = map[nat.Port][]nat.PortBinding{nat.Port(exposePort): {{HostIP: "0.0.0.0", HostPort: mapPort}}}
-		fmt.Printf(" port %d will be mapped to host port %d: ", component.ContainerPort, component.HostPort)
+		logger(" port %d will be mapped to host port %d: ", component.ContainerPort, component.HostPort)
 	}
 
 	// Mount AWS login credentials
@@ -148,7 +147,7 @@ func createContainer(component common.Component) error {
 		return err
 	}
 
-	fmt.Println()
+	logger("\n")
 	return nil
 }
 
@@ -177,8 +176,8 @@ func DockerGetClient() *client.Client {
 	return cli
 }
 
-func removeImage(component common.Component) error {
-	fmt.Printf("removing Image for '%s' (%s) ... \n", component.Name, component.Image)
+func removeImage(component common.Component, logger func(format string, a ...interface{})) error {
+	logger("removing Image for '%s' (%s) ... \n", component.Name, component.Image)
 	name := "docker"
 	args := []string{"rmi", component.Image}
 	cmd := exec.Command(name, args...)
@@ -188,9 +187,8 @@ func removeImage(component common.Component) error {
 	return nil
 }
 
-func pullImage(component common.Component) error {
+func pullImage(component common.Component, logger func(format string, a ...interface{})) error {
 	var pullOptions types.ImagePullOptions
-
 	if strings.Contains(component.Image, "dkr.ecr.eu-west-1.amazonaws.com") {
 		authString, err := getEcrAuth()
 		if err != nil {
@@ -200,7 +198,6 @@ func pullImage(component common.Component) error {
 			RegistryAuth: authString,
 		}
 	}
-
 	out, err := DockerGetClient().ImagePull(context.Background(), component.Image, pullOptions)
 	if err != nil {
 		return err
@@ -228,25 +225,21 @@ func pullImage(component common.Component) error {
 			}
 			panic(err)
 		}
-
-		//fmt.Printf("%+v\n", event)
 		switch true {
 		case event.Error != "":
 			return errors.Errorf("\nbuild error: %s", event.Error)
 		case event.Progress != "" || event.Status != "":
-			fmt.Printf(color.MagentaString("\r%s: %s", event.Status, event.Progress))
+			logger(color.MagentaString("\r%s: %s", event.Status, event.Progress))
 			if event.ProgressDetail.Current == 0 {
-				fmt.Println()
+				logger("\n")
 			}
 		case strings.TrimSuffix(event.Stream, "\n") != "":
-			fmt.Printf(color.MagentaString("%s", event.Stream))
+			logger(color.MagentaString("%s", event.Stream))
 		}
 
 	}
 
-	//io.Copy(os.Stdout, out)
-	//fmt.Printf("done\n")
-	fmt.Printf("\n")
+	logger("\n")
 	return nil
 }
 
@@ -284,7 +277,7 @@ func parseAwsLogin(loginOutput string) (authString string, resultError error) {
 	return
 }
 
-func printStatus(allComponents []common.Component, verbose bool, follow bool, followLength int) error {
+func printStatus(allComponents []common.Component, verbose bool, follow bool, writer io.Writer) error {
 
 	containerMap, err := dockerGetContainers()
 	images, err := dockerGetImages()
@@ -293,7 +286,7 @@ func printStatus(allComponents []common.Component, verbose bool, follow bool, fo
 		return err
 	}
 
-	table := tablewriter.NewWriter(os.Stdout)
+	table := tablewriter.NewWriter(writer)
 	table.SetHeader([]string{"Component", "Image (built or pulled)", "Container Exists (created)", "State", "HTTP"})
 
 	for _, cmp := range allComponents {
@@ -354,9 +347,9 @@ func printStatus(allComponents []common.Component, verbose bool, follow bool, fo
 	}
 
 	if follow {
-		print("\033[H\033[2J") // Clear screen
+		writer.Write([]byte("\033[H\033[2J")) // Clear screen
 	}
-	fmt.Printf("\r")
+	writer.Write([]byte("\r"))
 	table.Render()
 	return nil
 }
