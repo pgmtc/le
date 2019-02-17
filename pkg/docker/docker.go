@@ -1,7 +1,6 @@
 package docker
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -22,11 +21,8 @@ import (
 	"strings"
 )
 
-func dockerGetImages() (images []string, returnErr error) {
-	out, err := DockerGetClient().ImageList(context.Background(), types.ImageListOptions{})
-	if err != nil {
-		panic(err)
-	}
+func dockerGetImages() (images []string) {
+	out, _ := DockerGetClient().ImageList(context.Background(), types.ImageListOptions{})
 	for _, img := range out {
 		for _, tag := range img.RepoTags {
 			images = append(images, tag)
@@ -48,22 +44,19 @@ func dockerPrintLogs(component common.Component, follow bool) error {
 	return errors.Errorf("Error when getting container logs for '%s' (%s)\n", component.Name, component.DockerId)
 }
 
-func dockerGetContainers() (map[string]types.Container, error) {
-	containers, err := DockerGetClient().ContainerList(context.Background(), types.ContainerListOptions{
+func dockerGetContainers() map[string]types.Container {
+	containers, _ := DockerGetClient().ContainerList(context.Background(), types.ContainerListOptions{
 		All: true,
 	})
-	if err != nil {
-		return nil, err
-	}
 
 	containerMap := make(map[string]types.Container)
-	for _, container := range containers {
-		for _, cName := range container.Names {
+	for _, cont := range containers {
+		for _, cName := range cont.Names {
 			containerName := cName[1:len(cName)]
-			containerMap[containerName] = container
+			containerMap[containerName] = cont
 		}
 	}
-	return containerMap, nil
+	return containerMap
 }
 
 func startComponent(component common.Component, logger func(format string, a ...interface{})) error {
@@ -154,11 +147,7 @@ func createContainer(component common.Component, logger func(format string, a ..
 func getContainer(component common.Component) (types.Container, error) {
 	var nilCont types.Container
 	dockerId := component.DockerId
-	containerMap, err := dockerGetContainers()
-	if err != nil {
-		return nilCont, err
-	}
-
+	containerMap := dockerGetContainers()
 	if cont, ok := containerMap[dockerId]; ok {
 		return cont, nil
 	} else {
@@ -168,8 +157,6 @@ func getContainer(component common.Component) (types.Container, error) {
 
 func DockerGetClient() *client.Client {
 	cli, err := client.NewEnvClient()
-	//cli.UpdateClientVersion()
-	//cli, err := client.NewClientWithOpts(client.WithVersion("1.39"))
 	if err != nil {
 		panic(err)
 	}
@@ -189,7 +176,7 @@ func removeImage(component common.Component, logger func(format string, a ...int
 
 func pullImage(component common.Component, logger func(format string, a ...interface{})) error {
 	var pullOptions types.ImagePullOptions
-	authString, err := getAuthString(component)
+	authString, err := getAuthString(component.Repository)
 	if err != nil {
 		return errors.Errorf("error when obtaining authentication details: %s", err.Error())
 	}
@@ -223,7 +210,6 @@ func pullImage(component common.Component, logger func(format string, a ...inter
 			if err == io.EOF {
 				break
 			}
-			panic(err)
 		}
 		switch true {
 		case event.Error != "":
@@ -243,57 +229,10 @@ func pullImage(component common.Component, logger func(format string, a ...inter
 	return nil
 }
 
-func getAuthString(component common.Component) (authString string, resultErr error) {
-	if strings.Contains(component.Image, "dkr.ecr.eu-west-1.amazonaws.com") {
-		authString, resultErr = getEcrAuth()
-		return
-	}
-	return
-}
-
-func getEcrAuth() (authString string, resultError error) {
-	name := "aws"
-	args := []string{"ecr", "get-login", "--no-include-email", "--region", "eu-west-1"}
-	out, err := exec.Command(name, args...).Output()
-	if err != nil {
-		resultError = errors.Errorf("Error when pulling the image: %s", err.Error())
-		return
-	}
-
-	authString, resultError = parseAwsLogin(string(out))
-	return
-}
-
-func parseAwsLogin(loginOutput string) (authString string, resultError error) {
-	split := strings.Split(loginOutput, " ")
-	if len(split) != 7 {
-		resultError = errors.Errorf("Unexpected number of items in aws docker login command, got %d, expected %d", len(split), 7)
-		return
-	}
-
-	authConfig := types.AuthConfig{
-		Username:      split[3],
-		Password:      split[5],
-		ServerAddress: split[6],
-	}
-	encodedJSON, err := json.Marshal(authConfig)
-	if err != nil {
-		resultError = errors.Errorf("Error when encoding ECR auth: %s", err.Error())
-	}
-
-	authString = base64.URLEncoding.EncodeToString(encodedJSON)
-	return
-}
-
 func printStatus(allComponents []common.Component, verbose bool, follow bool, writer io.Writer) error {
 
-	containerMap, err := dockerGetContainers()
-	images, err := dockerGetImages()
-
-	if err != nil {
-		return err
-	}
-
+	containerMap := dockerGetContainers()
+	images := dockerGetImages()
 	table := tablewriter.NewWriter(writer)
 	table.SetHeader([]string{"Component", "Image (built or pulled)", "Container Exists (created)", "State", "HTTP"})
 

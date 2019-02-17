@@ -7,6 +7,13 @@ import (
 
 var mockConfig = MockConfig{}
 
+func TestMockConfig_GetRepositoryPrefix(t *testing.T) {
+	mockConfig.SetRepositoryPrefix("http://something-anything.co.uk")
+	if mockConfig.config.RepositoryPrefix != "http://something-anything.co.uk" {
+		t.Errorf("Expected %s, got %s", "http://something-anything.co.uk", mockConfig.config.RepositoryPrefix)
+	}
+}
+
 func TestMockConfig_SaveConfig(t *testing.T) {
 	_, err := mockConfig.SaveConfig()
 	if err != nil {

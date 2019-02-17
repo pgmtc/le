@@ -3,10 +3,6 @@ package common
 import "testing"
 
 var log = StringLogger{}
-var msg1 = "first message: %s"
-var msg2 = "second message: %s"
-var msg3 = "third message: %s"
-var msg4 = "fourth message: %s"
 
 func testLogMethod(t *testing.T, logMethod func(format string, a ...interface{}), messages *[]string) {
 	values := [][]string{
@@ -36,4 +32,18 @@ func TestStringLogger_Debugf(t *testing.T) {
 
 func TestStringLogger_Infof(t *testing.T) {
 	testLogMethod(t, log.Infof, &log.InfoMessages)
+}
+
+func TestStringLogger_Write(t *testing.T) {
+	preCount := len(log.InfoMessages)
+	log.Write([]byte("test-message"))
+	postCount := len(log.InfoMessages)
+
+	if preCount != (postCount - 1) {
+		t.Errorf("Expected that there will be an extra info message after write()")
+	}
+	lastMessage := log.InfoMessages[len(log.InfoMessages)-1]
+	if lastMessage != "test-message" {
+		t.Errorf("Expected last message to be %s, got %s", "test-message", log.InfoMessages[len(log.InfoMessages)-1])
+	}
 }

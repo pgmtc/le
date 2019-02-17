@@ -1,8 +1,8 @@
 package docker
 
 import (
-	"encoding/base64"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/pgmtc/le/pkg/common"
@@ -40,14 +40,36 @@ func Test_pullImage(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "testPublicImage",
+			args: args{
+				component: common.Component{
+					Name:  "test-container",
+					Image: "docker.io/library/nginx:stable-alpine",
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "testECRWithLogin",
 			args: args{
 				component: common.Component{
-					Name:  "local-db",
-					Image: "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
+					Name:       "local-db",
+					Image:      "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
+					Repository: "ecr:eu-west-1",
 				},
 			},
 			wantErr: !(os.Getenv("SKIP_AWS_TESTING") == ""),
+		},
+		{
+			name: "testNonExistingRepository",
+			args: args{
+				component: common.Component{
+					Name:       "test-container",
+					Image:      "non-existing-image",
+					Repository: "non-existing",
+				},
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -61,12 +83,12 @@ func Test_pullImage(t *testing.T) {
 
 			if err == nil {
 				// Check that the image exists
-				images, err := dockerGetImages()
-				if err != nil {
-					t.Errorf("Unexpected error when getting list of images: %s", err.Error())
-				}
-
-				if !common.ArrContains(images, tt.args.component.Image) {
+				images := dockerGetImages()
+				imageClensed := strings.Replace(tt.args.component.Image, "docker.io/library/", "", 1) // This is a workaround for public docker images from docker.io
+				if !common.ArrContains(images, imageClensed) {
+					t.Logf("%s", images)
+					t.Logf("%s", tt.args.component.Image)
+					t.Logf("%s", imageClensed)
 					t.Errorf("Pulled image '%s' seems not to exist", tt.args.component.Image)
 				}
 
@@ -75,10 +97,7 @@ func Test_pullImage(t *testing.T) {
 				if err != nil {
 					t.Errorf("Unexpected error when removing image: %s", err.Error())
 				}
-				images, err = dockerGetImages()
-				if err != nil {
-					t.Errorf("Unexpected error when getting list of images: %s", err.Error())
-				}
+				images = dockerGetImages()
 				if common.ArrContains(images, tt.args.component.Image) {
 					t.Errorf("Pulled image '%s' still exist, should have been removed", tt.args.component.Image)
 				}
@@ -185,51 +204,8 @@ func TestContainerWorkflow(t *testing.T) {
 
 func TestDockerGetImages(t *testing.T) {
 	common.SkipDockerTesting(t)
-	if _, err := dockerGetImages(); err != nil {
-		t.Errorf("Unexpected error, but got %s", err.Error())
-	}
-}
-
-func Test_parseAwsLogin(t *testing.T) {
-	type args struct {
-		loginOutput string
-	}
-	tests := []struct {
-		name           string
-		args           args
-		wantAuthString string
-		wantErr        bool
-	}{
-		{
-			name: "testSuccess",
-			args: args{
-				loginOutput: "docker login -u username -p password https://server-name",
-			},
-			wantAuthString: "{\"username\":\"username\",\"password\":\"password\",\"serveraddress\":\"https://server-name\"}",
-			wantErr:        false,
-		},
-		{
-			name: "testFail",
-			args: args{
-				loginOutput: "some other unexpected return value",
-			},
-			wantAuthString: "",
-			wantErr:        true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotAuthString, err := parseAwsLogin(tt.args.loginOutput)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parseAwsLogin() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			decodedAuthByte, _ := base64.URLEncoding.DecodeString(gotAuthString)
-			decodedAuthString := string(decodedAuthByte)
-			if decodedAuthString != tt.wantAuthString {
-				t.Errorf("parseAwsLogin() = %v, want %v", gotAuthString, tt.wantAuthString)
-			}
-		})
+	images := dockerGetImages()
+	if len(images) == 0 {
+		t.Errorf("Expected to have at least some images")
 	}
 }

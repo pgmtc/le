@@ -17,3 +17,8 @@ func TestConsoleLogger_Infof(t *testing.T) {
 	c := ConsoleLogger{}
 	c.Infof("%s", "Info message")
 }
+
+func TestConsoleLogger_Write(t *testing.T) {
+	c := ConsoleLogger{}
+	c.Write([]byte("Test message"))
+}

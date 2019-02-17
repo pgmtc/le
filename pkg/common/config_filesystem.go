@@ -16,15 +16,15 @@ type fileSystemConfig struct {
 	config         Config
 }
 
-func (c *fileSystemConfig) SetRepositoryPrefix(url string) {
-	c.config.RepositoryPrefix = url
-}
-
 func FileSystemConfig(configLocation string) Configuration {
 	return &fileSystemConfig{
 		configLocation: configLocation,
 		configFileName: "Config.yaml",
 	}
+}
+
+func (c *fileSystemConfig) SetRepositoryPrefix(url string) {
+	c.config.RepositoryPrefix = url
 }
 
 func (c *fileSystemConfig) LoadProfile(profileName string) (profile Profile, resultErr error) {

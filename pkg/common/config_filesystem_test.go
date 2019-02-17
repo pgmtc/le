@@ -28,6 +28,14 @@ func TestFileSystemConfig(t *testing.T) {
 	FileSystemConfig(tmpDir)
 }
 
+func TestFileSystemConfig_SetRepositoryPrefix(t *testing.T) {
+	fsConfig := setUp(".le-Config")
+	fsConfig.SetRepositoryPrefix("http://something-anything.co.uk")
+	if fsConfig.config.RepositoryPrefix != "http://something-anything.co.uk" {
+		t.Errorf("Expected %s, got %s", "http://something-anything.co.uk", fsConfig.config.RepositoryPrefix)
+	}
+}
+
 func TestFileSystemConfig_initConfigDir(t *testing.T) {
 	config := setUp(".le-Config")
 	defer tearDown()
