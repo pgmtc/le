@@ -12,6 +12,7 @@ type Component struct {
 	Repository    string   `yaml:"repository,omitempty"`
 	Env           []string `yaml:"env,omitempty"`
 	Links         []string `yaml:"links,omitempty"`
+	Mounts        []string `yaml:"mounts,omitempty"`
 }
 
 func ComponentNames(components []Component) []string {

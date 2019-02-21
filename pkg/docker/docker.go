@@ -119,22 +119,25 @@ func createContainer(component common.Component, logger func(format string, a ..
 	}
 
 	// Mount AWS login credentials
+	mounts, err := parseMounts(component)
+	if err != nil {
+		return errors.Errorf("error when parsing mounts: %s", err.Error())
+	}
 	usr, _ := user.Current()
 	dir := usr.HomeDir
-	var awsCliMount []mount.Mount
 	awsCliPath := filepath.Join(dir, ".aws")
 	if _, err := os.Stat(awsCliPath); !os.IsNotExist(err) {
-		awsCliMount = append(awsCliMount, mount.Mount{Type: mount.TypeBind, Source: dir + "/.aws", Target: "/root/.aws"})
+		mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: dir + "/.aws", Target: "/root/.aws"})
 	}
 
-	_, err := DockerGetClient().ContainerCreate(context.Background(), &container.Config{
+	_, err = DockerGetClient().ContainerCreate(context.Background(), &container.Config{
 		Image:        component.Image,
 		Env:          component.Env,
 		ExposedPorts: exposedPorts,
 	}, &container.HostConfig{
 		PortBindings: portMap,
 		Links:        component.Links,
-		Mounts:       awsCliMount,
+		Mounts:       mounts,
 	}, nil, component.DockerId)
 	if err != nil {
 		return err
@@ -299,4 +302,26 @@ func printStatus(allComponents []common.Component, verbose bool, follow bool, wr
 	writer.Write([]byte("\r"))
 	table.Render()
 	return nil
+}
+
+func parseMounts(cmp common.Component) (mounts []mount.Mount, resultErr error) {
+	if len(cmp.Mounts) > 0 {
+		for _, mnt := range cmp.Mounts {
+			mountSpec := strings.Split(mnt, ":")
+			if len(mountSpec) == 2 {
+				mntSrc := common.ParsePath(mountSpec[0])
+				mntDst := common.ParsePath(mountSpec[1])
+				if _, err := os.Stat(mntSrc); os.IsNotExist(err) {
+					resultErr = errors.Errorf("error when adding mount: source directory %s does not exist", mntSrc)
+					return
+				}
+				if _, err := os.Stat(mntSrc); !os.IsNotExist(err) {
+					mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: mntSrc, Target: mntDst})
+				}
+			} else {
+				resultErr = errors.Errorf("Unable to parse mount item: %s", mnt)
+			}
+		}
+	}
+	return
 }

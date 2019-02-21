@@ -209,3 +209,25 @@ func TestDockerGetImages(t *testing.T) {
 		t.Errorf("Expected to have at least some images")
 	}
 }
+
+func Test_parseMounts(t *testing.T) {
+	if _, err := parseMounts(common.Component{Mounts: []string{"invalid_format"}}); err == nil {
+		t.Errorf("Expected error due to invalid format, got nothing")
+	}
+	if _, err := parseMounts(common.Component{Mounts: []string{"/non-existing:/"}}); err == nil {
+		t.Errorf("Expected error due to non-existing source directory, got nothing")
+	}
+	mounts, err := parseMounts(common.Component{Mounts: []string{"/:/", "/etc:/etc"}})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
+	}
+	if len(mounts) != 2 {
+		t.Errorf("Expected to get 2 mounts back, got %d", len(mounts))
+	}
+	if mounts[0].Source != "/" {
+		t.Errorf("Expected first mount source to be '/', got '%s'", mounts[0].Source)
+	}
+	if mounts[0].Target != "/" {
+		t.Errorf("Expected first mount target to be '/', got '%s'", mounts[0].Target)
+	}
+}
