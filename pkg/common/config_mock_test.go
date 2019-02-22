@@ -15,7 +15,7 @@ func TestMockConfig_GetRepositoryPrefix(t *testing.T) {
 }
 
 func TestMockConfig_SaveConfig(t *testing.T) {
-	_, err := mockConfig.SaveConfig()
+	_, err := mockConfig.SaveConfig(true)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
@@ -24,7 +24,7 @@ func TestMockConfig_SaveConfig(t *testing.T) {
 	}
 
 	mockConfig.reset().setSaveToFail()
-	_, err = mockConfig.SaveConfig()
+	_, err = mockConfig.SaveConfig(true)
 	if err == nil {
 		t.Errorf("Expected error, got nothing")
 	}

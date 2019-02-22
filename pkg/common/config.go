@@ -3,7 +3,7 @@ package common
 const CONFIG_FILE_NAME = "Config.yaml"
 
 type Configuration interface {
-	SaveConfig() (fileName string, resultErr error)
+	SaveConfig(overwrite bool) (fileName string, resultErr error)
 	LoadConfig() (resultErr error)
 	SaveProfile(profileName string, profile Profile) (fileName string, resultErr error)
 	LoadProfile(profileName string) (profile Profile, resultErr error)

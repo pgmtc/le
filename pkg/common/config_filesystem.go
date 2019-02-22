@@ -57,12 +57,12 @@ func (c *fileSystemConfig) SaveProfile(profileName string, profile Profile) (fil
 	return
 }
 
-func (c *fileSystemConfig) SaveConfig() (fileName string, resultErr error) {
-	//_, err := c.SaveProfile(c.Config.Profile, c.CurrentProfile())
-	//if err != nil {
-	//	resultErr = errors.Errorf("error saving current profile: %s", err.Error())
-	//	return
-	//}
+func (c *fileSystemConfig) SaveConfig(overwrite bool) (fileName string, resultErr error) {
+	configDir := ParsePath(c.configLocation)
+	if _, err := os.Stat(configDir); !os.IsNotExist(err) && !overwrite {
+		resultErr = errors.Errorf("%s already exist", configDir)
+		return
+	}
 	fileName = path.Join(c.initConfigDir(c.configLocation), c.configFileName)
 	if err := YamlMarshall(c.config, fileName); err != nil {
 		resultErr = errors.Errorf("Error writing Config file\n- %s", err.Error())

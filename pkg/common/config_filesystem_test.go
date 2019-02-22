@@ -129,7 +129,7 @@ func Test_fileSystemConfig_SaveConfig(t *testing.T) {
 	config := setUp(".le-Config")
 	defer tearDown()
 
-	fileName, err := config.SaveConfig()
+	fileName, err := config.SaveConfig(true)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
@@ -139,9 +139,14 @@ func Test_fileSystemConfig_SaveConfig(t *testing.T) {
 		t.Errorf("Expected file name %s, got %s", expectedFileName, fileName)
 	}
 
+	// Test write failure - overwrite
+	if _, err = config.SaveConfig(false); err == nil {
+		t.Errorf("Expected error to be returned (overwrite false), got nothing")
+	}
+
 	// Test write failure
 	config.configFileName = "../../../../../../../../crap"
-	fileName, err = config.SaveConfig()
+	fileName, err = config.SaveConfig(true)
 	if err == nil {
 		t.Errorf("Expected rror, got nothing")
 	}
@@ -152,7 +157,7 @@ func Test_fileSystemConfig_LoadConfig(t *testing.T) {
 	validConfig := setUp(".le-Config")
 	defer tearDown()
 	validConfig.config.Profile = "default"
-	validConfig.SaveConfig()
+	validConfig.SaveConfig(true)
 	validConfig.SaveProfile("default", Profile{})
 	err := validConfig.LoadConfig()
 	if err != nil {
@@ -160,7 +165,7 @@ func Test_fileSystemConfig_LoadConfig(t *testing.T) {
 	}
 
 	validConfig.config.Profile = "non-existing"
-	validConfig.SaveConfig()
+	validConfig.SaveConfig(true)
 	err = validConfig.LoadConfig()
 	if err == nil {
 		t.Errorf("Expected error, got nothing")

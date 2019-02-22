@@ -26,7 +26,7 @@ func (c *DummyConfig) SetRepositoryPrefix(url string) {
 	c.config.RepositoryPrefix = url
 }
 
-func (c *DummyConfig) SaveConfig() (fileName string, resultErr error) {
+func (c *DummyConfig) SaveConfig(overwrite bool) (fileName string, resultErr error) {
 	c.saveConfigCalled = true
 	if c.failSaveRequired {
 		resultErr = errors.New("Deliberate testing error")
