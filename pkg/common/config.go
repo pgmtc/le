@@ -48,5 +48,6 @@ var defaultComponents = []Component{
 		Links: []string{
 			"container-1:cmp1",
 		},
+		Mounts: []string{"/loca-dir:/container-dir"},
 	},
 }
