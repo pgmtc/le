@@ -25,7 +25,7 @@ func (c *MockConfig) SetRepositoryPrefix(url string) {
 	c.config.RepositoryPrefix = url
 }
 
-func (c *MockConfig) SaveConfig() (fileName string, resultErr error) {
+func (c *MockConfig) SaveConfig(overwrite bool) (fileName string, resultErr error) {
 	c.saveConfigCalled = true
 	if c.failSaveRequired {
 		resultErr = errors.New("Deliberate testing error")

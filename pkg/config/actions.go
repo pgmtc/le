@@ -45,7 +45,10 @@ var initAction = common.RawAction{
 		config.SetProfile("default", common.DefaultProfile)
 		config.SetRepositoryPrefix("https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/")
 
-		fileName, err := config.SaveConfig()
+		fileName, err := config.SaveConfig(false)
+		if err != nil {
+			return err
+		}
 		log.Infof("Config written to %s\n", fileName)
 
 		fileName, err = config.SaveProfile("local", common.DefaultProfile)
@@ -92,7 +95,7 @@ var switchAction = common.RawAction{
 
 		config.SetProfile(args[0], profile)
 
-		configFile, err := config.SaveConfig()
+		configFile, err := config.SaveConfig(true)
 		if err != nil {
 			return errors.Errorf("Error when saving config: %s", err.Error())
 		}
