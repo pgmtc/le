@@ -141,14 +141,6 @@ func buildImage(ctx common.Context, image string, buildRoot string, dockerFile s
 		log.Errorf("%s", err.Error())
 	}
 	log.Debugf("Finished with build\n")
-	//defer buildResponse.Body.Close()
-
-	//log.Debugf("********* %s **********\n", buildResponse.OSType)
-	//_, err = io.Copy(os.Stdout, buildResponse.Body)
-	//if err != nil {
-	//	log.Fatal(err, " :unable to read image build response")
-	//}
-
 	d := json.NewDecoder(buildResponse.Body)
 
 	type Event struct {
@@ -183,11 +175,6 @@ func buildImage(ctx common.Context, image string, buildRoot string, dockerFile s
 
 		case strings.TrimSuffix(event.Stream, "\n") != "":
 			log.Debugf("%s", event.Stream)
-			if strings.HasPrefix(event.Stream, "Successfully built ") {
-				// Fish for image id
-				//imageId = strings.Replace(event.Stream, "Successfully built ", "", 1)
-				//imageId = strings.TrimSuffix(imageId, "\n")
-			}
 		}
 	}
 	return nil
