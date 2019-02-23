@@ -202,10 +202,17 @@ func Test_buildImage(t *testing.T) {
 	buildRoot := mockDir + "/buildtest"
 	dockerFile := mockDir + "/buildtest/Dockerfile"
 	buildArgs := []string{"arg1:value1"}
-	noCache := true
-	err := buildImage(ctx, image, buildRoot, dockerFile, buildArgs, noCache)
+	err := buildImage(ctx, image, buildRoot, dockerFile, buildArgs, true)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
+	}
+	// Test missing parameters
+	if err := buildImage(ctx, "", "", "", buildArgs, true); err == nil {
+		t.Errorf("Expected error (missing parameters), got nothing")
+	}
+	// Test invalid build root
+	if err := buildImage(ctx, image, "../../../../../../../../../../../../../../", dockerFile, buildArgs, true); err == nil {
+		t.Errorf("Expected error (invalid build root), got nothing")
 	}
 }
 
