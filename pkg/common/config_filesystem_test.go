@@ -3,6 +3,7 @@ package common
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -11,7 +12,7 @@ var tmpDir string
 
 func setUp(dirSuffix string) fileSystemConfig {
 	tmpDir, _ = ioutil.TempDir("", "le-test-Config-mock")
-	targetDir := tmpDir + "/" + dirSuffix
+	targetDir := filepath.Join(tmpDir, dirSuffix)
 	return fileSystemConfig{
 		configLocation: targetDir,
 		configFileName: "Config.yaml",

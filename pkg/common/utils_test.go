@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/user"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -54,17 +55,17 @@ func TestParsePath(t *testing.T) {
 		{
 			name: "test-relative",
 			args: args{path: "relative/path.txt"},
-			want: cwd + "/relative/path.txt",
+			want: filepath.Join(cwd, "relative/path.txt"),
 		},
 		{
 			name: "test-absolute",
 			args: args{path: "/absolute/relative/path.txt"},
-			want: "/absolute/relative/path.txt",
+			want: filepath.VolumeName(cwd) + filepath.Join("/absolute/relative/path.txt"),
 		},
 		{
 			name: "test-home",
 			args: args{path: "~/somedir/path.txt"},
-			want: usr.HomeDir + "/somedir/path.txt",
+			want: filepath.Join(usr.HomeDir, "/somedir/path.txt"),
 		},
 		{
 			name: "test-cwd",
@@ -74,7 +75,7 @@ func TestParsePath(t *testing.T) {
 		{
 			name: "test-cwd-2",
 			args: args{path: ""},
-			want: cwd + "/",
+			want: filepath.Join(cwd, "/"),
 		},
 	}
 	for _, tt := range tests {
