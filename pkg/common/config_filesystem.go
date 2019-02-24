@@ -4,6 +4,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -15,15 +16,15 @@ type fileSystemConfig struct {
 	config         Config
 }
 
-func (c *fileSystemConfig) SetRepositoryPrefix(url string) {
-	c.config.RepositoryPrefix = url
-}
-
 func FileSystemConfig(configLocation string) Configuration {
 	return &fileSystemConfig{
 		configLocation: configLocation,
 		configFileName: "Config.yaml",
 	}
+}
+
+func (c *fileSystemConfig) SetRepositoryPrefix(url string) {
+	c.config.RepositoryPrefix = url
 }
 
 func (c *fileSystemConfig) LoadProfile(profileName string) (profile Profile, resultErr error) {
@@ -56,7 +57,12 @@ func (c *fileSystemConfig) SaveProfile(profileName string, profile Profile) (fil
 	return
 }
 
-func (c *fileSystemConfig) SaveConfig() (fileName string, resultErr error) {
+func (c *fileSystemConfig) SaveConfig(overwrite bool) (fileName string, resultErr error) {
+	configDir := ParsePath(c.configLocation)
+	if _, err := os.Stat(configDir); !os.IsNotExist(err) && !overwrite {
+		resultErr = errors.Errorf("%s already exist", configDir)
+		return
+	}
 	fileName = filepath.Join(c.initConfigDir(c.configLocation), c.configFileName)
 	if err := YamlMarshall(c.config, fileName); err != nil {
 		resultErr = errors.Errorf("Error writing Config file\n- %s", err.Error())

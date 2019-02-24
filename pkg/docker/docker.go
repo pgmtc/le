@@ -1,7 +1,6 @@
 package docker
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -9,11 +8,13 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/fatih/color"
+	"github.com/mholt/archiver"
 	"github.com/olekukonko/tablewriter"
 	"github.com/pgmtc/le/pkg/common"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/user"
@@ -22,11 +23,16 @@ import (
 	"strings"
 )
 
-func dockerGetImages() (images []string, returnErr error) {
-	out, err := DockerGetClient().ImageList(context.Background(), types.ImageListOptions{})
+func getClient() *client.Client {
+	cli, err := client.NewEnvClient()
 	if err != nil {
 		panic(err)
 	}
+	return cli
+}
+
+func getImages() (images []string) {
+	out, _ := getClient().ImageList(context.Background(), types.ImageListOptions{})
 	for _, img := range out {
 		for _, tag := range img.RepoTags {
 			images = append(images, tag)
@@ -35,10 +41,10 @@ func dockerGetImages() (images []string, returnErr error) {
 	return
 }
 
-func dockerPrintLogs(component common.Component, follow bool) error {
+func printLogs(component common.Component, follow bool) error {
 	if container, err := getContainer(component); err == nil {
 		options := types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true, Follow: follow, Timestamps: false}
-		out, err := DockerGetClient().ContainerLogs(context.Background(), container.ID, options)
+		out, err := getClient().ContainerLogs(context.Background(), container.ID, options)
 		if err != nil {
 			return err
 		}
@@ -48,29 +54,26 @@ func dockerPrintLogs(component common.Component, follow bool) error {
 	return errors.Errorf("Error when getting container logs for '%s' (%s)\n", component.Name, component.DockerId)
 }
 
-func dockerGetContainers() (map[string]types.Container, error) {
-	containers, err := DockerGetClient().ContainerList(context.Background(), types.ContainerListOptions{
+func getContainers() map[string]types.Container {
+	containers, _ := getClient().ContainerList(context.Background(), types.ContainerListOptions{
 		All: true,
 	})
-	if err != nil {
-		return nil, err
-	}
 
 	containerMap := make(map[string]types.Container)
-	for _, container := range containers {
-		for _, cName := range container.Names {
+	for _, cont := range containers {
+		for _, cName := range cont.Names {
 			containerName := cName[1:len(cName)]
-			containerMap[containerName] = container
+			containerMap[containerName] = cont
 		}
 	}
-	return containerMap, nil
+	return containerMap
 }
 
 func startComponent(component common.Component, logger func(format string, a ...interface{})) error {
 	if container, err := getContainer(component); err == nil {
 		logger("Starting container '%s' for component '%s'\n", component.DockerId, component.Name)
 
-		if err := DockerGetClient().ContainerStart(context.Background(), container.ID, types.ContainerStartOptions{}); err != nil {
+		if err := getClient().ContainerStart(context.Background(), container.ID, types.ContainerStartOptions{}); err != nil {
 			return err
 		}
 		return nil
@@ -81,7 +84,7 @@ func startComponent(component common.Component, logger func(format string, a ...
 func stopContainer(component common.Component, logger func(format string, a ...interface{})) error {
 	if container, err := getContainer(component); err == nil {
 		logger("Stopping container '%s' for component '%s'\n", component.DockerId, component.Name)
-		if err := DockerGetClient().ContainerStop(context.Background(), container.ID, nil); err != nil {
+		if err := getClient().ContainerStop(context.Background(), container.ID, nil); err != nil {
 			return err
 		}
 		return nil
@@ -97,7 +100,7 @@ func removeComponent(component common.Component, logger func(format string, a ..
 			}
 		}
 		logger("Removing container '%s' for component '%s'\n", component.DockerId, component.Name)
-		if err := DockerGetClient().ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{}); err != nil {
+		if err := getClient().ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{}); err != nil {
 			return err
 		}
 		return nil
@@ -126,22 +129,25 @@ func createContainer(component common.Component, logger func(format string, a ..
 	}
 
 	// Mount AWS login credentials
+	mounts, err := parseMounts(component)
+	if err != nil {
+		return errors.Errorf("error when parsing mounts: %s", err.Error())
+	}
 	usr, _ := user.Current()
 	dir := usr.HomeDir
-	var awsCliMount []mount.Mount
 	awsCliPath := filepath.Join(dir, ".aws")
 	if _, err := os.Stat(awsCliPath); !os.IsNotExist(err) {
-		awsCliMount = append(awsCliMount, mount.Mount{Type: mount.TypeBind, Source: dir + "/.aws", Target: "/root/.aws"})
+		mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: dir + "/.aws", Target: "/root/.aws"})
 	}
 
-	_, err := DockerGetClient().ContainerCreate(context.Background(), &container.Config{
+	_, err = getClient().ContainerCreate(context.Background(), &container.Config{
 		Image:        component.Image,
 		Env:          component.Env,
 		ExposedPorts: exposedPorts,
 	}, &container.HostConfig{
 		PortBindings: portMap,
 		Links:        component.Links,
-		Mounts:       awsCliMount,
+		Mounts:       mounts,
 	}, nil, component.DockerId)
 	if err != nil {
 		return err
@@ -154,26 +160,12 @@ func createContainer(component common.Component, logger func(format string, a ..
 func getContainer(component common.Component) (types.Container, error) {
 	var nilCont types.Container
 	dockerId := component.DockerId
-	containerMap, err := dockerGetContainers()
-	if err != nil {
-		return nilCont, err
-	}
-
+	containerMap := getContainers()
 	if cont, ok := containerMap[dockerId]; ok {
 		return cont, nil
 	} else {
 		return nilCont, errors.New("Can't find the container")
 	}
-}
-
-func DockerGetClient() *client.Client {
-	cli, err := client.NewEnvClient()
-	//cli.UpdateClientVersion()
-	//cli, err := client.NewClientWithOpts(client.WithVersion("1.39"))
-	if err != nil {
-		panic(err)
-	}
-	return cli
 }
 
 func removeImage(component common.Component, logger func(format string, a ...interface{})) error {
@@ -189,7 +181,7 @@ func removeImage(component common.Component, logger func(format string, a ...int
 
 func pullImage(component common.Component, logger func(format string, a ...interface{})) error {
 	var pullOptions types.ImagePullOptions
-	authString, err := getAuthString(component)
+	authString, err := getAuthString(component.Repository)
 	if err != nil {
 		return errors.Errorf("error when obtaining authentication details: %s", err.Error())
 	}
@@ -198,7 +190,7 @@ func pullImage(component common.Component, logger func(format string, a ...inter
 			RegistryAuth: authString,
 		}
 	}
-	out, err := DockerGetClient().ImagePull(context.Background(), component.Image, pullOptions)
+	out, err := getClient().ImagePull(context.Background(), component.Image, pullOptions)
 	if err != nil {
 		return err
 	}
@@ -223,7 +215,6 @@ func pullImage(component common.Component, logger func(format string, a ...inter
 			if err == io.EOF {
 				break
 			}
-			panic(err)
 		}
 		switch true {
 		case event.Error != "":
@@ -243,57 +234,10 @@ func pullImage(component common.Component, logger func(format string, a ...inter
 	return nil
 }
 
-func getAuthString(component common.Component) (authString string, resultErr error) {
-	if strings.Contains(component.Image, "dkr.ecr.eu-west-1.amazonaws.com") {
-		authString, resultErr = getEcrAuth()
-		return
-	}
-	return
-}
-
-func getEcrAuth() (authString string, resultError error) {
-	name := "aws"
-	args := []string{"ecr", "get-login", "--no-include-email", "--region", "eu-west-1"}
-	out, err := exec.Command(name, args...).Output()
-	if err != nil {
-		resultError = errors.Errorf("Error when pulling the image: %s", err.Error())
-		return
-	}
-
-	authString, resultError = parseAwsLogin(string(out))
-	return
-}
-
-func parseAwsLogin(loginOutput string) (authString string, resultError error) {
-	split := strings.Split(loginOutput, " ")
-	if len(split) != 7 {
-		resultError = errors.Errorf("Unexpected number of items in aws docker login command, got %d, expected %d", len(split), 7)
-		return
-	}
-
-	authConfig := types.AuthConfig{
-		Username:      split[3],
-		Password:      split[5],
-		ServerAddress: split[6],
-	}
-	encodedJSON, err := json.Marshal(authConfig)
-	if err != nil {
-		resultError = errors.Errorf("Error when encoding ECR auth: %s", err.Error())
-	}
-
-	authString = base64.URLEncoding.EncodeToString(encodedJSON)
-	return
-}
-
 func printStatus(allComponents []common.Component, verbose bool, follow bool, writer io.Writer) error {
 
-	containerMap, err := dockerGetContainers()
-	images, err := dockerGetImages()
-
-	if err != nil {
-		return err
-	}
-
+	containerMap := getContainers()
+	images := getImages()
 	table := tablewriter.NewWriter(writer)
 	table.SetHeader([]string{"Component", "Image (built or pulled)", "Container Exists (created)", "State", "HTTP"})
 
@@ -360,4 +304,142 @@ func printStatus(allComponents []common.Component, verbose bool, follow bool, wr
 	writer.Write([]byte("\r"))
 	table.Render()
 	return nil
+}
+
+func parseMounts(cmp common.Component) (mounts []mount.Mount, resultErr error) {
+	if len(cmp.Mounts) > 0 {
+		for _, mnt := range cmp.Mounts {
+			mountSpec := strings.Split(mnt, ":")
+			if len(mountSpec) == 2 {
+				mntSrc := common.ParsePath(mountSpec[0])
+				mntDst := common.ParsePath(mountSpec[1])
+				if _, err := os.Stat(mntSrc); os.IsNotExist(err) {
+					resultErr = errors.Errorf("error when adding mount: source directory %s does not exist", mntSrc)
+					return
+				}
+				if _, err := os.Stat(mntSrc); !os.IsNotExist(err) {
+					mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: mntSrc, Target: mntDst})
+				}
+			} else {
+				resultErr = errors.Errorf("Unable to parse mount item: %s", mnt)
+			}
+		}
+	}
+	return
+}
+
+func buildImage(ctx common.Context, image string, buildRoot string, dockerFile string, buildArgs []string, noCache bool) error {
+	log := ctx.Log
+	if dockerFile == "" || image == "" || buildRoot == "" {
+		return errors.Errorf("Missing parameters: image: %s, buildRoot: %s, dockerFile: %s", image, buildRoot, dockerFile)
+	}
+	log.Debugf("Building image %s'\n - Build Root: %s\n - Dockerfile: %s\n - No Cache: %t\n", image, buildRoot, dockerFile, noCache)
+
+	log.Debugf("Creating context tar ... \n")
+	contextTarFileName, returnError := mkContextTar(buildRoot, dockerFile)
+	if returnError != nil {
+		return returnError
+	}
+	defer os.Remove(contextTarFileName)
+	log.Debugf("Context tar: %s\n", contextTarFileName)
+
+	log.Debugf("Building docker context from %s\n", contextTarFileName)
+	dockerBuildContext, returnError := os.Open(contextTarFileName)
+	if returnError != nil {
+		return returnError
+	}
+	defer dockerBuildContext.Close()
+
+	cli := getClient()
+	args := parseBuildArgs(buildArgs)
+
+	options := types.ImageBuildOptions{
+		SuppressOutput: false,
+		Remove:         true,
+		ForceRemove:    true,
+		PullParent:     false,
+		Tags:           []string{image},
+		Dockerfile:     "Dockerfile",
+		BuildArgs:      args,
+		NoCache:        noCache,
+	}
+
+	log.Debugf("Starting docker build ...\n")
+	buildResponse, err := cli.ImageBuild(context.Background(), dockerBuildContext, options)
+	if err != nil {
+		log.Errorf("%s", err.Error())
+	}
+	log.Debugf("Finished with build\n")
+	d := json.NewDecoder(buildResponse.Body)
+
+	type Event struct {
+		Stream         string `json:"stream"`
+		Status         string `json:"status"`
+		Error          string `json:"error"`
+		Progress       string `json:"progress"`
+		ProgressDetail struct {
+			Current int `json:"current"`
+			Total   int `json:"total"`
+		} `json:"progressDetail"`
+	}
+
+	var event *Event
+	for {
+		if err := d.Decode(&event); err != nil {
+			if err == io.EOF {
+				break
+			}
+			panic(err)
+		}
+
+		//log.Debugf("%+v\n", event)
+		switch true {
+		case event.Error != "":
+			return errors.Errorf("\nbuild error: %s", event.Error)
+		case event.Progress != "" || event.Status != "":
+			log.Debugf("\r%s: %s", event.Status, event.Progress)
+			if event.ProgressDetail.Current == 0 {
+				log.Debugf("\n")
+			}
+
+		case strings.TrimSuffix(event.Stream, "\n") != "":
+			log.Debugf("%s", event.Stream)
+		}
+	}
+	return nil
+}
+
+func mkContextTar(contextDir string, dockerFile string) (tarFile string, resultErr error) {
+	tmpDir, resultErr := ioutil.TempDir("", "")
+	if resultErr != nil {
+		return
+	}
+	tarFile = tmpDir + "/docker-context.tar"
+	resultErr = archiver.Archive([]string{contextDir + "/", dockerFile}, tarFile)
+	return
+}
+
+func parseBuildArgs(buildArgs []string) (result map[string]*string) {
+	result = map[string]*string{}
+	for _, buildArg := range buildArgs {
+		var argName, argValue string
+		argSplit := strings.Split(buildArg, ":")
+		switch len(argSplit) {
+		case 1:
+			argName = argSplit[0]
+			argValue = argSplit[0]
+		default:
+			argName = argSplit[0]
+			argValue = argSplit[1]
+		}
+		argName = strings.Trim(argName, " ")
+		argValue = strings.Trim(argValue, " ")
+		if strings.HasPrefix(argValue, "$") {
+			argValue = os.Getenv(argValue[1:])
+		}
+		if argName != "" {
+			result[argName] = &argValue
+		}
+	}
+	return
 }

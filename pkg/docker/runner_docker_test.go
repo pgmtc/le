@@ -18,9 +18,10 @@ var ctx = common.Context{
 			TestUrl:       "http://localhost:9998",
 		},
 		{
-			Name:     "test-internal-component",
-			DockerId: "test-component",
-			Image:    "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
+			Name:       "test-internal-component",
+			DockerId:   "test-component",
+			Image:      "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
+			Repository: "ecr:eu-west-1",
 		},
 		{
 			Name:     "test-invalid",
@@ -38,7 +39,7 @@ func TestDockerRunner_Status(t *testing.T) {
 }
 
 func TestDockerRunner_Pull(t *testing.T) {
-	logger := setUp()
+	logger := setUpForRun()
 	if os.Getenv("NO_NETWORK") == "true" {
 		t.Skipf("NO_NETWORK set to true, skipping")
 	}
@@ -50,7 +51,7 @@ func TestDockerRunner_Pull(t *testing.T) {
 }
 
 func TestDockerRunner_Workflow(t *testing.T) {
-	logger := setUp()
+	logger := setUpForRun()
 	if os.Getenv("NO_NETWORK") == "true" {
 		t.Skipf("NO_NETWORK set to true, skipping")
 	}
