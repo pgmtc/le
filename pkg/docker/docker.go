@@ -312,7 +312,7 @@ func parseMounts(cmp common.Component) (mounts []mount.Mount, resultErr error) {
 			mountSpec := strings.Split(mnt, ":")
 			if len(mountSpec) == 2 {
 				mntSrc := common.ParsePath(mountSpec[0])
-				mntDst := common.ParsePath(mountSpec[1])
+				mntDst := mountSpec[1] // do not do any parsing as it is for container dir
 				if _, err := os.Stat(mntSrc); os.IsNotExist(err) {
 					resultErr = errors.Errorf("error when adding mount: source directory %s does not exist", mntSrc)
 					return

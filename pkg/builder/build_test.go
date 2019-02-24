@@ -3,6 +3,7 @@ package builder
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -11,15 +12,15 @@ import (
 
 func setUp() (tmpDir string, mockContext common.Context) {
 	tmpDir, _ = ioutil.TempDir("", "le-test-mock")
-	os.MkdirAll(tmpDir+"/buildtest", os.ModePerm)
-	ioutil.WriteFile(tmpDir+"/buildtest/config.yaml", []byte(""+
+	os.MkdirAll(filepath.Join(tmpDir, "buildtest"), os.ModePerm)
+	ioutil.WriteFile(filepath.Join(tmpDir, "buildtest/config.yaml"), []byte(""+
 		"image: test-image\n"+
 		"buildroot: "+tmpDir+"/buildtest/\n"+
 		"dockerfile: "+tmpDir+"/buildtest/Dockerfile\n"), 0644)
 	ioutil.WriteFile(tmpDir+"/buildtest/Dockerfile", []byte("FROM scratch\nADD . ."), 0644)
 
-	os.MkdirAll(tmpDir+"/buildtest-invalid", os.ModePerm)
-	ioutil.WriteFile(tmpDir+"/buildtest-invalid/config.yaml", []byte("some:unparsable:rubbish"), 0644)
+	os.MkdirAll(filepath.Join(tmpDir, "buildtest-invalid"), os.ModePerm)
+	ioutil.WriteFile(filepath.Join(tmpDir, "/buildtest-invalid/config.yaml"), []byte("some:unparsable:rubbish"), 0644)
 
 	config := common.CreateMockConfig([]common.Component{})
 	mockContext = common.Context{
@@ -31,11 +32,11 @@ func setUp() (tmpDir string, mockContext common.Context) {
 
 func Test_parseBuildProperties(t *testing.T) {
 	tmpDir, _ := setUp()
-	buildDir := tmpDir + "/buildtest"
+	buildDir := filepath.Join(tmpDir, "buildtest")
 	err, image, buildDir, dockerFile, buildArgs := parseBuildProperties(buildDir)
 	expectedImage := "test-image"
-	expectedBuildDir := tmpDir + "/buildtest/"
-	expectedDockerfile := tmpDir + "/buildtest/Dockerfile"
+	expectedBuildDir := filepath.Join(tmpDir, "/buildtest")
+	expectedDockerfile := filepath.Join(tmpDir, "/buildtest/Dockerfile")
 	expectedBuildArgs := []string{"arg1:value1"}
 	if err != nil {
 		t.Errorf("Unexpected error returned: %s", err.Error())
@@ -70,7 +71,7 @@ func Test_parseBuildProperties(t *testing.T) {
 
 func Test_buildAction(t *testing.T) {
 	tmpDir, mockContext := setUp()
-	buildContext := tmpDir + "/buildtest"
+	buildContext := filepath.Join(tmpDir, "/buildtest")
 	spyBuilder := &SpyBuilder{}
 	buildAction := getBuildAction(spyBuilder)
 
@@ -85,8 +86,8 @@ func Test_buildAction(t *testing.T) {
 
 	// Test success
 	expectedImage := "test-image"
-	expectedBuildRoot := buildContext + "/"
-	expectedDockerFile := buildContext + "/Dockerfile"
+	expectedBuildRoot := buildContext
+	expectedDockerFile := filepath.Join(buildContext, "Dockerfile")
 	expectedNoCache := true
 	expectedCtx := mockContext
 
@@ -100,7 +101,7 @@ func Test_buildAction(t *testing.T) {
 	if spyBuilder.Spy.BuildRoot != expectedBuildRoot {
 		t.Errorf("Expected %s, got %s", expectedBuildRoot, spyBuilder.Spy.BuildRoot)
 	}
-	if spyBuilder.Spy.DockerFile != (buildContext + "/Dockerfile") {
+	if spyBuilder.Spy.DockerFile != (filepath.Join(buildContext, "Dockerfile")) {
 		t.Errorf("Expected %s, got %s", expectedDockerFile, spyBuilder.Spy.DockerFile)
 	}
 	if spyBuilder.Spy.NoCache != expectedNoCache {

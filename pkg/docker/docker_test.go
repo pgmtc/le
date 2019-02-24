@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -239,21 +241,28 @@ func TestDockerGetImages(t *testing.T) {
 }
 
 func Test_parseMounts(t *testing.T) {
+	cwd, _ := os.Getwd()
 	if _, err := parseMounts(common.Component{Mounts: []string{"invalid_format"}}); err == nil {
 		t.Errorf("Expected error due to invalid format, got nothing")
 	}
 	if _, err := parseMounts(common.Component{Mounts: []string{"/non-existing:/"}}); err == nil {
 		t.Errorf("Expected error due to non-existing source directory, got nothing")
 	}
-	mounts, err := parseMounts(common.Component{Mounts: []string{"/:/", "/etc:/etc"}})
+	mountsToParse := []string{filepath.Join("/") + ":/", "/etc:/etc"}
+	if runtime.GOOS == "windows" {
+		mountsToParse = []string{filepath.Join("/") + ":/", "/windows:/etc"}
+	}
+
+	mounts, err := parseMounts(common.Component{Mounts: mountsToParse})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 	if len(mounts) != 2 {
 		t.Errorf("Expected to get 2 mounts back, got %d", len(mounts))
 	}
-	if mounts[0].Source != "/" {
-		t.Errorf("Expected first mount source to be '/', got '%s'", mounts[0].Source)
+	expectedPath := filepath.VolumeName(cwd) + filepath.Join("/")
+	if mounts[0].Source != expectedPath {
+		t.Errorf("Expected first mount source to be '%s', got '%s'", expectedPath, mounts[0].Source)
 	}
 	if mounts[0].Target != "/" {
 		t.Errorf("Expected first mount target to be '/', got '%s'", mounts[0].Target)
