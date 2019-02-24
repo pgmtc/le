@@ -1,9 +1,4 @@
 language: go
-os:
-  - linux
-  - windows
-  - osx
-
 env:
   - GO111MODULE=on
 go:
