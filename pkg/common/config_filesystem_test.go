@@ -49,7 +49,7 @@ func TestFileSystemConfig_initConfigDir(t *testing.T) {
 			t.Errorf("Expected panic, nothing returned in recover")
 		}
 	}()
-	_ = config.initConfigDir("../../../../../../../../../../../../../../../crap")
+	_ = config.initConfigDir("K:../../../../../../../../../../../../../../../crap")
 
 }
 
