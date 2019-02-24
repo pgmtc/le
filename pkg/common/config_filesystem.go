@@ -4,7 +4,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 )
