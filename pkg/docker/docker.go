@@ -8,11 +8,13 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/fatih/color"
+	"github.com/mholt/archiver"
 	"github.com/olekukonko/tablewriter"
 	"github.com/pgmtc/le/pkg/common"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/user"
@@ -321,6 +323,122 @@ func parseMounts(cmp common.Component) (mounts []mount.Mount, resultErr error) {
 			} else {
 				resultErr = errors.Errorf("Unable to parse mount item: %s", mnt)
 			}
+		}
+	}
+	return
+}
+
+func buildImage(ctx common.Context, image string, buildRoot string, dockerFile string, buildArgs []string, noCache bool) error {
+	log := ctx.Log
+	if dockerFile == "" || image == "" || buildRoot == "" {
+		return errors.Errorf("Missing parameters: image: %s, buildRoot: %s, dockerFile: %s", image, buildRoot, dockerFile)
+	}
+	log.Debugf("Building image %s'\n - Build Root: %s\n - Dockerfile: %s\n - No Cache: %t\n", image, buildRoot, dockerFile, noCache)
+
+	log.Debugf("Creating context tar ... \n")
+	contextTarFileName, returnError := mkContextTar(buildRoot, dockerFile)
+	if returnError != nil {
+		return returnError
+	}
+	defer os.Remove(contextTarFileName)
+	log.Debugf("Context tar: %s\n", contextTarFileName)
+
+	log.Debugf("Building docker context from %s\n", contextTarFileName)
+	dockerBuildContext, returnError := os.Open(contextTarFileName)
+	if returnError != nil {
+		return returnError
+	}
+	defer dockerBuildContext.Close()
+
+	cli := DockerGetClient()
+	args := parseBuildArgs(buildArgs)
+
+	options := types.ImageBuildOptions{
+		SuppressOutput: false,
+		Remove:         true,
+		ForceRemove:    true,
+		PullParent:     false,
+		Tags:           []string{image},
+		Dockerfile:     "Dockerfile",
+		BuildArgs:      args,
+		NoCache:        noCache,
+	}
+
+	log.Debugf("Starting docker build ...\n")
+	buildResponse, err := cli.ImageBuild(context.Background(), dockerBuildContext, options)
+	if err != nil {
+		log.Errorf("%s", err.Error())
+	}
+	log.Debugf("Finished with build\n")
+	d := json.NewDecoder(buildResponse.Body)
+
+	type Event struct {
+		Stream         string `json:"stream"`
+		Status         string `json:"status"`
+		Error          string `json:"error"`
+		Progress       string `json:"progress"`
+		ProgressDetail struct {
+			Current int `json:"current"`
+			Total   int `json:"total"`
+		} `json:"progressDetail"`
+	}
+
+	var event *Event
+	for {
+		if err := d.Decode(&event); err != nil {
+			if err == io.EOF {
+				break
+			}
+			panic(err)
+		}
+
+		//log.Debugf("%+v\n", event)
+		switch true {
+		case event.Error != "":
+			return errors.Errorf("\nbuild error: %s", event.Error)
+		case event.Progress != "" || event.Status != "":
+			log.Debugf("\r%s: %s", event.Status, event.Progress)
+			if event.ProgressDetail.Current == 0 {
+				log.Debugf("\n")
+			}
+
+		case strings.TrimSuffix(event.Stream, "\n") != "":
+			log.Debugf("%s", event.Stream)
+		}
+	}
+	return nil
+}
+
+func mkContextTar(contextDir string, dockerFile string) (tarFile string, resultErr error) {
+	tmpDir, resultErr := ioutil.TempDir("", "")
+	if resultErr != nil {
+		return
+	}
+	tarFile = tmpDir + "/docker-context.tar"
+	resultErr = archiver.Archive([]string{contextDir + "/", dockerFile}, tarFile)
+	return
+}
+
+func parseBuildArgs(buildArgs []string) (result map[string]*string) {
+	result = map[string]*string{}
+	for _, buildArg := range buildArgs {
+		var argName, argValue string
+		argSplit := strings.Split(buildArg, ":")
+		switch len(argSplit) {
+		case 1:
+			argName = argSplit[0]
+			argValue = argSplit[0]
+		default:
+			argName = argSplit[0]
+			argValue = argSplit[1]
+		}
+		argName = strings.Trim(argName, " ")
+		argValue = strings.Trim(argValue, " ")
+		if strings.HasPrefix(argValue, "$") {
+			argValue = os.Getenv(argValue[1:])
+		}
+		if argName != "" {
+			result[argName] = &argValue
 		}
 	}
 	return

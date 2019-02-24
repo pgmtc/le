@@ -39,7 +39,7 @@ func TestDockerRunner_Status(t *testing.T) {
 }
 
 func TestDockerRunner_Pull(t *testing.T) {
-	logger := setUp()
+	logger := setUpForRun()
 	if os.Getenv("NO_NETWORK") == "true" {
 		t.Skipf("NO_NETWORK set to true, skipping")
 	}
@@ -51,7 +51,7 @@ func TestDockerRunner_Pull(t *testing.T) {
 }
 
 func TestDockerRunner_Workflow(t *testing.T) {
-	logger := setUp()
+	logger := setUpForRun()
 	if os.Getenv("NO_NETWORK") == "true" {
 		t.Skipf("NO_NETWORK set to true, skipping")
 	}

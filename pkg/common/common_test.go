@@ -6,26 +6,6 @@ import (
 	"testing"
 )
 
-//var (
-//	calledParam              string
-//	handlerMethodCalledStore = map[string]bool{}
-//	testConfig               = CreateMemoryConfig([]Component{
-//		{Name: "test-component-1", DockerId: "test-component-1-docker-id", Image: "test-component-1-image"},
-//		{Name: "test-component-2", DockerId: "test-component-2-docker-id", Image: "test-component-2-image"},
-//	})
-//)
-//
-//// Method called by actionHandler test - success
-//func handlerMethod_success(component Component) error {
-//	handlerMethodCalledStore[component.Name] = true
-//	return nil
-//}
-//
-//// Method called by actionHandler test - failure
-//func handlerMethod_fail(component Component) error {
-//	return errors.New("Method deliberately returned error")
-//}
-
 func TestMakeActions(t *testing.T) {
 	actions := MakeActions()
 	if actions == nil {

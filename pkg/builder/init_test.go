@@ -13,7 +13,7 @@ func cleanup() {
 	}
 }
 
-func Test(t *testing.T) {
+func Test_initAction(t *testing.T) {
 	cleanup()
 	defer cleanup()
 
