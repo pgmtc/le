@@ -111,7 +111,7 @@ func Test_pullImage(t *testing.T) {
 
 			if err == nil {
 				// Check that the image exists
-				images := dockerGetImages()
+				images := getImages()
 				imageClensed := strings.Replace(tt.args.component.Image, "docker.io/library/", "", 1) // This is a workaround for public docker images from docker.io
 				if !common.ArrContains(images, imageClensed) {
 					t.Logf("%s", images)
@@ -125,7 +125,7 @@ func Test_pullImage(t *testing.T) {
 				if err != nil {
 					t.Errorf("Unexpected error when removing image: %s", err.Error())
 				}
-				images = dockerGetImages()
+				images = getImages()
 				if common.ArrContains(images, tt.args.component.Image) {
 					t.Errorf("Pulled image '%s' still exist, should have been removed", tt.args.component.Image)
 				}
@@ -214,7 +214,7 @@ func TestContainerWorkflow(t *testing.T) {
 		t.Errorf("Expected container to be started, got %s", err.Error())
 	}
 
-	err = dockerPrintLogs(cmp, false)
+	err = printLogs(cmp, false)
 	if err != nil {
 		t.Errorf("Expected container to print logs, got %s", err.Error())
 	}
@@ -232,7 +232,7 @@ func TestContainerWorkflow(t *testing.T) {
 
 func TestDockerGetImages(t *testing.T) {
 	common.SkipDockerTesting(t)
-	images := dockerGetImages()
+	images := getImages()
 	if len(images) == 0 {
 		t.Errorf("Expected to have at least some images")
 	}

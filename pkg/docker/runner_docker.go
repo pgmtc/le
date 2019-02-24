@@ -76,5 +76,5 @@ func (Runner) Pull(ctx common.Context, cmp common.Component) error {
 }
 
 func (Runner) Logs(ctx common.Context, cmp common.Component, follow bool) error {
-	return dockerPrintLogs(cmp, follow)
+	return printLogs(cmp, follow)
 }
