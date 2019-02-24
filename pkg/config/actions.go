@@ -51,7 +51,7 @@ var initAction = common.RawAction{
 		}
 		log.Infof("Config written to %s\n", fileName)
 
-		fileName, err = config.SaveProfile("local", common.DefaultProfile)
+		fileName, err = config.SaveProfile("default", common.DefaultProfile)
 		log.Infof("Profile written to %s\n", fileName)
 
 		return err
