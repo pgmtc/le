@@ -4,7 +4,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -31,7 +30,7 @@ func (c *fileSystemConfig) LoadProfile(profileName string) (profile Profile, res
 	configDir := c.initConfigDir(c.configLocation)
 	out := Profile{}
 
-	fileName := path.Join(configDir, "profile-"+profileName+".yaml")
+	fileName := filepath.Join(configDir, "profile-"+profileName+".yaml")
 	if _, err := os.Stat(fileName); os.IsNotExist(err) {
 		resultErr = errors.Errorf("profile does not exist, create it first")
 		return
@@ -49,7 +48,7 @@ func (c *fileSystemConfig) LoadProfile(profileName string) (profile Profile, res
 
 func (c *fileSystemConfig) SaveProfile(profileName string, profile Profile) (fileName string, resultErr error) {
 	configDir := c.initConfigDir(c.configLocation)
-	fileName = path.Join(configDir, "profile-"+profileName+".yaml")
+	fileName = filepath.Join(configDir, "profile-"+profileName+".yaml")
 	if err := YamlMarshall(profile, fileName); err != nil {
 		resultErr = errors.Errorf("error writing Config file: %s", err.Error())
 		return
@@ -58,12 +57,7 @@ func (c *fileSystemConfig) SaveProfile(profileName string, profile Profile) (fil
 }
 
 func (c *fileSystemConfig) SaveConfig() (fileName string, resultErr error) {
-	//_, err := c.SaveProfile(c.Config.Profile, c.CurrentProfile())
-	//if err != nil {
-	//	resultErr = errors.Errorf("error saving current profile: %s", err.Error())
-	//	return
-	//}
-	fileName = path.Join(c.initConfigDir(c.configLocation), c.configFileName)
+	fileName = filepath.Join(c.initConfigDir(c.configLocation), c.configFileName)
 	if err := YamlMarshall(c.config, fileName); err != nil {
 		resultErr = errors.Errorf("Error writing Config file\n- %s", err.Error())
 		return
@@ -72,8 +66,8 @@ func (c *fileSystemConfig) SaveConfig() (fileName string, resultErr error) {
 }
 
 func (c *fileSystemConfig) LoadConfig() (resultErr error) {
-	//fileName := path.Join(c.initConfigDir(), configFileName)
-	fileName := path.Join(ParsePath(c.configLocation), c.configFileName)
+	//fileName := filepath.Join(c.initConfigDir(), configFileName)
+	fileName := filepath.Join(ParsePath(c.configLocation), c.configFileName)
 	if err := YamlUnmarshall(fileName, &c.config); err != nil {
 		resultErr = errors.Errorf("Error reading Config file %s:\n- %s", fileName, err.Error())
 		return
@@ -89,10 +83,10 @@ func (c *fileSystemConfig) LoadConfig() (resultErr error) {
 
 func (c *fileSystemConfig) GetAvailableProfiles() (profiles []string) {
 	configDir := c.initConfigDir(c.configLocation)
-	files, _ := filepath.Glob(configDir + "/profile-*.yaml")
+	files, _ := filepath.Glob(filepath.Join(configDir, "profile-*.yaml"))
 
 	for _, file := range files {
-		profileName := strings.TrimPrefix(file, configDir+"/profile-")
+		profileName := strings.TrimPrefix(file, filepath.Join(configDir, "profile-"))
 		profileName = strings.TrimSuffix(profileName, ".yaml")
 		profiles = append(profiles, profileName)
 	}

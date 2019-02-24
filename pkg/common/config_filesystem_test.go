@@ -70,7 +70,7 @@ func TestFileSystemConfig_SaveAndLoadProfile(t *testing.T) {
 		t.Errorf("Unexpected error, got %s", err.Error())
 	}
 
-	expected := config.configLocation + "/profile-test.yaml"
+	expected := filepath.Join(config.configLocation, "/profile-test.yaml")
 	if fileName != expected {
 		t.Errorf("Expected file name to be %s, got %s", expected, fileName)
 	}
@@ -127,13 +127,13 @@ func Test_fileSystemConfig_SaveConfig(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	expectedFileName := tmpDir + "/.le-Config/Config.yaml"
+	expectedFileName := filepath.Join(tmpDir, ".le-Config", "Config.yaml")
 	if expectedFileName != fileName {
 		t.Errorf("Expected file name %s, got %s", expectedFileName, fileName)
 	}
 
 	// Test write failure
-	config.configFileName = "../../../../../../../../crap"
+	config.configFileName = "K:../../../../../../../../crap"
 	fileName, err = config.SaveConfig()
 	if err == nil {
 		t.Errorf("Expected rror, got nothing")
