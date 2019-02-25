@@ -9,7 +9,7 @@ type Component struct {
 	Image         string   `yaml:"image,omitempty"`
 	ContainerPort int      `yaml:"containerPort,omitempty"`
 	HostPort      int      `yaml:"hostPort,omitempty"`
-	Auth          string   `yaml:"repository,omitempty"`
+	Auth          string   `yaml:"auth,omitempty"`
 	Env           []string `yaml:"env,omitempty"`
 	Links         []string `yaml:"links,omitempty"`
 	Mounts        []string `yaml:"mounts,omitempty"`
