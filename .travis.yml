@@ -11,14 +11,12 @@ notifications:
 
 install:
   - go mod download
-  - go install github.com/golang/mock/mockgen
 #  - go get github.com/Microsoft/go-winio
 #  - go get golang.org/x/sys/windows
 #  - go get github.com/jstemmer/go-junit-report
 
 
 script:
-  - go generate ./...
   - ./scripts/coverage.sh
 
 after_success:
