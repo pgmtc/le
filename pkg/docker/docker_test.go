@@ -83,7 +83,7 @@ func Test_pullImage(t *testing.T) {
 				component: common.Component{
 					Name:       "local-db",
 					Image:      "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
-					Repository: "ecr:eu-west-1",
+					Repository: "aws ecr get-login --no-include-email --region eu-west-1",
 				},
 			},
 			wantErr: !(os.Getenv("SKIP_AWS_TESTING") == ""),

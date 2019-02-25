@@ -21,7 +21,7 @@ var ctx = common.Context{
 			Name:       "test-internal-component",
 			DockerId:   "test-component",
 			Image:      "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
-			Repository: "ecr:eu-west-1",
+			Repository: "aws ecr get-login --no-include-email --region eu-west-1",
 		},
 		{
 			Name:     "test-invalid",

@@ -9,33 +9,24 @@ import (
 	"strings"
 )
 
-// getAuthString returns authstring used by docker client based on component's repository property
-func getAuthString(repository string) (authString string, resultErr error) {
-	var loginCmd string
-	switch true {
-	case strings.HasPrefix(repository, "ecr:"):
-		loginCmd, resultErr = getEcrLoginCmd(repository)
-	case repository == "":
-		loginCmd = ""
-	default:
-		resultErr = errors.Errorf("Unknown repository type: %s", repository)
-	}
-	if resultErr != nil || loginCmd == "" {
-		return
-	}
-	authString, resultErr = parseLoginCmd(loginCmd)
-	return
-}
+// getAuthString returns authstring used by docker client based on component's dockerAuth property
+func getAuthString(dockerAuth string) (authString string, resultErr error) {
+	if dockerAuth != "" {
+		commandParts := strings.Split(dockerAuth, " ")
+		var cmd *exec.Cmd
+		if len(commandParts) < 2 {
+			cmd = exec.Command(commandParts[0])
+		} else {
+			cmd = exec.Command(commandParts[0], commandParts[1:]...)
+		}
 
-// getEcrLoginCmd returns command in docker cli format
-func getEcrLoginCmd(ecrLocation string) (loginCmd string, resultError error) {
-	region := strings.TrimPrefix(ecrLocation, "ecr:")
-	var cmdResults []byte
-	cmdResults, resultError = exec.Command("aws", "ecr", "get-login", "--no-include-email", "--region", region).Output()
-	if resultError != nil {
-		return
+		stdoutStderr, err := cmd.CombinedOutput()
+		if err != nil {
+			resultErr = err
+			return
+		}
+		authString, resultErr = parseLoginCmd(string(stdoutStderr))
 	}
-	loginCmd = string(cmdResults)
 	return
 }
 

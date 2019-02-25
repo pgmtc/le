@@ -3,15 +3,14 @@ package docker
 import (
 	"encoding/base64"
 	"os"
-	"regexp"
-	"strings"
 	"testing"
 )
 
 func Test_getAuthString(t *testing.T) {
 	type args struct {
-		repository string
+		dockerAuth string
 	}
+
 	tests := []struct {
 		name           string
 		args           args
@@ -21,7 +20,7 @@ func Test_getAuthString(t *testing.T) {
 		{
 			name: "eu-west-1",
 			args: args{
-				repository: "ecr:eu-west-1",
+				dockerAuth: "aws ecr get-login --no-include-email --region eu-west-1",
 			},
 			wantErr:        !(os.Getenv("SKIP_AWS_TESTING") == ""),
 			wantAuthString: os.Getenv("SKIP_AWS_TESTING") == "",
@@ -29,15 +28,15 @@ func Test_getAuthString(t *testing.T) {
 		{
 			name: "unknown-repo",
 			args: args{
-				repository: "some-unknown-repo",
+				dockerAuth: "do-some-rubbish",
 			},
 			wantErr:        true,
 			wantAuthString: false,
 		},
 		{
-			name: "no-repository",
+			name: "no-dockerAuth",
 			args: args{
-				repository: "",
+				dockerAuth: "",
 			},
 			wantErr:        false,
 			wantAuthString: false,
@@ -45,7 +44,7 @@ func Test_getAuthString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotAuthString, err := getAuthString(tt.args.repository)
+			gotAuthString, err := getAuthString(tt.args.dockerAuth)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getAuthString() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -58,61 +57,6 @@ func Test_getAuthString(t *testing.T) {
 			decodedStr := string(decoded)
 			if tt.wantAuthString == (decodedStr == "") {
 				t.Errorf("getAuthStrig()\n - decodedStr = %v\n - wantAuthString = %v", decodedStr, tt.wantAuthString)
-			}
-		})
-	}
-}
-
-func Test_getEcrLoginCmd(t *testing.T) {
-	if os.Getenv("SKIP_AWS_TESTING") != "" {
-		t.Skipf("SKIP_AWS_TESTING present, skipping")
-	}
-	type args struct {
-		ecrLocation string
-	}
-	tests := []struct {
-		name        string
-		args        args
-		wantToMatch string
-		wantErr     bool
-	}{
-		{
-			name: "test us-east-1",
-			args: args{
-				ecrLocation: "ecr:us-east-1",
-			},
-			wantErr: false,
-		},
-		{
-			name: "test eu-west-1",
-			args: args{
-				ecrLocation: "ecr:eu-west-1",
-			},
-			wantErr: false,
-		},
-		{
-			name: "test moon (non existing region)",
-			args: args{
-				ecrLocation: "ecr:moon",
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotLoginCmd, err := getEcrLoginCmd(tt.args.ecrLocation)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("getEcrLoginCmd() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			if !tt.wantErr {
-				region := strings.TrimPrefix(tt.args.ecrLocation, "ecr:")
-				regex := "docker login -u AWS -p [^\\s]+ https://[^\\s\\\\.]+.dkr.ecr." + region + ".amazonaws.com"
-				r, _ := regexp.Compile(regex)
-				if !r.MatchString(gotLoginCmd) {
-					t.Errorf("Unexpected result\n - %s - not matching regexp: %s", gotLoginCmd, regex)
-				}
 			}
 		})
 	}
