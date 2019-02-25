@@ -2,7 +2,8 @@ package common
 
 const CONFIG_FILE_NAME = "Config.yaml"
 
-type Configuration interface {
+//go:generate mockgen -destination=./mocks/mock_configprovider.go -package=mocks github.com/pgmtc/le/pkg/common ConfigProvider
+type ConfigProvider interface {
 	SaveConfig(overwrite bool) (fileName string, resultErr error)
 	LoadConfig() (resultErr error)
 	SaveProfile(profileName string, profile Profile) (fileName string, resultErr error)

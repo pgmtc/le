@@ -46,7 +46,6 @@ func YamlMarshall(data interface{}, fileName string) (resultErr error) {
 		resultErr = errors.Errorf("error writing file: %s", err.Error())
 		return
 	}
-
 	return
 }
 

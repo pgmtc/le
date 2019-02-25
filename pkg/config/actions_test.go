@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+// TODO - use Mocked ConfigProvider
 func setUp() (config *DummyConfig, log *common.StringLogger, ctx common.Context) {
 	config = &DummyConfig{
 		currentProfile: common.Profile{
@@ -77,6 +78,12 @@ func TestInitAction(t *testing.T) {
 	if !config.saveProfileCalled {
 		t.Errorf("Save profile expected to have been called, it had not")
 	}
+	// Test write error
+	config.setSaveToFail()
+	if err := initAction.Handler(ctx); err == nil {
+		t.Errorf("Expected error, got nothing")
+	}
+
 }
 
 func TestStatusAction(t *testing.T) {

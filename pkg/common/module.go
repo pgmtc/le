@@ -14,7 +14,7 @@ type Logger interface {
 
 type Context struct {
 	Log    Logger
-	Config Configuration
+	Config ConfigProvider
 	Module Module
 }
 

@@ -11,6 +11,6 @@ func (Module) GetActions() map[string]common.Action {
 	builder := docker.Builder{}
 	return map[string]common.Action{
 		"build": getBuildAction(builder),
-		"init":  &initAction,
+		"init":  initAction(common.OsFileSystemHandler{}, common.YamlMarshaller{}),
 	}
 }

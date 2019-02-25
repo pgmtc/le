@@ -104,7 +104,7 @@ func (c *MockConfig) setSaveToFail() *MockConfig {
 	return c
 }
 
-func CreateMockConfig(components []Component) Configuration {
+func CreateMockConfig(components []Component) ConfigProvider {
 	config := MockConfig{
 		currentProfile: Profile{
 			Components: components,

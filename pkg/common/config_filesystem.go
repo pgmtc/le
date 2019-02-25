@@ -16,7 +16,7 @@ type fileSystemConfig struct {
 	config         Config
 }
 
-func FileSystemConfig(configLocation string) Configuration {
+func FileSystemConfig(configLocation string) ConfigProvider {
 	return &fileSystemConfig{
 		configLocation: configLocation,
 		configFileName: "Config.yaml",
