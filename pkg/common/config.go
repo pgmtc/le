@@ -46,6 +46,7 @@ var defaultComponents = []Component{
 		HostPort:      443,
 		TestUrl:       "http://localhost:443",
 		Env:           []string{"ENV_1=value", "ENV_2=value2"},
+		Auth:          "aws ecr get-login --no-include-email --region eu-west-1",
 		Links: []string{
 			"container-1:cmp1",
 		},
