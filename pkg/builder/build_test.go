@@ -1,11 +1,16 @@
 package builder
 
+// mockgen -destination=mocks/mock_builder.go -package=mocks github.com/pgmtc/le/pkg/builder Builder
+
 import (
+	"github.com/pgmtc/le/pkg/builder/mocks"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/pgmtc/le/pkg/common"
 )
 
@@ -71,8 +76,11 @@ func Test_parseBuildProperties(t *testing.T) {
 func Test_buildAction(t *testing.T) {
 	tmpDir, mockContext := setUp()
 	buildContext := tmpDir + "/buildtest"
-	spyBuilder := &SpyBuilder{}
-	buildAction := getBuildAction(spyBuilder)
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockBuilder := mocks.NewMockBuilder(mockCtrl)
+	buildAction := getBuildAction(mockBuilder)
 
 	// Try missing specdir parameter
 	if err := buildAction.Run(mockContext, "--specdir"); err == nil {
@@ -87,36 +95,28 @@ func Test_buildAction(t *testing.T) {
 	expectedImage := "test-image"
 	expectedBuildRoot := buildContext + "/"
 	expectedDockerFile := buildContext + "/Dockerfile"
-	expectedNoCache := true
 	expectedCtx := mockContext
 
+	mockBuilder.EXPECT().BuildImage(expectedCtx, expectedImage, expectedBuildRoot, expectedDockerFile, nil, true).Return(nil).Times(1)
 	if err := buildAction.Run(mockContext, "--specdir", buildContext, "--nocache"); err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	if spyBuilder.Spy.Image != expectedImage {
-		t.Errorf("Expected %s, got %s", "test-image", spyBuilder.Spy.Image)
-	}
-	if spyBuilder.Spy.BuildRoot != expectedBuildRoot {
-		t.Errorf("Expected %s, got %s", expectedBuildRoot, spyBuilder.Spy.BuildRoot)
-	}
-	if spyBuilder.Spy.DockerFile != (buildContext + "/Dockerfile") {
-		t.Errorf("Expected %s, got %s", expectedDockerFile, spyBuilder.Spy.DockerFile)
-	}
-	if spyBuilder.Spy.NoCache != expectedNoCache {
-		t.Errorf("Expected %t, got %t", expectedNoCache, spyBuilder.Spy.NoCache)
-	}
-	if spyBuilder.Spy.Ctx != expectedCtx {
-		t.Errorf("Expected %v, got %v", expectedCtx, spyBuilder.Spy.Ctx)
+	// Test no cache set to false
+	mockBuilder.EXPECT().BuildImage(expectedCtx, expectedImage, expectedBuildRoot, expectedDockerFile, nil, false).Return(nil).Times(1)
+	if err := buildAction.Run(mockContext, "--specdir", buildContext); err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	// Test Builder returning error
-	spyBuilder.WantErrorMessage = "artificial error"
-	err := buildAction.Run(mockContext, "--specdir", buildContext, "--nocache")
-	if err == nil {
-		t.Errorf("Expected error, got nothing")
+	// Test no cache set to false
+	mockBuilder.EXPECT().BuildImage(expectedCtx, expectedImage, expectedBuildRoot, expectedDockerFile, nil, false).Return(nil).Times(1)
+	if err := buildAction.Run(mockContext, "--specdir", buildContext); err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
 	}
-	if err != nil && err.Error() != spyBuilder.WantErrorMessage {
-		t.Errorf("Expected error message %s, got %s", spyBuilder.WantErrorMessage, err.Error())
+
+	// Test that error is passed through
+	mockBuilder.EXPECT().BuildImage(expectedCtx, expectedImage, expectedBuildRoot, expectedDockerFile, nil, false).Return(errors.Errorf("artificial error")).Times(1)
+	if err := buildAction.Run(mockContext, "--specdir", buildContext); err == nil {
+		t.Errorf("Expected error, got nothing")
 	}
 }

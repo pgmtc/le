@@ -17,6 +17,7 @@ install:
 
 
 script:
+  - go generate ./...
   - ./scripts/coverage.sh
 
 after_success:
