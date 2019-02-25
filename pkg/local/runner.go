@@ -2,6 +2,7 @@ package local
 
 import "github.com/pgmtc/le/pkg/common"
 
+//go:generate mockgen -destination=./mocks/mock_runner_test.go -package=mocks github.com/pgmtc/le/pkg/local Runner
 type Runner interface {
 	Create(ctx common.Context, cmp common.Component) error
 	Remove(ctx common.Context, cmp common.Component) error

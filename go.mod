@@ -27,5 +27,6 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
 	golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a // indirect
+	golang.org/x/vgo v0.0.0-20180912184537-9d567625acf4 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 )
