@@ -18,10 +18,10 @@ var ctx = common.Context{
 			TestUrl:       "http://localhost:9998",
 		},
 		{
-			Name:       "test-internal-component",
-			DockerId:   "test-component",
-			Image:      "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
-			Repository: "aws ecr get-login --no-include-email --region eu-west-1",
+			Name:     "test-internal-component",
+			DockerId: "test-component",
+			Image:    "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
+			Auth:     "aws ecr get-login --no-include-email --region eu-west-1",
 		},
 		{
 			Name:     "test-invalid",

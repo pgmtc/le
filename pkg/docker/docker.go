@@ -181,7 +181,7 @@ func removeImage(component common.Component, logger func(format string, a ...int
 
 func pullImage(component common.Component, logger func(format string, a ...interface{})) error {
 	var pullOptions types.ImagePullOptions
-	authString, err := getAuthString(component.Repository)
+	authString, err := getAuthString(component.Auth)
 	if err != nil {
 		return errors.Errorf("error when obtaining authentication details: %s", err.Error())
 	}

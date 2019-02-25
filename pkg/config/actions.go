@@ -63,7 +63,7 @@ var statusAction = common.RawAction{
 		log := ctx.Log
 		config := ctx.Config
 
-		log.Infof("Repository Prefix: %s\n", config.Config().RepositoryPrefix)
+		log.Infof("Auth Prefix: %s\n", config.Config().RepositoryPrefix)
 		log.Infof("Current profile: %s\n", config.Config().Profile)
 		log.Infof("Available profiles: %s\n", config.GetAvailableProfiles())
 		if len(args) > 0 && args[0] == "-v" {

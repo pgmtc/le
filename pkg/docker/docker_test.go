@@ -81,9 +81,9 @@ func Test_pullImage(t *testing.T) {
 			name: "testECRWithLogin",
 			args: args{
 				component: common.Component{
-					Name:       "local-db",
-					Image:      "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
-					Repository: "aws ecr get-login --no-include-email --region eu-west-1",
+					Name:  "local-db",
+					Image: "674155361995.dkr.ecr.eu-west-1.amazonaws.com/orchard/orchard-valuation-client-ui:latest",
+					Auth:  "aws ecr get-login --no-include-email --region eu-west-1",
 				},
 			},
 			wantErr: !(os.Getenv("SKIP_AWS_TESTING") == ""),
@@ -92,9 +92,9 @@ func Test_pullImage(t *testing.T) {
 			name: "testNonExistingRepository",
 			args: args{
 				component: common.Component{
-					Name:       "test-container",
-					Image:      "non-existing-image",
-					Repository: "non-existing",
+					Name:  "test-container",
+					Image: "non-existing-image",
+					Auth:  "non-existing",
 				},
 			},
 			wantErr: true,
