@@ -3,6 +3,7 @@ package local
 import (
 	"github.com/golang/mock/gomock"
 	"github.com/pgmtc/le/pkg/common"
+	"github.com/pgmtc/le/pkg/local/mocks"
 	"testing"
 )
 
@@ -27,7 +28,7 @@ func Test_CreateAction(t *testing.T) {
 	ctx, components := setUp()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRunner := NewMockRunner(mockCtrl)
+	mockRunner := mocks.NewMockRunner(mockCtrl)
 
 	action := getComponentAction(mockRunner.Create)
 	mockRunner.EXPECT().Create(ctx, components[0]).Times(1)
@@ -41,7 +42,7 @@ func Test_StartAction(t *testing.T) {
 	ctx, components := setUp()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRunner := NewMockRunner(mockCtrl)
+	mockRunner := mocks.NewMockRunner(mockCtrl)
 
 	action := getComponentAction(mockRunner.Start)
 	mockRunner.EXPECT().Start(ctx, components[0]).Times(1)
@@ -55,7 +56,7 @@ func Test_StopAction(t *testing.T) {
 	ctx, components := setUp()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRunner := NewMockRunner(mockCtrl)
+	mockRunner := mocks.NewMockRunner(mockCtrl)
 
 	action := getComponentAction(mockRunner.Stop)
 	mockRunner.EXPECT().Stop(ctx, components[0]).Times(1)
@@ -69,7 +70,7 @@ func Test_RemoveAction(t *testing.T) {
 	ctx, components := setUp()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRunner := NewMockRunner(mockCtrl)
+	mockRunner := mocks.NewMockRunner(mockCtrl)
 
 	action := getComponentAction(mockRunner.Remove)
 	mockRunner.EXPECT().Remove(ctx, components[0]).Times(1)
@@ -83,7 +84,7 @@ func Test_PullAction(t *testing.T) {
 	ctx, components := setUp()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRunner := NewMockRunner(mockCtrl)
+	mockRunner := mocks.NewMockRunner(mockCtrl)
 
 	action := getComponentAction(mockRunner.Pull)
 	mockRunner.EXPECT().Pull(ctx, components[0]).Times(1)
@@ -97,7 +98,7 @@ func Test_LogAction(t *testing.T) {
 	ctx, components := setUp()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRunner := NewMockRunner(mockCtrl)
+	mockRunner := mocks.NewMockRunner(mockCtrl)
 
 	noFollowAction := logsComponentAction(mockRunner, false)
 	mockRunner.EXPECT().Logs(ctx, components[0], false).Times(1)
@@ -118,7 +119,7 @@ func Test_StatusAction(t *testing.T) {
 	ctx, _ := setUp()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRunner := NewMockRunner(mockCtrl)
+	mockRunner := mocks.NewMockRunner(mockCtrl)
 
 	// Plain status
 	statusAction := getRawAction(mockRunner.Status)
