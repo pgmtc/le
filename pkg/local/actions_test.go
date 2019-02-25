@@ -41,7 +41,7 @@ func Test_StartAction(t *testing.T) {
 	ctx, components := setUp()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRunner := mocks.NewMockRunner(mockCtrl)
+	mockRunner := NewMockRunner(mockCtrl)
 
 	action := getComponentAction(mockRunner.Start)
 	mockRunner.EXPECT().Start(ctx, components[0]).Times(1)
